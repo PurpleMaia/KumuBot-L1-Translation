@@ -22,6 +22,7 @@ client = OpenAI(api_key=api_key)
 
 # Define the judge model
 JUDGE_MODEL = "gpt-4o-mini"
+# JUDGE_MODEL = "o1"
 
 # Define the model folders - USERS CAN MODIFY THIS LIST TO INCLUDE ONLY SPECIFIC MODELS
 model_folders = [

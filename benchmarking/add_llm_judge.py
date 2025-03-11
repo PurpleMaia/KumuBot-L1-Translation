@@ -21,6 +21,7 @@ client = OpenAI(api_key=api_key)
 
 # Define the judge model
 JUDGE_MODEL = "gpt-4o-mini"
+# JUDGE_MODEL = "o1"
 
 # Define the existing models to compare against
 existing_models = [
