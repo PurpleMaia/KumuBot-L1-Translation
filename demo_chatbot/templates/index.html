@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KumuBot Translation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>KumuBot Translation</h1>
+            <p>Translate Hawaiian text to English with ease</p>
+        </header>
+        
+        <div class="controls">
+            <div class="toggle-group">
+                <div class="toggle-container">
+                    <span class="toggle-label">Model:</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="modelToggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span id="modelType" style="margin-left: 10px;">Fast Model</span>
+                </div>
+                
+                <div class="toggle-container">
+                    <span class="toggle-label">Translation:</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="translationToggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span id="translationType" style="margin-left: 10px;">Regular</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="translation-container">
+            <div class="translation-box">
+                <label for="hawaiianInput" class="textarea-label">Hawaiian Text</label>
+                <textarea id="hawaiianInput" placeholder="Enter Hawaiian text here..."></textarea>
+                <button id="translateBtn" class="submit-btn">Translate</button>
+            </div>
+            
+            <div class="translation-box">
+                <label for="translationOutput" class="textarea-label">English Translation</label>
+                <textarea id="translationOutput" placeholder="Translation will appear here..." readonly></textarea>
+                <div class="loading" id="loadingIndicator">
+                    <div class="dot-typing"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

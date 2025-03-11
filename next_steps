@@ -1,0 +1,6 @@
+Models to Try:
+deepseek-r1 
+o3-mini
+
+Use Analysis of Translations from Keao to see if that can train models further to give reasoning of how it made its translation. 
+Maybe this can allow it to learn how the translations are being made instead of translating word to word without understanding the meaning.
