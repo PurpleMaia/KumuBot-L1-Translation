@@ -1,0 +1,10 @@
+pandas
+numpy
+openai
+groq
+google-generativeai
+requests
+flask
+flask-cors
+python-dotenv
+tqdm

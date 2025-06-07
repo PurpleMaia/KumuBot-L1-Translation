@@ -14,11 +14,16 @@ A small text file `next_steps` lists potential future work.
 
 ## Dependencies
 
-Install required Python packages:
+Install required Python packages using [uv](https://github.com/astral-sh/uv):
 
 ```bash
-pip install pandas numpy openai groq google-generativeai requests \
-            flask flask-cors python-dotenv tqdm
+# install uv if you don't already have it
+curl -Ls https://astral.sh/uv/install.sh | sh
+
+# create a virtual environment and install dependencies
+uv venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
 ```
 
 ## Setup
