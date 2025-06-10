@@ -20,7 +20,7 @@ Install required Python packages using [uv](https://github.com/astral-sh/uv):
 # install uv if you don't already have it
 curl -Ls https://astral.sh/uv/install.sh | sh
 
-# create a virtual environment and install dependencies
+# create a virtual environment and install dependencies (note that sourcing the .venv is required in case you also use conda)
 uv venv
 source .venv/bin/activate
 uv pip install -r requirements.txt
