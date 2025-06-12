@@ -15,11 +15,17 @@ api_key = os.getenv("OPENAI_API_KEY_KOA")
 if not api_key:
     raise ValueError("Please set the OPENAI_API_KEY environment variable")
 
+# Get API key from environment variable
+api_base_url = os.getenv("OPENAI_API_EMBEDDING_BASE_URL")
+if not api_base_url:
+    raise ValueError("Please set the OPENAI_API_EMBEDDING_BASE_URL environment variable")
+
 # Initialize OpenAI client
-client = OpenAI(api_key=api_key)
+client = OpenAI(api_key=api_key, base_url=api_base_url)
 
 # Define the model name
-embedding_model = "text-embedding-3-large"
+#embedding_model = "text-embedding-3-large"
+embedding_model = "nomic-embed-text"
 
 # Default list of model folders
 DEFAULT_MODEL_FOLDERS = [
@@ -67,7 +73,7 @@ def get_embedding(text):
             response = client.embeddings.create(
                 model=embedding_model,
                 input=text,
-                dimensions=3072  # text-embedding-large-v3 supports 3072 dimensions
+                dimensions=768  # text-embedding-large-v3 supports 3072 dimensions, nomic-embed-text is 768?
             )
             return response.data[0].embedding
         except Exception as e:
