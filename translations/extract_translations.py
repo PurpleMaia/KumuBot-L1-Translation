@@ -82,7 +82,15 @@ def main():
                     data = json.load(f)
                 
                 row_id = data['row_id']
-                model_translation = data[f'{folder}_translation']
+                #print("trying to extract "+f'{folder}_translation')
+                folder_prop_key = f'{folder}_translation'
+                if (str(folder) == "llama-3.3-70B-Instruct_exl2_6.0bpw-maui"):
+                    #print("working with folder "+folder)
+                    folder_prop_key = "llama-3.3_translation"
+                if (str(folder) == "qwen3-30b-a3b-maui-awq"):
+                    #print("working with folder "+folder)
+                    folder_prop_key = "qwen3-30b-a3b-maui_translation"
+                model_translation = data[folder_prop_key]
                 
                 # Extract translation if tags exist, otherwise use the original text
                 extracted_translation = extract_translation(model_translation)
