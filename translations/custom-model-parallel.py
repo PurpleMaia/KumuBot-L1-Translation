@@ -9,11 +9,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Allow overriding the output directory via the OUTPUT_DIR environment variable
-OUTPUT_DIR = os.getenv("OUTPUT_DIR", "llama-3.3-parallel")
+OUTPUT_DIR = os.getenv("OUTPUT_DIR")
+if not OUTPUT_DIR:
+    raise ValueError("OUTPUT_DIR not found in environment variables. Please check your .env file.")
 API_KEY = os.getenv("OPENAI_API_KEY_KOA")
 if not API_KEY:
     raise ValueError("OPENAI_API_KEY_KOA not found in environment variables. Please check your .env file.")
-BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+BASE_URL = os.getenv("OPENAI_BASE_URL")
+if not BASE_URL:
+    raise ValueError("BASE_URL not found in environment variables. Please check your .env file.")
 MODEL_NAME = os.getenv("OPENAI_MODEL_NAME", "gpt-4o")
 MAX_PARALLEL = int(os.getenv("MAX_PARALLEL", "1"))
 
