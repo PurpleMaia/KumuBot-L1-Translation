@@ -21,8 +21,8 @@ client = OpenAI(api_key=api_key)
 # Define the model name
 embedding_model = "text-embedding-3-large"
 
-# Define the model folders
-model_folders = [
+# Default list of model folders
+DEFAULT_MODEL_FOLDERS = [
     "gemini-2.0-flash-thinking",
     "gpt4o",
     "o1",
@@ -30,8 +30,29 @@ model_folders = [
     "gpt-4o-mini",
     "gpt-4.5-preview",
     "deepseek-r1-distill-llama-70b",
-    "gpt-4o-mini-finetuned"
+    "gpt-4o-mini-finetuned",
 ]
+
+
+def discover_folders() -> list[str]:
+    """Return subdirectories that contain translation_0.json"""
+    folders = []
+    for entry in os.listdir(os.path.join(os.path.dirname(__file__), "..", "translations")):
+        candidate = os.path.join(os.path.dirname(__file__), "..", "translations", entry)
+        if os.path.isdir(candidate) and os.path.isfile(os.path.join(candidate, "translation_0.json")):
+            folders.append(entry)
+    return folders
+
+
+folders_env = os.getenv("MODEL_FOLDERS")
+discover_env = os.getenv("DISCOVER_FOLDERS", "false").lower() in {"1", "true", "yes"}
+
+if folders_env:
+    model_folders = [f.strip() for f in folders_env.split(",") if f.strip()]
+elif discover_env:
+    model_folders = discover_folders()
+else:
+    model_folders = DEFAULT_MODEL_FOLDERS
 
 def get_embedding(text):
     """
