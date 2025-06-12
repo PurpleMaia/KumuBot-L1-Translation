@@ -45,11 +45,11 @@ def calculate_summary_results(input_file='dataset_with_similarities.csv',
     
     # Print summary to console
     print("\nSemantic Similarity Results (sorted by average similarity):")
-    print("=" * 50)
-    print(f"{'Model':<30} | {'Average Similarity':<20}")
-    print("-" * 50)
+    print("=" * 75)
+    print(f"{'Model':<50} | {'Average Similarity':<20}")
+    print("-" * 75)
     for model, avg_similarity in sorted_models:
-        print(f"{model:<30} | {avg_similarity:.6f}")
+        print(f"{model:<50} | {avg_similarity:.6f}")
     
     print(f"\nDone! Summary results saved to {output_file}")
     
