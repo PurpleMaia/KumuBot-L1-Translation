@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-OUTPUT_DIR = "llama-3.3-parallel"
+# Allow overriding the output directory via the OUTPUT_DIR environment variable
+OUTPUT_DIR = os.getenv("OUTPUT_DIR", "llama-3.3-parallel")
 API_KEY = os.getenv("OPENAI_API_KEY_KOA")
 if not API_KEY:
     raise ValueError("OPENAI_API_KEY_KOA not found in environment variables. Please check your .env file.")

@@ -35,20 +35,29 @@ uv pip install -r requirements.txt
    GROQ_API_KEY=<Groq API key>
    GOOGLE_API_KEY=<Gemini API key>
    ```
-2. Run any script in `translations/` to translate the dataset, e.g.:
+2. Run any script in `translations/` to translate the dataset. Most scripts now
+   accept `OUTPUT_DIR` and `OPENAI_MODEL_NAME` from the environment. For example:
    ```bash
-   python translations/gpt4o.py
+   OPENAI_MODEL_NAME=gpt-4o OUTPUT_DIR=gpt-4o python translations/llama3.3_parallel.py
    ```
-   Each script writes JSON files to a folder named after the model.
-3. Combine model outputs back into `data/dataset.csv`:
+   Each script writes JSON files to a folder named after the model (or the value
+   of `OUTPUT_DIR`).
+3. Combine model outputs back into `data/dataset.csv`. You can specify folders
+   via `MODEL_FOLDERS` or set `DISCOVER_FOLDERS=true` to automatically detect
+   them:
    ```bash
    python translations/extract_translations.py
    ```
 4. Evaluate translations:
-   - `benchmarking/semantic_similarity.py` computes embedding similarities.
+   - `benchmarking/semantic_similarity.py` computes embedding similarities. It uses the same `MODEL_FOLDERS`/`DISCOVER_FOLDERS` logic as `extract_translations.py`.
    - `benchmarking/llm_as_judge.py` compares translations using an LLM and writes `roundrobin.csv` and `judge_results_summary.csv`.
    - `benchmarking/semantic_similarity_summary.py` summarizes similarity scores.
-5. (Optional) Launch the demo chatbot:
+5. (Optional) launch the entire translation and evaluation pipeline with
+   `run_pipeline.sh`:
+   ```bash
+   OPENAI_MODEL_NAME=my-model OUTPUT_DIR=my-folder ./run_pipeline.sh
+   ```
+6. (Optional) Launch the demo chatbot:
    ```bash
    python demo_chatbot/app.py
    ```

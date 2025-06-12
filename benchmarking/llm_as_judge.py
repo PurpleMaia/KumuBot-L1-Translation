@@ -24,16 +24,38 @@ client = OpenAI(api_key=api_key)
 JUDGE_MODEL = "gpt-4o-mini"
 # JUDGE_MODEL = "o1"
 
-# Define the model folders - USERS CAN MODIFY THIS LIST TO INCLUDE ONLY SPECIFIC MODELS
-model_folders = [
+# Default list of model folders - USERS CAN MODIFY THIS LIST
+DEFAULT_MODEL_FOLDERS = [
     "gemini-2.0-flash-thinking",
     "gpt4o",
     "o1",
     "llama-3.3",
     "gpt-4o-mini",
     "gpt-4.5-preview",
-    "deepseek-r1-distill-llama-70b"
+    "deepseek-r1-distill-llama-70b",
 ]
+
+
+def discover_folders() -> list[str]:
+    """Return subdirectories that contain translation_0.json"""
+    folders = []
+    translations_dir = os.path.join(os.path.dirname(__file__), "..", "translations")
+    for entry in os.listdir(translations_dir):
+        candidate = os.path.join(translations_dir, entry)
+        if os.path.isdir(candidate) and os.path.isfile(os.path.join(candidate, "translation_0.json")):
+            folders.append(entry)
+    return folders
+
+
+folders_env = os.getenv("MODEL_FOLDERS")
+discover_env = os.getenv("DISCOVER_FOLDERS", "false").lower() in {"1", "true", "yes"}
+
+if folders_env:
+    model_folders = [f.strip() for f in folders_env.split(",") if f.strip()]
+elif discover_env:
+    model_folders = discover_folders()
+else:
+    model_folders = DEFAULT_MODEL_FOLDERS
 
 # Define which rows to use for judging - USERS CAN MODIFY THIS LIST
 # For example, to only use the first two examples, set to [0, 1]
