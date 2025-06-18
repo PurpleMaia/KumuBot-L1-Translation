@@ -34,11 +34,13 @@ uv pip install -r requirements.txt
    OPENAI_API_KEY=<key for the demo chatbot>
    GROQ_API_KEY=<Groq API key>
    GOOGLE_API_KEY=<Gemini API key>
+   OPENAI_BASE_URL=<custom base URL for OpenAI API (optional)>
    ```
 2. Run any script in `translations/` to translate the dataset. Most scripts now
    accept `OUTPUT_DIR` and `OPENAI_MODEL_NAME` from the environment. For example:
    ```bash
-   OPENAI_MODEL_NAME=gpt-4o OUTPUT_DIR=gpt-4o python translations/llama3.3_parallel.py
+   OPENAI_MODEL_NAME=gpt-4o OUTPUT_DIR=gpt-4o \
+   MAX_PARALLEL=4 python translations/custom-model-parallel.py
    ```
    Each script writes JSON files to a folder named after the model (or the value
    of `OUTPUT_DIR`).

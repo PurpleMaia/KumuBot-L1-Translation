@@ -3,6 +3,7 @@ import json
 import os
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 from constants import prompt
 from dotenv import load_dotenv
 
@@ -62,7 +63,8 @@ def process_row(idx: int, hawaiian_text: str, reference_translation: str):
 
 
 def main():
-    file_path = "../data/dataset.csv"
+    base_dir = Path(__file__).resolve().parents[1]
+    file_path = base_dir / "data" / "dataset.csv"
     try:
         df = pd.read_csv(file_path)
         print(f"Successfully loaded {file_path}. Found {len(df)} rows.")
