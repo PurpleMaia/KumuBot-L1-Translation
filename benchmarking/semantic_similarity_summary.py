@@ -2,6 +2,9 @@
 import pandas as pd
 import numpy as np
 import csv
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def calculate_summary_results(input_file='dataset_with_similarities.csv', 
                              output_file='semantic_similarity_results.csv'):

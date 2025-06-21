@@ -39,7 +39,6 @@ DEFAULT_MODEL_FOLDERS = [
     "gpt-4o-mini-finetuned",
 ]
 
-
 def discover_folders() -> list[str]:
     """Return subdirectories that contain translation_0.json"""
     folders = []
@@ -47,11 +46,14 @@ def discover_folders() -> list[str]:
         candidate = os.path.join(os.path.dirname(__file__), "..", "translations", entry)
         if os.path.isdir(candidate) and os.path.isfile(os.path.join(candidate, "translation_0.json")):
             folders.append(entry)
+    print (folders)
     return folders
 
 
 folders_env = os.getenv("MODEL_FOLDERS")
-discover_env = os.getenv("DISCOVER_FOLDERS", "false").lower() in {"1", "true", "yes"}
+discover_env = os.getenv("DISCOVER_FOLDERS", "false").lower() in {"1", "true", "yes",True}
+# print("discover_env is ")
+# print(discover_env)
 
 if folders_env:
     model_folders = [f.strip() for f in folders_env.split(",") if f.strip()]
@@ -101,7 +103,7 @@ def cosine_similarity(vec1, vec2):
 def main():
     # Read the dataset with translations
     print("Reading dataset.csv...")
-    df = pd.read_csv('../data/dataset.csv')
+    df = pd.read_csv('data/dataset.csv')
     
     if 'English' not in df.columns:
         print("Error: 'English' column not found in dataset.csv")
@@ -150,7 +152,7 @@ def main():
         df[f"{model}_similarity"] = similarities
     
     # Save the updated dataframe with similarity scores
-    output_file = 'dataset_with_similarities.csv'
+    output_file = 'benchmarking/dataset_with_similarities.csv'
     print(f"Saving results to {output_file}...")
     df.to_csv(output_file, index=False)
     

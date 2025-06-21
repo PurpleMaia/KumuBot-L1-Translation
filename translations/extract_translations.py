@@ -4,6 +4,9 @@ import os
 import csv
 import re
 import pandas as pd
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Default list of model folders
 DEFAULT_MODEL_FOLDERS = [
@@ -21,15 +24,20 @@ DEFAULT_MODEL_FOLDERS = [
 def discover_folders() -> list[str]:
     """Return subdirectories that contain translation_0.json"""
     folders = []
-    for entry in os.listdir("."):
-        if os.path.isdir(entry) and os.path.isfile(os.path.join(entry, "translation_0.json")):
+    for entry in os.listdir("./translations/"):
+        # print(entry)
+        if os.path.isdir("./translations/"+entry) and os.path.isfile(os.path.join("./translations/"+entry, "translation_0.json")):
             folders.append(entry)
+    # print("folders is")
+    # print(folders)
     return folders
 
 
 # Determine which folders to use
 folders_env = os.getenv("MODEL_FOLDERS")
-discover_env = os.getenv("DISCOVER_FOLDERS", "false").lower() in {"1", "true", "yes"}
+discover_env = os.getenv("DISCOVER_FOLDERS", "false").lower() in {"1", "true", "yes",True}
+# print("discover_env is ")
+# print(discover_env)
 
 if folders_env:
     model_folders = [f.strip() for f in folders_env.split(",") if f.strip()]
@@ -56,7 +64,7 @@ def extract_translation(text):
 def main():
     # Read the original dataset.csv
     try:
-        df = pd.read_csv('../data/dataset.csv')
+        df = pd.read_csv('data/dataset.csv')
         print(f"Read original dataset.csv with {len(df)} rows")
     except FileNotFoundError:
         print("Error: Original dataset.csv not found")
@@ -71,11 +79,11 @@ def main():
     
     # Process each folder
     for folder in model_folders:
-        print(f"Processing folder: {folder}")
+        print(f"Processing folder: ./translations/{folder}")
         
         # Process each JSON file in the folder
         for i in range(10):  # translation_0.json to translation_9.json
-            json_file = os.path.join(folder, f"translation_{i}.json")
+            json_file = os.path.join("./translations/"+folder, f"translation_{i}.json")
             
             try:
                 with open(json_file, 'r', encoding='utf-8') as f:
@@ -113,7 +121,7 @@ def main():
                 print(f"  Error processing {json_file}: {str(e)}")
     
     # Save the updated dataframe back to dataset.csv
-    df.to_csv('../data/dataset.csv', index=False)
+    df.to_csv('data/dataset.csv', index=False)
     print(f"Successfully updated dataset.csv with {len(model_folders)} new columns")
 
 if __name__ == "__main__":

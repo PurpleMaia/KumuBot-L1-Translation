@@ -16,13 +16,14 @@ if not OUTPUT_DIR:
 API_KEY = os.getenv("OPENAI_API_KEY_KOA")
 if not API_KEY:
     raise ValueError("OPENAI_API_KEY_KOA not found in environment variables. Please check your .env file.")
-BASE_URL = os.getenv("OPENAI_BASE_URL")
+BASE_URL = os.getenv("OPENAI_API_BASE_URL")
 if not BASE_URL:
-    raise ValueError("BASE_URL not found in environment variables. Please check your .env file.")
+    raise ValueError("OPENAI_API_BASE_URL not found in environment variables. Please check your .env file.")
 MODEL_NAME = os.getenv("OPENAI_MODEL_NAME", "gpt-4o")
 MAX_PARALLEL = int(os.getenv("MAX_PARALLEL", "1"))
+MAX_TOKENS = int(os.getenv("MAX_TOKENS", "1024"))
 
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+os.makedirs("translations/"+OUTPUT_DIR, exist_ok=True)
 
 
 def translate_text(hawaiian_text: str) -> str | None:
@@ -35,7 +36,7 @@ def translate_text(hawaiian_text: str) -> str | None:
         "model": MODEL_NAME,
         "messages": [{"role": "user", "content": full_prompt}],
         "temperature": 0,
-        "max_tokens": 1024,
+        "max_tokens": MAX_TOKENS,
     }
     url = BASE_URL.rstrip("/") + "/chat/completions"
     response = requests.post(url, headers=headers, json=payload)
@@ -48,13 +49,14 @@ def translate_text(hawaiian_text: str) -> str | None:
 def process_row(idx: int, hawaiian_text: str, reference_translation: str):
     translation = translate_text(hawaiian_text)
     if translation:
+        key_name=OUTPUT_DIR+"_translation"
         output_data = {
             "row_id": idx,
             "hawaiian_text": hawaiian_text,
-            "translation": translation,
             "reference_translation": reference_translation,
         }
-        output_file = os.path.join(OUTPUT_DIR, f"translation_{idx}.json")
+        output_data[key_name] = translation
+        output_file = os.path.join("translations/"+OUTPUT_DIR, f"translation_{idx}.json")
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(output_data, f, ensure_ascii=False, indent=2)
         print(f"Saved translation to {output_file}")
