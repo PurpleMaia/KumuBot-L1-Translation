@@ -1,0 +1,75 @@
+# Fine-Tuning with MLX‑LM
+
+This guide explains how to fine‑tune a language model with the [MLX‑LM](https://github.com/ml-explore/mlx-lm) library using the Hawaiian→English pairs in this repository.
+
+## Background
+
+The benchmarking workflow measures translation quality by comparing candidate model outputs against the reference English column in `data/dataset.csv`. The script `benchmarking/semantic_similarity.py` computes embeddings for each translation and then calculates cosine similarity with the reference. The higher the similarity, the closer the candidate is to the reference.
+
+For fine‑tuning we will use the same Hawaiian and English pairs located in `finetuning/finetuning_dataset.csv`.
+
+## Preparing the Data
+
+1. Convert the CSV to the JSONL format expected by MLX‑LM. A helper script `finetuning/convert_to_jsonl.py` reads `finetuning_dataset.csv` and produces `hawaiian_english_training.jsonl`:
+   ```bash
+   python finetuning/convert_to_jsonl.py
+   ```
+   Each line in the resulting file has a `messages` list with a system prompt, a user message containing the Hawaiian text, and the assistant response containing the reference translation.
+
+2. Place the JSONL file in a directory accessible to the training command (e.g. `finetuning/`).
+
+## Running LoRA Fine-Tuning
+
+The MLX‑LM package ships a command `mlx_lm.lora` that performs LoRA or QLoRA fine‑tuning. A minimal command to fine‑tune a base model is:
+
+```bash
+mlx_lm.lora \
+  --model <path_to_model_or_repo> \
+  --train \
+  --data finetuning/ \
+  --iters 600
+```
+
+Replace `<path_to_model_or_repo>` with the Hugging Face model name or a local path. When the model is quantized MLX‑LM automatically switches to QLoRA. The learned adapters are saved in the `adapters/` directory by default; you can change this with `--adapter-path`.
+
+Common options:
+- `--wandb <project>` – log metrics to Weights & Biases.
+- `--fine-tune-type full` – train the entire model instead of using LoRA adapters.
+- `--mask-prompt` – ignore prompt tokens when computing loss for chat datasets.
+
+For more details see `mlx_lm.lora --help` or the [LoRA documentation](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/LORA.md).
+
+## Evaluating and Using the Model
+
+After training finishes you can evaluate perplexity with:
+
+```bash
+mlx_lm.lora \
+  --model <path_to_model_or_repo> \
+  --adapter-path adapters/ \
+  --data finetuning/ \
+  --test
+```
+
+To generate translations with the fine‑tuned model:
+
+```bash
+mlx_lm.generate \
+  --model <path_to_model_or_repo> \
+  --adapter-path adapters/ \
+  --prompt "<Hawaiian sentence>"
+```
+
+If you wish to fuse the adapters with the base model, run:
+
+```bash
+mlx_lm.fuse --model <path_to_model_or_repo>
+```
+
+The fused model is placed in `fused_model/` and can optionally be uploaded to the Hugging Face Hub.
+
+## References
+
+- [LoRA Fine-Tuning with MLX‑LM](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/LORA.md)
+- [LoRA fine‑tuning example notebook](https://gist.github.com/awni/773e2a12079da40a1cbc566686c84c8f)
+- “Fine‑tuning Phi models with MLX” *(Strathweb, 2025)* for additional tips on training phi‑based models.
