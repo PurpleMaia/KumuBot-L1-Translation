@@ -31,7 +31,7 @@ For fine‑tuning we will use the same Hawaiian and English pairs located in `fi
    - `valid.jsonl` (10% of the data)
    - `test.jsonl` (10% of the data)
 
-3. The JSONL files are now ready for MLX‑LM training. The `--data` parameter should point to the `finetuning/` directory containing these files.
+3. The JSONL files are now ready for MLX‑LM training. Our small sample will have to use `--batch-size=2`. The `--data` parameter should point to the `finetuning/` directory containing these files.
 
 ## Running LoRA Fine-Tuning
 
@@ -42,7 +42,8 @@ mlx_lm.lora \
   --model <path_to_model_or_repo> \
   --train \
   --data finetuning/ \
-  --iters 600
+  --iters 600 \
+  --batch-size=2
 ```
 
 Replace `<path_to_model_or_repo>` with the Hugging Face model name or a local path. When the model is quantized MLX‑LM automatically switches to QLoRA. The learned adapters are saved in the `adapters/` directory by default; you can change this with `--adapter-path`.
