@@ -11,17 +11,22 @@ For fine‑tuning we will use the same Hawaiian and English pairs located in `fi
 ## Preparing the Data
 
 1. Convert the CSV to the JSONL format expected by MLX‑LM. A helper script `finetuning/convert_to_jsonl.py` reads `finetuning_dataset.csv` and produces `hawaiian_english_training.jsonl`:
+
    ```bash
    python finetuning/convert_to_jsonl.py
    ```
+
    Each line in the resulting file has a `messages` list with a system prompt, a user message containing the Hawaiian text, and the assistant response containing the reference translation.
 
 2. Prepare the data for MLX‑LM by splitting it into train/validation/test sets. The script `finetuning/prepare_mlx_data.py` reads `hawaiian_english_training.jsonl` and creates the required files:
+
    ```bash
    cd finetuning/
    python prepare_mlx_data.py
    ```
+
    This creates:
+
    - `train.jsonl` (80% of the data)
    - `valid.jsonl` (10% of the data)
    - `test.jsonl` (10% of the data)
@@ -43,6 +48,7 @@ mlx_lm.lora \
 Replace `<path_to_model_or_repo>` with the Hugging Face model name or a local path. When the model is quantized MLX‑LM automatically switches to QLoRA. The learned adapters are saved in the `adapters/` directory by default; you can change this with `--adapter-path`.
 
 Common options:
+
 - `--wandb <project>` – log metrics to Weights & Biases.
 - `--fine-tune-type full` – train the entire model instead of using LoRA adapters.
 - `--mask-prompt` – ignore prompt tokens when computing loss for chat datasets.
@@ -78,8 +84,32 @@ mlx_lm.fuse --model <path_to_model_or_repo>
 
 The fused model is placed in `fused_model/` and can optionally be uploaded to the Hugging Face Hub.
 
+## Troubleshooting
+
+### Model Loading Errors
+
+If you encounter errors like `Exception: data did not match any variant of untagged enum ModelWrapper` when using models from LM Studio, this is likely due to tokenizer incompatibility.
+
+**Why this happens:**
+
+- LM Studio may modify model files for its own optimizations
+- These modifications can make tokenizer files incompatible with MLX‑LM
+- MLX‑LM expects models in their original Hugging Face format
+
+**Solutions:**
+
+1. **Download models using huggingface-cli instead of LM Studio:**
+
+   ```bash
+   # Install huggingface-cli if needed
+   pip install huggingface-hub
+
+   # Download an MLX-compatible model
+   huggingface-cli download mlx-community/Llama-3.2-1B-Instruct-4bit --local-dir ./models/llama-3.2-1b
+   ```
+
 ## References
 
 - [LoRA Fine-Tuning with MLX‑LM](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/LORA.md)
 - [LoRA fine‑tuning example notebook](https://gist.github.com/awni/773e2a12079da40a1cbc566686c84c8f)
-- “Fine‑tuning Phi models with MLX” *(Strathweb, 2025)* for additional tips on training phi‑based models.
+- “Fine‑tuning Phi models with MLX” _(Strathweb, 2025)_ for additional tips on training phi‑based models.
