@@ -16,7 +16,17 @@ For fine‑tuning we will use the same Hawaiian and English pairs located in `fi
    ```
    Each line in the resulting file has a `messages` list with a system prompt, a user message containing the Hawaiian text, and the assistant response containing the reference translation.
 
-2. Place the JSONL file in a directory accessible to the training command (e.g. `finetuning/`).
+2. Prepare the data for MLX‑LM by splitting it into train/validation/test sets. The script `finetuning/prepare_mlx_data.py` reads `hawaiian_english_training.jsonl` and creates the required files:
+   ```bash
+   cd finetuning/
+   python prepare_mlx_data.py
+   ```
+   This creates:
+   - `train.jsonl` (80% of the data)
+   - `valid.jsonl` (10% of the data)
+   - `test.jsonl` (10% of the data)
+
+3. The JSONL files are now ready for MLX‑LM training. The `--data` parameter should point to the `finetuning/` directory containing these files.
 
 ## Running LoRA Fine-Tuning
 
