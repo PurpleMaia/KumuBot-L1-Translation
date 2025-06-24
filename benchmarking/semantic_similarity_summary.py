@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def calculate_summary_results(input_file='dataset_with_similarities.csv', 
-                             output_file='semantic_similarity_results.csv'):
+def calculate_summary_results(input_file='benchmarking/dataset_with_similarities.csv',
+                             output_file='benchmarking/semantic_similarity_results.csv'):
     """
     Calculate and save summary results of semantic similarities.
     
