@@ -2,3 +2,4 @@
 */__pycache*
 .python-version
 adapters
+fused_model
