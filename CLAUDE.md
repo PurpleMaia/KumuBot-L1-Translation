@@ -98,3 +98,7 @@ Currently, there are no automated tests in the repository. When adding new funct
 - Verify JSON output format matches expected structure
 - Check that extraction script correctly updates the dataset
 - Ensure benchmarking scripts handle missing/incomplete data gracefully
+
+## Workflow Tips
+
+- Always use uv pip to work with packages instead of just pip
