@@ -23,6 +23,7 @@ from epub_utils_optimized import (
     get_default_csv_paths,
     NGramIndex
 )
+from rapidfuzz import fuzz
 
 
 def check_single_passage(
@@ -252,7 +253,7 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(
-        description='Optimized: Check which passages from CSV datasets are found in an epub file',
+        description='Optimized: Check which passages from CSV datasets are found in an epub file, or compare CSV files',
         epilog='''
         This optimized version uses:
         - rapidfuzz for 10-100x faster fuzzy matching
@@ -261,7 +262,7 @@ def main():
         - progress bars to track execution
         '''
     )
-    parser.add_argument('epub_path', help='Path to the epub file')
+    parser.add_argument('epub_path', nargs='?', help='Path to the epub file (not needed for --compare-csv)')
     parser.add_argument(
         '--csv', 
         nargs='+', 
@@ -298,8 +299,28 @@ def main():
         action='store_true',
         help='Disable n-gram indexing (slower but uses less memory)'
     )
+    parser.add_argument(
+        '--compare-csv',
+        action='store_true',
+        help='Compare passages between CSV files instead of checking against epub'
+    )
+    parser.add_argument(
+        '--show-all',
+        action='store_true',
+        help='Show all passages when comparing CSVs (not just differences)'
+    )
     
     args = parser.parse_args()
+    
+    # If comparing CSVs, handle that separately
+    if args.compare_csv:
+        csv_paths = args.csv if args.csv else get_default_csv_paths()
+        compare_csv_files(
+            csv_paths=csv_paths,
+            similarity_threshold=args.threshold,
+            show_all=args.show_all
+        )
+        return
     
     # Default CSV files if not specified
     if not args.csv:
@@ -363,6 +384,200 @@ def main():
     total_found = sum(r['found_count'] for r in results.values())
     total_passages = sum(r['total_passages'] for r in results.values())
     print(f"Total passages found across all CSVs: {total_found}/{total_passages} ({total_found/total_passages*100:.1f}%)")
+
+
+def compare_csv_files(
+    csv_paths: List[str] = None,
+    similarity_threshold: float = 0.95,
+    show_all: bool = False
+) -> None:
+    """
+    Compare passages between CSV files to find which are the same and which are different.
+    
+    Args:
+        csv_paths: List of CSV files to compare (default: both datasets)
+        similarity_threshold: Minimum similarity to consider passages the same
+        show_all: Show all passages, not just differences
+    """
+    if not csv_paths:
+        csv_paths = get_default_csv_paths()
+    
+    # Ensure we have exactly 2 CSV files
+    existing_paths = [p for p in csv_paths if Path(p).exists()]
+    if len(existing_paths) != 2:
+        print(f"Error: Need exactly 2 CSV files to compare, found {len(existing_paths)}")
+        return
+    
+    print(f"Comparing passages between:")
+    print(f"  1. {Path(existing_paths[0]).name}")
+    print(f"  2. {Path(existing_paths[1]).name}")
+    print(f"Similarity threshold: {similarity_threshold:.2f}")
+    print("-" * 80)
+    
+    # Load passages from both files
+    passages1 = load_csv_passages(existing_paths[0])
+    passages2 = load_csv_passages(existing_paths[1])
+    
+    print(f"\nLoaded {len(passages1)} passages from {Path(existing_paths[0]).name}")
+    print(f"Loaded {len(passages2)} passages from {Path(existing_paths[1]).name}")
+    
+    # Create hash maps for quick lookup
+    hash_to_passage1 = {p['hawaiian_hash']: p for p in passages1}
+    hash_to_passage2 = {p['hawaiian_hash']: p for p in passages2}
+    
+    # Find exact matches by hash
+    common_hashes = set(hash_to_passage1.keys()) & set(hash_to_passage2.keys())
+    unique_to_file1 = set(hash_to_passage1.keys()) - set(hash_to_passage2.keys())
+    unique_to_file2 = set(hash_to_passage2.keys()) - set(hash_to_passage1.keys())
+    
+    print(f"\nExact matches (by hash): {len(common_hashes)} passages")
+    print(f"Unique to {Path(existing_paths[0]).name}: {len(unique_to_file1)} passages")
+    print(f"Unique to {Path(existing_paths[1]).name}: {len(unique_to_file2)} passages")
+    
+    # For non-exact matches, use fuzzy matching to find similar passages
+    print("\nSearching for similar passages (not exact matches)...")
+    similar_pairs = []
+    
+    # Check passages unique to file1 against all passages in file2
+    with tqdm(total=len(unique_to_file1), desc="Checking fuzzy matches") as pbar:
+        for hash1 in unique_to_file1:
+            p1 = hash_to_passage1[hash1]
+            best_match = None
+            best_score = 0.0
+            
+            for p2 in passages2:
+                if p2['hawaiian_hash'] not in common_hashes:
+                    # Compare Hawaiian text
+                    score = fuzz.ratio(p1['hawaiian'], p2['hawaiian']) / 100.0
+                    if score > best_score and score >= similarity_threshold:
+                        best_score = score
+                        best_match = p2
+            
+            if best_match:
+                similar_pairs.append((p1, best_match, best_score))
+            pbar.update(1)
+    
+    print(f"\nFound {len(similar_pairs)} similar passage pairs (>= {similarity_threshold:.2f} similarity)")
+    
+    # Display results
+    print("\n" + "=" * 80)
+    print("DETAILED COMPARISON RESULTS:")
+    print("=" * 80)
+    
+    if show_all or len(common_hashes) <= 10:
+        print(f"\n1. EXACT MATCHES ({len(common_hashes)} passages):")
+        for i, hash_val in enumerate(sorted(common_hashes)[:10]):
+            p1 = hash_to_passage1[hash_val]
+            p2 = hash_to_passage2[hash_val]
+            print(f"\n   Match {i+1}:")
+            hawaiian_preview1 = p1['hawaiian'][:100] + '...' if len(p1['hawaiian']) > 100 else p1['hawaiian']
+            hawaiian_preview2 = p2['hawaiian'][:100] + '...' if len(p2['hawaiian']) > 100 else p2['hawaiian']
+            print(f"   - {Path(existing_paths[0]).name} Row {p1['index']}: {hawaiian_preview1}")
+            print(f"   - {Path(existing_paths[1]).name} Row {p2['index']}: {hawaiian_preview2}")
+        if len(common_hashes) > 10 and not show_all:
+            print(f"\n   ... and {len(common_hashes) - 10} more exact matches")
+    else:
+        print(f"\n1. EXACT MATCHES: {len(common_hashes)} passages (use --show-all to see details)")
+    
+    if similar_pairs:
+        print(f"\n2. SIMILAR PASSAGES (not exact, but >= {similarity_threshold:.2f} similarity):")
+        for i, (p1, p2, score) in enumerate(similar_pairs[:5]):
+            print(f"\n   Similar pair {i+1} (similarity: {score:.3f}):")
+            hawaiian_preview1 = p1['hawaiian'][:100] + '...' if len(p1['hawaiian']) > 100 else p1['hawaiian']
+            hawaiian_preview2 = p2['hawaiian'][:100] + '...' if len(p2['hawaiian']) > 100 else p2['hawaiian']
+            print(f"   - {Path(existing_paths[0]).name} Row {p1['index']}: {hawaiian_preview1}")
+            print(f"   - {Path(existing_paths[1]).name} Row {p2['index']}: {hawaiian_preview2}")
+        if len(similar_pairs) > 5:
+            print(f"\n   ... and {len(similar_pairs) - 5} more similar pairs")
+    
+    if unique_to_file1:
+        print(f"\n3. UNIQUE TO {Path(existing_paths[0]).name.upper()} ({len(unique_to_file1)} passages):")
+        for i, hash_val in enumerate(sorted(unique_to_file1)[:5]):
+            p = hash_to_passage1[hash_val]
+            hawaiian_preview = p['hawaiian'][:100] + '...' if len(p['hawaiian']) > 100 else p['hawaiian']
+            print(f"   - Row {p['index']}: {hawaiian_preview}")
+        if len(unique_to_file1) > 5:
+            print(f"   ... and {len(unique_to_file1) - 5} more")
+    
+    if unique_to_file2:
+        print(f"\n4. UNIQUE TO {Path(existing_paths[1]).name.upper()} ({len(unique_to_file2)} passages):")
+        for i, hash_val in enumerate(sorted(unique_to_file2)[:5]):
+            p = hash_to_passage2[hash_val]
+            hawaiian_preview = p['hawaiian'][:100] + '...' if len(p['hawaiian']) > 100 else p['hawaiian']
+            print(f"   - Row {p['index']}: {hawaiian_preview}")
+        if len(unique_to_file2) > 5:
+            print(f"   ... and {len(unique_to_file2) - 5} more")
+    
+    # Summary statistics
+    print("\n" + "=" * 80)
+    print("SUMMARY STATISTICS:")
+    print("=" * 80)
+    total_unique = len(passages1) + len(passages2) - len(common_hashes)
+    print(f"Total unique passages across both files: {total_unique}")
+    print(f"Overlap percentage: {len(common_hashes) / total_unique * 100:.1f}%")
+    
+    # Export comparison results if requested
+    export_path = "passage_comparison.csv"
+    print(f"\nExporting detailed comparison to {export_path}...")
+    
+    with open(export_path, 'w', encoding='utf-8', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['Status', 'File1_Row', 'File2_Row', 'Similarity', 
+                        'Hawaiian_Text', 'English_Text', 'Source_File'])
+        
+        # Write exact matches
+        for hash_val in common_hashes:
+            p1 = hash_to_passage1[hash_val]
+            p2 = hash_to_passage2[hash_val]
+            writer.writerow([
+                'Exact Match',
+                p1['index'],
+                p2['index'],
+                '1.000',
+                p1['hawaiian'],
+                p1['english'],
+                'Both'
+            ])
+        
+        # Write similar matches
+        for p1, p2, score in similar_pairs:
+            writer.writerow([
+                'Similar',
+                p1['index'],
+                p2['index'],
+                f'{score:.3f}',
+                p1['hawaiian'],
+                p1['english'],
+                'Both (fuzzy)'
+            ])
+        
+        # Write unique to file1
+        for hash_val in unique_to_file1:
+            p = hash_to_passage1[hash_val]
+            writer.writerow([
+                'Unique',
+                p['index'],
+                '-',
+                '0.000',
+                p['hawaiian'],
+                p['english'],
+                Path(existing_paths[0]).name
+            ])
+        
+        # Write unique to file2
+        for hash_val in unique_to_file2:
+            p = hash_to_passage2[hash_val]
+            writer.writerow([
+                'Unique',
+                '-',
+                p['index'],
+                '0.000',
+                p['hawaiian'],
+                p['english'],
+                Path(existing_paths[1]).name
+            ])
+    
+    print(f"Comparison results exported to {export_path}")
 
 
 if __name__ == '__main__':
