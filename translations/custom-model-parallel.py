@@ -12,18 +12,24 @@ load_dotenv()
 # Allow overriding the output directory via the OUTPUT_DIR environment variable
 OUTPUT_DIR = os.getenv("OUTPUT_DIR")
 if not OUTPUT_DIR:
-    raise ValueError("OUTPUT_DIR not found in environment variables. Please check your .env file.")
+    raise ValueError(
+        "OUTPUT_DIR not found in environment variables. Please check your .env file."
+    )
 API_KEY = os.getenv("OPENAI_API_KEY_KOA")
 if not API_KEY:
-    raise ValueError("OPENAI_API_KEY_KOA not found in environment variables. Please check your .env file.")
+    raise ValueError(
+        "OPENAI_API_KEY_KOA not found in environment variables. Please check your .env file."
+    )
 BASE_URL = os.getenv("OPENAI_API_BASE_URL")
 if not BASE_URL:
-    raise ValueError("OPENAI_API_BASE_URL not found in environment variables. Please check your .env file.")
+    raise ValueError(
+        "OPENAI_API_BASE_URL not found in environment variables. Please check your .env file."
+    )
 MODEL_NAME = os.getenv("OPENAI_MODEL_NAME", "gpt-4o")
 MAX_PARALLEL = int(os.getenv("MAX_PARALLEL", "1"))
 MAX_TOKENS = int(os.getenv("MAX_TOKENS", "1024"))
 
-os.makedirs("translations/"+OUTPUT_DIR, exist_ok=True)
+os.makedirs("translations/" + OUTPUT_DIR, exist_ok=True)
 
 
 def translate_text(hawaiian_text: str) -> str | None:
@@ -49,14 +55,16 @@ def translate_text(hawaiian_text: str) -> str | None:
 def process_row(idx: int, hawaiian_text: str, reference_translation: str):
     translation = translate_text(hawaiian_text)
     if translation:
-        key_name=OUTPUT_DIR+"_translation"
+        key_name = OUTPUT_DIR + "_translation"
         output_data = {
             "row_id": idx,
             "hawaiian_text": hawaiian_text,
             "reference_translation": reference_translation,
         }
         output_data[key_name] = translation
-        output_file = os.path.join("translations/"+OUTPUT_DIR, f"translation_{idx}.json")
+        output_file = os.path.join(
+            "translations/" + OUTPUT_DIR, f"translation_{idx}.json"
+        )
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(output_data, f, ensure_ascii=False, indent=2)
         print(f"Saved translation to {output_file}")
@@ -77,7 +85,9 @@ def main():
     hawaiian_col = "Hawaiian"
     english_col = "English"
     if hawaiian_col not in df.columns or english_col not in df.columns:
-        print(f"Warning: Expected column names '{hawaiian_col}' and '{english_col}' not found.")
+        print(
+            f"Warning: Expected column names '{hawaiian_col}' and '{english_col}' not found."
+        )
         hawaiian_col = df.columns[0]
         english_col = df.columns[1]
     print(f"Using columns: Hawaiian='{hawaiian_col}', English='{english_col}'")

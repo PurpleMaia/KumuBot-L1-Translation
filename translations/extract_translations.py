@@ -26,7 +26,9 @@ def discover_folders() -> list[str]:
     folders = []
     for entry in os.listdir("./translations/"):
         # print(entry)
-        if os.path.isdir("./translations/"+entry) and os.path.isfile(os.path.join("./translations/"+entry, "translation_0.json")):
+        if os.path.isdir("./translations/" + entry) and os.path.isfile(
+            os.path.join("./translations/" + entry, "translation_0.json")
+        ):
             folders.append(entry)
     # print("folders is")
     # print(folders)
@@ -35,7 +37,12 @@ def discover_folders() -> list[str]:
 
 # Determine which folders to use
 folders_env = os.getenv("MODEL_FOLDERS")
-discover_env = os.getenv("DISCOVER_FOLDERS", "false").lower() in {"1", "true", "yes",True}
+discover_env = os.getenv("DISCOVER_FOLDERS", "false").lower() in {
+    "1",
+    "true",
+    "yes",
+    True,
+}
 # print("discover_env is ")
 # print(discover_env)
 
@@ -52,19 +59,20 @@ def extract_translation(text):
     Extract text between the last set of <translation> and </translation> tags.
     If no tags are found, return None to indicate the original text should be used.
     """
-    pattern = r'<translation>(.*?)</translation>'
+    pattern = r"<translation>(.*?)</translation>"
     matches = re.findall(pattern, text, re.DOTALL)
-    
+
     if matches:
         # Return the last match (from the last set of translation tags)
         return matches[-1].strip()
     # Return None to indicate no translation tags were found
     return None
 
+
 def main():
     # Read the original dataset.csv
     try:
-        df = pd.read_csv('data/dataset.csv')
+        df = pd.read_csv("data/dataset.csv")
         print(f"Read original dataset.csv with {len(df)} rows")
     except FileNotFoundError:
         print("Error: Original dataset.csv not found")
@@ -72,57 +80,60 @@ def main():
     except Exception as e:
         print(f"Error reading dataset.csv: {str(e)}")
         return
-    
+
     # Initialize columns for each model
     for folder in model_folders:
         df[folder] = ""
-    
+
     # Process each folder
     for folder in model_folders:
         print(f"Processing folder: ./translations/{folder}")
-        
+
         # Process each JSON file in the folder
         for i in range(10):  # translation_0.json to translation_9.json
-            json_file = os.path.join("./translations/"+folder, f"translation_{i}.json")
-            
+            json_file = os.path.join(
+                "./translations/" + folder, f"translation_{i}.json"
+            )
+
             try:
-                with open(json_file, 'r', encoding='utf-8') as f:
+                with open(json_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                
-                row_id = data['row_id']
-                #print("trying to extract "+f'{folder}_translation')
-                folder_prop_key = f'{folder}_translation'
-                if (str(folder) == "llama-3.3-70B-Instruct_exl2_6.0bpw-maui"):
-                    #print("working with folder "+folder)
+
+                row_id = data["row_id"]
+                # print("trying to extract "+f'{folder}_translation')
+                folder_prop_key = f"{folder}_translation"
+                if str(folder) == "llama-3.3-70B-Instruct_exl2_6.0bpw-maui":
+                    # print("working with folder "+folder)
                     folder_prop_key = "llama-3.3_translation"
-                if (str(folder) == "qwen3-30b-a3b-maui-awq"):
-                    #print("working with folder "+folder)
+                if str(folder) == "qwen3-30b-a3b-maui-awq":
+                    # print("working with folder "+folder)
                     folder_prop_key = "qwen3-30b-a3b-maui_translation"
                 model_translation = data[folder_prop_key]
-                
+
                 # Extract translation if tags exist, otherwise use the original text
                 extracted_translation = extract_translation(model_translation)
                 if extracted_translation is None:
                     # If no translation tags found, use the original model_translation
                     extracted_translation = model_translation
-                
+
                 # Add the translation to the dataframe
                 if 0 <= row_id < len(df):
                     df.at[row_id, folder] = extracted_translation
                     print(f"  Added translation from {json_file} to row {row_id}")
                 else:
                     print(f"  Warning: row_id {row_id} out of range for dataset")
-                
+
             except FileNotFoundError:
                 print(f"  Warning: File not found: {json_file}")
             except json.JSONDecodeError:
                 print(f"  Error: Invalid JSON in file: {json_file}")
             except Exception as e:
                 print(f"  Error processing {json_file}: {str(e)}")
-    
+
     # Save the updated dataframe back to dataset.csv
-    df.to_csv('data/dataset.csv', index=False)
+    df.to_csv("data/dataset.csv", index=False)
     print(f"Successfully updated dataset.csv with {len(model_folders)} new columns")
+
 
 if __name__ == "__main__":
     main()
