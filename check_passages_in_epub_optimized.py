@@ -389,7 +389,8 @@ def main():
 def compare_csv_files(
     csv_paths: List[str] = None,
     similarity_threshold: float = 0.95,
-    show_all: bool = False
+    show_all: bool = False,
+    save_file: bool = False
 ) -> None:
     """
     Compare passages between CSV files to find which are the same and which are different.
@@ -517,67 +518,68 @@ def compare_csv_files(
     print(f"Overlap percentage: {len(common_hashes) / total_unique * 100:.1f}%")
     
     # Export comparison results if requested
-    export_path = "passage_comparison.csv"
-    print(f"\nExporting detailed comparison to {export_path}...")
-    
-    with open(export_path, 'w', encoding='utf-8', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(['Status', 'File1_Row', 'File2_Row', 'Similarity', 
-                        'Hawaiian_Text', 'English_Text', 'Source_File'])
+    if save_file:
+        export_path = "passage_comparison.csv"
+        print(f"\nExporting detailed comparison to {export_path}...")
         
-        # Write exact matches
-        for hash_val in common_hashes:
-            p1 = hash_to_passage1[hash_val]
-            p2 = hash_to_passage2[hash_val]
-            writer.writerow([
-                'Exact Match',
-                p1['index'],
-                p2['index'],
-                '1.000',
-                p1['hawaiian'],
-                p1['english'],
-                'Both'
-            ])
+        with open(export_path, 'w', encoding='utf-8', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['Status', 'File1_Row', 'File2_Row', 'Similarity', 
+                            'Hawaiian_Text', 'English_Text', 'Source_File'])
+            
+            # Write exact matches
+            for hash_val in common_hashes:
+                p1 = hash_to_passage1[hash_val]
+                p2 = hash_to_passage2[hash_val]
+                writer.writerow([
+                    'Exact Match',
+                    p1['index'],
+                    p2['index'],
+                    '1.000',
+                    p1['hawaiian'],
+                    p1['english'],
+                    'Both'
+                ])
+            
+            # Write similar matches
+            for p1, p2, score in similar_pairs:
+                writer.writerow([
+                    'Similar',
+                    p1['index'],
+                    p2['index'],
+                    f'{score:.3f}',
+                    p1['hawaiian'],
+                    p1['english'],
+                    'Both (fuzzy)'
+                ])
+            
+            # Write unique to file1
+            for hash_val in unique_to_file1:
+                p = hash_to_passage1[hash_val]
+                writer.writerow([
+                    'Unique',
+                    p['index'],
+                    '-',
+                    '0.000',
+                    p['hawaiian'],
+                    p['english'],
+                    Path(existing_paths[0]).name
+                ])
+            
+            # Write unique to file2
+            for hash_val in unique_to_file2:
+                p = hash_to_passage2[hash_val]
+                writer.writerow([
+                    'Unique',
+                    '-',
+                    p['index'],
+                    '0.000',
+                    p['hawaiian'],
+                    p['english'],
+                    Path(existing_paths[1]).name
+                ])
         
-        # Write similar matches
-        for p1, p2, score in similar_pairs:
-            writer.writerow([
-                'Similar',
-                p1['index'],
-                p2['index'],
-                f'{score:.3f}',
-                p1['hawaiian'],
-                p1['english'],
-                'Both (fuzzy)'
-            ])
-        
-        # Write unique to file1
-        for hash_val in unique_to_file1:
-            p = hash_to_passage1[hash_val]
-            writer.writerow([
-                'Unique',
-                p['index'],
-                '-',
-                '0.000',
-                p['hawaiian'],
-                p['english'],
-                Path(existing_paths[0]).name
-            ])
-        
-        # Write unique to file2
-        for hash_val in unique_to_file2:
-            p = hash_to_passage2[hash_val]
-            writer.writerow([
-                'Unique',
-                '-',
-                p['index'],
-                '0.000',
-                p['hawaiian'],
-                p['english'],
-                Path(existing_paths[1]).name
-            ])
-    
-    print(f"Comparison results exported to {export_path}")
+        print(f"Comparison results exported to {export_path}")
 
 
 if __name__ == '__main__':

@@ -76,6 +76,108 @@ class NGramIndex:
         return candidates[:100]  # Return top 100 candidates
 
 
+def extract_text_from_epub_html_aware(epub_path: str) -> List[Tuple[str, str]]:
+    """
+    Extract aligned Hawaiian-English pairs using HTML table structure.
+    Returns list of (hawaiian, english) tuples.
+    """
+    from html.parser import HTMLParser
+    
+    class BilingualTableExtractor(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.in_table = False
+            self.in_english_cell = False
+            self.in_hawaiian_cell = False
+            self.current_english = []
+            self.current_hawaiian = []
+            self.pairs = []
+            self.current_text = []
+            self.skip_tags = {'a', 'sup', 'sub'}
+            self.in_skip_tag = False
+            
+        def handle_starttag(self, tag, attrs):
+            attrs_dict = dict(attrs)
+            
+            if tag == 'table' and attrs_dict.get('class') == 'alignedText':
+                self.in_table = True
+                
+            elif self.in_table and tag == 'td':
+                if attrs_dict.get('class', '').startswith('first'):
+                    self.in_english_cell = True
+                    self.in_hawaiian_cell = False
+                elif attrs_dict.get('class', '').startswith('second'):
+                    self.in_hawaiian_cell = True
+                    self.in_english_cell = False
+                    
+            elif tag in self.skip_tags:
+                self.in_skip_tag = True
+                
+        def handle_endtag(self, tag):
+            if tag == 'table' and self.in_table:
+                self.in_table = False
+                self._save_current_pair()
+                
+            elif tag == 'td':
+                if self.in_english_cell:
+                    self.current_english.extend(self.current_text)
+                    self.in_english_cell = False
+                elif self.in_hawaiian_cell:
+                    self.current_hawaiian.extend(self.current_text)
+                    self.in_hawaiian_cell = False
+                self.current_text = []
+                
+            elif tag == 'tr' and self.in_table:
+                self._save_current_pair()
+                
+            elif tag in self.skip_tags:
+                self.in_skip_tag = False
+                
+        def handle_data(self, data):
+            if self.in_skip_tag:
+                return
+                
+            if self.in_english_cell or self.in_hawaiian_cell:
+                cleaned = data.strip()
+                if cleaned:
+                    self.current_text.append(cleaned)
+                    
+        def _save_current_pair(self):
+            english_text = ' '.join(self.current_english).strip()
+            hawaiian_text = ' '.join(self.current_hawaiian).strip()
+            
+            if len(english_text) > 50 and len(hawaiian_text) > 50:
+                if not any(skip in english_text.lower()[:100] for skip in [
+                    'contents', 'volume', 'page', 'ebookmaker', 'chapter', 'mokuna'
+                ]):
+                    # Clean text
+                    english_text = re.sub(r'\s+', ' ', english_text)
+                    hawaiian_text = re.sub(r'\s+', ' ', hawaiian_text)
+                    english_text = re.sub(r'\[\s*\d+\s*\]', '', english_text)
+                    hawaiian_text = re.sub(r'\[\s*\d+\s*\]', '', hawaiian_text)
+                    self.pairs.append((hawaiian_text, english_text))
+                    
+            self.current_english = []
+            self.current_hawaiian = []
+    
+    all_pairs = []
+    
+    with zipfile.ZipFile(epub_path, 'r') as epub:
+        html_files = [f for f in epub.namelist() if f.endswith('.html') or f.endswith('.xhtml')]
+        
+        for html_file in sorted(html_files):
+            try:
+                content = epub.read(html_file).decode('utf-8')
+                parser = BilingualTableExtractor()
+                parser.feed(content)
+                all_pairs.extend(parser.pairs)
+            except Exception as e:
+                print(f"Error processing {html_file}: {e}")
+                continue
+    
+    return all_pairs
+
+
 def extract_text_from_epub(epub_path: str) -> List[Dict[str, str]]:
     """
     Extract text content from EPUB file, preserving page structure.
@@ -173,38 +275,196 @@ def extract_text_from_epub(epub_path: str) -> List[Dict[str, str]]:
 def identify_passage_pairs(pages: List[Dict[str, str]], start_after_preface: bool = True) -> List[Tuple[str, str]]:
     """
     Identify English-Hawaiian passage pairs from the extracted pages.
-    Assumes alternating pages after the preface: English (left) then Hawaiian (right).
+    For Fornander collection, this contains bilingual parallel text within pages.
     """
     pairs = []
     
-    # Find where main content starts (after preface)
-    start_index = 0
-    if start_after_preface:
-        for i, page in enumerate(pages):
-            content_lower = page['content'].lower()
-            if 'preface' in content_lower or 'introduction' in content_lower:
-                # Start after this page
-                start_index = i + 1
-                break
-    
-    # Process pages in pairs (English, Hawaiian)
-    i = start_index
-    while i < len(pages) - 1:
-        english_page = pages[i]['content']
-        hawaiian_page = pages[i + 1]['content']
+    # Find pages with substantial bilingual content
+    for page in pages:
+        content = page['content']
         
-        # Skip if either page is too short (likely not content)
-        if len(english_page) < 50 or len(hawaiian_page) < 50:
-            i += 1
+        # Skip short pages (likely headers, footers, TOC)
+        if len(content) < 1000:
             continue
+            
+        # Skip if it doesn't contain both English and Hawaiian indicators
+        content_lower = content.lower()
+        has_hawaiian_indicators = any(word in content_lower for word in [
+            'mokuna', 'moolelo', 'alii', 'aina', 'keiki', 'wahine', 'kane', 
+            'kaua', 'laua', 'mau', 'nei', 'paha', 'kela', 'keia'
+        ])
+        has_english_indicators = any(word in content_lower for word in [
+            'chapter', 'legend', 'king', 'queen', 'island', 'according', 
+            'tradition', 'history', 'people', 'chief'
+        ])
         
-        # Create the pair
-        pairs.append((hawaiian_page, english_page))
-        
-        # Move to next pair
-        i += 2
+        if not (has_hawaiian_indicators and has_english_indicators):
+            continue
+            
+        # Extract parallel passages from bilingual content
+        page_pairs = extract_bilingual_pairs(content)
+        pairs.extend(page_pairs)
     
     return pairs
+
+
+def extract_bilingual_pairs(content: str) -> List[Tuple[str, str]]:
+    """
+    Extract English-Hawaiian passage pairs from bilingual text.
+    The Fornander collection has English paragraphs followed by Hawaiian translations.
+    """
+    pairs = []
+    
+    # Use a more targeted approach based on the actual structure observed
+    # Pattern: English sentence(s) followed by Hawaiian translation(s)
+    
+    # Look for specific patterns where English is followed by Hawaiian
+    # Split content where we see transitions from English to Hawaiian
+    
+    # First, let's split the content into segments around sentence boundaries
+    # but keep context together
+    
+    # Split on periods followed by capital letters, but be more careful
+    segments = re.split(r'(?<=\.)\s+(?=[A-Z])', content)
+    
+    current_english = ""
+    current_hawaiian = ""
+    state = "unknown"  # Can be "english", "hawaiian", or "unknown"
+    
+    for segment in segments:
+        segment = segment.strip()
+        if len(segment) < 20:  # Skip very short segments
+            continue
+            
+        # Score this segment
+        eng_score = score_english_text(segment)
+        haw_score = score_hawaiian_text(segment)
+        
+        # Determine what language this segment is
+        if eng_score > haw_score and eng_score > 0.2:
+            segment_lang = "english"
+        elif haw_score > eng_score and haw_score > 0.2:
+            segment_lang = "hawaiian"
+        else:
+            segment_lang = "unknown"
+        
+        # State machine to build pairs
+        if state == "unknown":
+            if segment_lang == "english":
+                current_english = segment
+                state = "english"
+            elif segment_lang == "hawaiian":
+                current_hawaiian = segment
+                state = "hawaiian"
+                
+        elif state == "english":
+            if segment_lang == "english":
+                # Continue building English text
+                current_english += " " + segment
+            elif segment_lang == "hawaiian":
+                # Found Hawaiian after English - this might be a pair
+                current_hawaiian = segment
+                state = "hawaiian"
+            else:
+                # Unknown segment - might be transition
+                if len(current_english) > 100:
+                    current_english += " " + segment
+                    
+        elif state == "hawaiian":
+            if segment_lang == "hawaiian":
+                # Continue building Hawaiian text
+                current_hawaiian += " " + segment
+            elif segment_lang == "english":
+                # We have a complete pair: previous English + previous Hawaiian
+                if (len(current_english) > 100 and len(current_hawaiian) > 100 and
+                    not any(skip in current_english.lower()[:100] for skip in [
+                        'contents', 'chapter', 'fornander collection'
+                    ])):
+                    pairs.append((current_hawaiian, current_english))
+                
+                # Start new English
+                current_english = segment
+                current_hawaiian = ""
+                state = "english"
+            else:
+                # Unknown - might be continuing Hawaiian
+                current_hawaiian += " " + segment
+    
+    # Don't forget the last pair if we ended in Hawaiian state
+    if (state == "hawaiian" and len(current_english) > 100 and len(current_hawaiian) > 100 and
+        not any(skip in current_english.lower()[:100] for skip in [
+            'contents', 'chapter', 'fornander collection'
+        ])):
+        pairs.append((current_hawaiian, current_english))
+    
+    return pairs
+
+
+def score_english_text(text: str) -> float:
+    """
+    Score how likely text is to be English (0-1 scale).
+    """
+    text_lower = text.lower()
+    english_words = [
+        'the', 'and', 'of', 'to', 'a', 'in', 'was', 'that', 'he', 'it',
+        'with', 'for', 'as', 'his', 'on', 'be', 'at', 'by', 'this', 'had',
+        'from', 'they', 'she', 'or', 'an', 'were', 'been', 'have', 'their',
+        'said', 'each', 'which', 'do', 'how', 'if', 'will', 'up', 'other',
+        'about', 'out', 'many', 'then', 'them', 'these', 'so', 'some', 'her',
+        'would', 'make', 'like', 'into', 'time', 'has', 'two', 'more', 'very',
+        'after', 'words', 'first', 'where', 'much', 'through', 'before', 'right',
+        'good', 'here', 'better', 'every', 'those', 'came', 'came'
+    ]
+    
+    words = text_lower.split()
+    if not words:
+        return 0.0
+        
+    english_count = sum(1 for word in words if word in english_words)
+    return english_count / len(words)
+
+
+def score_hawaiian_text(text: str) -> float:
+    """
+    Score how likely text is to be Hawaiian (0-1 scale).
+    """
+    text_lower = text.lower()
+    
+    # Hawaiian words and particles
+    hawaiian_words = [
+        'aloha', 'mahalo', 'ohana', 'keiki', 'wahine', 'kane', 'alii', 'aina',
+        'kai', 'mauka', 'makai', 'pau', 'hale', 'wiki', 'nui', 'iki', 'mau',
+        'keia', 'kela', 'nei', 'la', 'no', 'hoi', 'mai', 'aku', 'ae', 'ana',
+        'ai', 'ia', 'oe', 'au', 'kaua', 'laua', 'lakou', 'oukou', 'maua',
+        'ma', 'i', 'o', 'a', 'e', 'ke', 'ka', 'na', 'he', 'ua', 'ai',
+        'moolelo', 'mokuna', 'hanau', 'make', 'ola', 'hele', 'hiki', 'ike',
+        'lohe', 'olelo', 'pono', 'makai', 'hoolohe', 'kokoke', 'mamua',
+        'mahope', 'manawa', 'wahi', 'ano', 'mea', 'hana', 'noho', 'komo'
+    ]
+    
+    words = text_lower.split()
+    if not words:
+        return 0.0
+        
+    hawaiian_count = sum(1 for word in words if word in hawaiian_words)
+    base_score = hawaiian_count / len(words)
+    
+    # Boost score based on Hawaiian linguistic features
+    # High vowel ratio (Hawaiian has many vowels)
+    vowel_count = sum(1 for char in text_lower if char in 'aeiou')
+    vowel_ratio = vowel_count / len(text_lower) if text_lower else 0
+    
+    # Presence of doubled vowels (common in Hawaiian)
+    double_vowels = len(re.findall(r'[aeiou]{2,}', text_lower))
+    double_vowel_boost = min(double_vowels / len(words) * 2, 0.2) if words else 0
+    
+    # Presence of apostrophes (okina)
+    apostrophe_count = text.count("'") + text.count("'")
+    apostrophe_boost = min(apostrophe_count / len(words) * 0.5, 0.1) if words else 0
+    
+    # Combine scores
+    final_score = base_score + (vowel_ratio - 0.4) * 0.3 + double_vowel_boost + apostrophe_boost
+    return max(0.0, min(1.0, final_score))
 
 
 def compute_passage_hash(text: str) -> str:

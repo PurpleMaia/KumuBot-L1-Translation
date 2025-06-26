@@ -86,7 +86,8 @@ def extract_passages_from_epub(
     epub_path: str,
     num_passages: Optional[int] = None,
     skip_duplicates: bool = True,
-    num_processes: Optional[int] = None
+    num_processes: Optional[int] = None,
+    use_html_structure: bool = True
 ) -> List[Tuple[str, str]]:
     """
     Optimized function to extract passages from an epub file.
@@ -103,13 +104,19 @@ def extract_passages_from_epub(
     print(f"Extracting passages from {epub_path}...")
     start_time = time.time()
     
-    # Extract pages from epub
-    pages = extract_text_from_epub(epub_path)
-    print(f"Found {len(pages)} pages in the epub")
-    
-    # Identify passage pairs
-    pairs = identify_passage_pairs(pages)
-    print(f"Identified {len(pairs)} potential passage pairs")
+    if use_html_structure:
+        # Use HTML-aware extraction for properly aligned text
+        from epub_utils_optimized import extract_text_from_epub_html_aware
+        pairs = extract_text_from_epub_html_aware(epub_path)
+        print(f"Extracted {len(pairs)} aligned passage pairs from HTML tables")
+    else:
+        # Extract pages from epub
+        pages = extract_text_from_epub(epub_path)
+        print(f"Found {len(pages)} pages in the epub")
+        
+        # Identify passage pairs
+        pairs = identify_passage_pairs(pages)
+        print(f"Identified {len(pairs)} potential passage pairs")
     
     # Load existing passages if checking for duplicates
     existing_hashes = set()
@@ -130,7 +137,21 @@ def extract_passages_from_epub(
         num_processes = min(mp.cpu_count(), 4)  # Cap at 4 processes
     
     # Process passages
-    if num_processes > 1 and len(pairs) > 100:
+    if use_html_structure:
+        # For HTML-extracted pairs, we already have clean pairs
+        # Just need to filter for duplicates and limit
+        filtered_pairs = []
+        for hawaiian, english in pairs:
+            if skip_duplicates:
+                hash_val = compute_passage_hash(hawaiian)
+                if hash_val in existing_hashes:
+                    continue
+                    
+            filtered_pairs.append((hawaiian, english))
+            
+            if num_passages and len(filtered_pairs) >= num_passages:
+                break
+    elif num_processes > 1 and len(pairs) > 100:
         # Use multiprocessing for large datasets
         print(f"Using {num_processes} processes for parallel filtering...")
         
@@ -260,12 +281,12 @@ def main():
     if args.preview:
         print("\nPreview of extracted passages:")
         print("-" * 80)
-        for i, (hawaiian, english) in enumerate(passages[:3]):
+        for i, (hawaiian, english) in enumerate(passages[:5]):
             print(f"\nPassage {i+1}:")
             print(f"Hawaiian: {hawaiian[:200]}...")
             print(f"English: {english[:200]}...")
-        if len(passages) > 3:
-            print(f"\n... and {len(passages) - 3} more passages")
+        if len(passages) > 5:
+            print(f"\n... and {len(passages) - 5} more passages")
         return
     
     # Determine output path and save
