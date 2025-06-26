@@ -272,9 +272,6 @@ def main():
         
         # Try optimized version first
         check_script = Path(__file__).parent / 'check_passages_in_epub_optimized.py'
-        if not check_script.exists():
-            # Fall back to original
-            check_script = Path(__file__).parent / 'check_passages_in_epub.py'
         
         if check_script.exists():
             print(f"Running {check_script.name}...")
