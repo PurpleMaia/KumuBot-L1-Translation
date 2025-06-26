@@ -26,7 +26,7 @@ from epub_utils_optimized import (
 )
 
 
-def validate_passage_pair(pair: Tuple[str, str], min_length: int = 50) -> bool:
+def validate_passage_pair(pair: Tuple[str, str], min_length: int = 50, max_length: int = 3000) -> bool:
     """
     Validate if a passage pair is suitable for extraction.
     """
@@ -34,6 +34,10 @@ def validate_passage_pair(pair: Tuple[str, str], min_length: int = 50) -> bool:
     
     # Check minimum length
     if len(hawaiian) < min_length or len(english) < min_length:
+        return False
+    
+    # Check maximum length (skip extremely long passages like chants/genealogies)
+    if max_length > 0 and (len(hawaiian) > max_length or len(english) > max_length):
         return False
     
     # Check if passages are too similar (might be same language)
@@ -59,7 +63,8 @@ def validate_passage_pair(pair: Tuple[str, str], min_length: int = 50) -> bool:
 def process_passages_batch(
     pairs_batch: List[Tuple[str, str]], 
     existing_hashes: set,
-    skip_duplicates: bool
+    skip_duplicates: bool,
+    max_length: int = 3000
 ) -> List[Tuple[str, str]]:
     """
     Process a batch of passage pairs in parallel.
@@ -68,7 +73,7 @@ def process_passages_batch(
     
     for hawaiian, english in pairs_batch:
         # Validate the pair
-        if not validate_passage_pair((hawaiian, english)):
+        if not validate_passage_pair((hawaiian, english), max_length=max_length):
             continue
         
         # Check for duplicates if requested
@@ -87,7 +92,8 @@ def extract_passages_from_epub(
     num_passages: Optional[int] = None,
     skip_duplicates: bool = True,
     num_processes: Optional[int] = None,
-    use_html_structure: bool = True
+    use_html_structure: bool = True,
+    max_length: int = 3000
 ) -> List[Tuple[str, str]]:
     """
     Optimized function to extract passages from an epub file.
@@ -97,6 +103,8 @@ def extract_passages_from_epub(
         num_passages: Maximum number of passages to extract (None for all)
         skip_duplicates: Whether to skip passages already in the dataset
         num_processes: Number of processes for parallel processing
+        use_html_structure: Whether to use HTML-aware extraction
+        max_length: Maximum character length per passage (0 to disable limit)
         
     Returns:
         List of (hawaiian, english) tuples
@@ -139,9 +147,13 @@ def extract_passages_from_epub(
     # Process passages
     if use_html_structure:
         # For HTML-extracted pairs, we already have clean pairs
-        # Just need to filter for duplicates and limit
+        # Just need to filter for duplicates, length, and limit
         filtered_pairs = []
         for hawaiian, english in pairs:
+            # Validate length
+            if not validate_passage_pair((hawaiian, english), max_length=max_length):
+                continue
+                
             if skip_duplicates:
                 hash_val = compute_passage_hash(hawaiian)
                 if hash_val in existing_hashes:
@@ -165,7 +177,8 @@ def extract_passages_from_epub(
             process_func = partial(
                 process_passages_batch,
                 existing_hashes=existing_hashes,
-                skip_duplicates=skip_duplicates
+                skip_duplicates=skip_duplicates,
+                max_length=max_length
             )
             
             # Process batches with progress bar
@@ -189,7 +202,7 @@ def extract_passages_from_epub(
         with tqdm(total=len(pairs), desc="Processing passages") as pbar:
             for hawaiian, english in pairs:
                 # Validate the pair
-                if not validate_passage_pair((hawaiian, english)):
+                if not validate_passage_pair((hawaiian, english), max_length=max_length):
                     pbar.update(1)
                     continue
                 
@@ -241,6 +254,8 @@ def main():
     parser.add_argument('--check-existing', action='store_true',
                        help='Check which existing CSV passages are in this epub (runs optimized checker)')
     parser.add_argument('--processes', type=int, help='Number of processes to use (default: auto)')
+    parser.add_argument('--max-length', type=int, default=3000,
+                       help='Maximum character length per passage (default: 3000, use 0 to disable)')
     
     args = parser.parse_args()
     
@@ -270,7 +285,8 @@ def main():
         args.epub_path,
         num_passages=args.num_passages,
         skip_duplicates=not args.no_dedup,
-        num_processes=args.processes
+        num_processes=args.processes,
+        max_length=args.max_length
     )
     
     if not passages:
