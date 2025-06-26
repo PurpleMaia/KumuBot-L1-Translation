@@ -217,8 +217,14 @@ def extract_passages_from_epub(
                 
                 if num_passages and len(filtered_pairs) >= num_passages:
                     break
-    
-    print(f"\nExtracted {len(filtered_pairs)} new passages")
+    extracted_message = "new passages after filtering"
+    if skip_duplicates:
+        extracted_message += " duplicates"
+        if max_length != 0:
+            extracted_message += " and"
+    if max_length != 0:
+        extracted_message += " passages with length greater than "+str(max_length)
+    print(f"\nExtracted {len(filtered_pairs)} "+extracted_message)
     print(f"Time taken: {time.time() - start_time:.2f} seconds")
     return filtered_pairs
 
