@@ -68,6 +68,8 @@ def process_passages_batch(
 ) -> List[Tuple[str, str]]:
     """
     Process a batch of passage pairs in parallel.
+    Note: This function cannot prevent internal duplicates across batches
+    due to parallel processing. Internal deduplication happens at the end.
     """
     filtered_pairs = []
     
@@ -76,7 +78,8 @@ def process_passages_batch(
         if not validate_passage_pair((hawaiian, english), max_length=max_length):
             continue
         
-        # Check for duplicates if requested
+        # Check for duplicates against existing CSV data only
+        # (internal duplicates will be handled after parallel processing)
         if skip_duplicates:
             hash_val = compute_passage_hash(hawaiian)
             if hash_val in existing_hashes:
@@ -149,6 +152,8 @@ def extract_passages_from_epub(
         # For HTML-extracted pairs, we already have clean pairs
         # Just need to filter for duplicates, length, and limit
         filtered_pairs = []
+        seen_hashes = set()  # Track hashes within this extraction to prevent internal duplicates
+
         for hawaiian, english in pairs:
             # Validate length
             if not validate_passage_pair((hawaiian, english), max_length=max_length):
@@ -156,8 +161,13 @@ def extract_passages_from_epub(
                 
             if skip_duplicates:
                 hash_val = compute_passage_hash(hawaiian)
+                # Check against existing CSV data
                 if hash_val in existing_hashes:
                     continue
+                # Check against already processed passages in this extraction
+                if hash_val in seen_hashes:
+                    continue
+                seen_hashes.add(hash_val)
                     
             filtered_pairs.append((hawaiian, english))
             
@@ -184,20 +194,44 @@ def extract_passages_from_epub(
             # Process batches with progress bar
             all_filtered = []
             with tqdm(total=len(pairs), desc="Processing passages") as pbar:
-                for batch_result in pool.imap(process_func, batches):
+                for i, batch_result in enumerate(pool.imap(process_func, batches)):
                     all_filtered.extend(batch_result)
-                    pbar.update(len(batches[0]))  # Approximate update
+                    # More accurate progress update
+                    batch_len = len(batches[i]) if i < len(batches) else len(batches[-1])
+                    pbar.update(batch_len)
                     
                     # Stop if we have enough passages
                     if num_passages and len(all_filtered) >= num_passages:
                         pool.terminate()
                         break
         
+        # Deduplicate internally within the extracted passages
+        if skip_duplicates:
+            print("Removing internal duplicates from parallel processing...")
+            seen_hashes = set()
+            deduped_pairs = []
+            duplicates_removed = 0
+            
+            for hawaiian, english in all_filtered:
+                hash_val = compute_passage_hash(hawaiian)
+                if hash_val not in seen_hashes:
+                    seen_hashes.add(hash_val)
+                    deduped_pairs.append((hawaiian, english))
+                else:
+                    duplicates_removed += 1
+            
+            if duplicates_removed > 0:
+                print(f"Removed {duplicates_removed} internal duplicates from parallel processing")
+            
+            all_filtered = deduped_pairs
+        
         filtered_pairs = all_filtered[:num_passages] if num_passages else all_filtered
     else:
         # Use single process for small datasets
         print("Processing passages...")
         filtered_pairs = []
+        
+        seen_hashes = set()  # Track hashes within this extraction to prevent internal duplicates
         
         with tqdm(total=len(pairs), desc="Processing passages") as pbar:
             for hawaiian, english in pairs:
@@ -208,9 +242,15 @@ def extract_passages_from_epub(
                 
                 if skip_duplicates:
                     hash_val = compute_passage_hash(hawaiian)
+                    # Check against existing CSV data
                     if hash_val in existing_hashes:
                         pbar.update(1)
                         continue
+                    # Check against already processed passages in this extraction
+                    if hash_val in seen_hashes:
+                        pbar.update(1)
+                        continue
+                    seen_hashes.add(hash_val)
                 
                 filtered_pairs.append((hawaiian, english))
                 pbar.update(1)
