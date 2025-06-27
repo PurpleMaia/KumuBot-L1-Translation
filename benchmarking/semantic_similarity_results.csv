@@ -13,6 +13,7 @@ mistral-Small-3.1-24B-ud-q4kxl-maui,0.8822492608583176
 QwQ-32B-exl2-6_5bpw-maui,0.8801704102254403
 gpt-4o-mini,0.8786649816077213
 gemini-2.0-flash-thinking,0.8773336117211397
+pmf-train-1-8k-all-fornander-gemma-3-4b-it-mlx-4bit-maui,0.8295837783256005
 pmf-kumubotv1-gemma-3-4b-it-mlx-4bit-maui,0.8130509614271064
 pmf-all-fornander-gemma-3-4b-it-mlx-4bit-maui,0.8095434451895563
 qwen3-30b-a3b-maui-awq,0.801118343017148
