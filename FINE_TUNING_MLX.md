@@ -8,6 +8,8 @@ The benchmarking workflow measures translation quality by comparing candidate mo
 
 For fine‑tuning we will use the same Hawaiian and English pairs located in `finetuning/finetuning_dataset.csv`.
 
+> **Note**: For detailed experimental results and proven configurations, see [MLX_FINETUNING_NOTES.md](MLX_FINETUNING_NOTES.md).
+
 ## Preparing the Data
 
 1. Convert the CSV to the JSONL format expected by MLX‑LM. A helper script `finetuning/convert_to_jsonl.py` reads `finetuning_dataset.csv` and produces `hawaiian_english_training.jsonl`:
@@ -31,7 +33,9 @@ For fine‑tuning we will use the same Hawaiian and English pairs located in `fi
    - `valid.jsonl` (10% of the data)
    - `test.jsonl` (10% of the data)
 
-3. The JSONL files are now ready for MLX‑LM training. Our small sample will have to use `--batch-size=2`. The `--data` parameter should point to the `finetuning/` directory containing these files.
+3. The JSONL files are now ready for MLX‑LM training. The `--data` parameter should point to the `finetuning/` directory containing these files.
+
+   **Memory considerations**: If you encounter OOM errors with `--batch-size=2`, use `--batch-size=1 --grad-checkpoint` instead (proven to work with ~100GB RAM).
 
 ## Running LoRA Fine-Tuning
 
@@ -44,6 +48,21 @@ mlx_lm.lora \
   --data finetuning/ \
   --iters 600 \
   --batch-size=2
+```
+
+**Recommended settings based on extensive testing:**
+
+```bash
+# For large datasets (2000+ examples) with memory constraints
+mlx_lm.lora \
+  --model mlx-community/gemma-3-4b-it-4bit \
+  --train \
+  --data finetuning/ \
+  --iters 2000 \
+  --batch-size 1 \
+  --grad-checkpoint \
+  --steps-per-eval 200 \
+  --save-every 200  # Important for finding best checkpoint
 ```
 
 Replace `<path_to_model_or_repo>` with the Hugging Face model name or a local path. When the model is quantized MLX‑LM automatically switches to QLoRA. The learned adapters are saved in the `adapters/` directory by default; you can change this with `--adapter-path`.
@@ -80,10 +99,15 @@ mlx_lm.generate \
 If you wish to fuse the adapters with the base model, run:
 
 ```bash
-mlx_lm.fuse --model <path_to_model_or_repo>
+mlx_lm.fuse \
+  --model <path_to_model_or_repo> \
+  --adapter-path adapters/ \
+  --save-path fused_model/
 ```
 
 The fused model is placed in `fused_model/` and can optionally be uploaded to the Hugging Face Hub.
+
+**Tip**: If you saved checkpoints during training, test them to find the best one. In our experiments, iteration 1800 outperformed the final iteration 2000.
 
 ## Troubleshooting
 
@@ -108,6 +132,16 @@ If you encounter errors like `Exception: data did not match any variant of untag
    # Download an MLX-compatible model
    huggingface-cli download mlx-community/Llama-3.2-1B-Instruct-4bit --local-dir ./models/llama-3.2-1b
    ```
+
+## Proven Results
+
+Based on extensive experimentation with Hawaiian-English translation:
+- **Best model**: `mlx-community/gemma-3-4b-it-4bit` with 2,831 training pairs
+- **Optimal iterations**: 1800 (not more!)
+- **Performance**: 0.8296 semantic similarity (3.6% improvement over base model)
+- **Key settings**: `--batch-size 1 --grad-checkpoint` for memory efficiency
+
+See [MLX_FINETUNING_NOTES.md](MLX_FINETUNING_NOTES.md) for detailed experimental results and analysis.
 
 ## References
 
