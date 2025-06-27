@@ -14,6 +14,7 @@ QwQ-32B-exl2-6_5bpw-maui,0.8801704102254403
 gpt-4o-mini,0.8786649816077213
 gemini-2.0-flash-thinking,0.8773336117211397
 pmf-kumubotv1-gemma-3-4b-it-mlx-4bit-maui,0.8130509614271064
+pmf-all-fornander-gemma-3-4b-it-mlx-4bit-maui,0.8095434451895563
 qwen3-30b-a3b-maui-awq,0.801118343017148
 deepseek-r1-distill-llama-70b,0.7989829392565233
 gemma-3-4b-it-mlx-4bit-maui,0.793647884161947
