@@ -1,6 +1,6 @@
 # Hawaiian to English Translation Project
 
-This repository contains scripts and data for evaluating large language models (LLMs) on Hawaiian→English translation. The dataset consists of 10 Hawaiian sentences with reference translations.
+This repository contains scripts and data for evaluating large language models (LLMs) on Hawaiian→English translation. The head-to-head dataset consists of 10 Hawaiian sentences with reference translations.
 
 ## Directory Structure
 
@@ -57,7 +57,7 @@ uv pip install -r requirements.txt
 5. (Optional) launch the entire translation and evaluation pipeline with
    `run_pipeline.sh`:
    ```bash
-   OPENAI_MODEL_NAME=my-model OUTPUT_DIR=my-folder ./run_pipeline.sh
+   OPENAI_BASE_URL=my-url OPENAI_MODEL_NAME=my-model OUTPUT_DIR=my-folder ./run_pipeline.sh
    ```
 6. (Optional) Launch the demo chatbot:
    ```bash
