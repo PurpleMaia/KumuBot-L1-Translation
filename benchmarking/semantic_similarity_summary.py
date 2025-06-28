@@ -51,11 +51,11 @@ def calculate_summary_results(
 
     # Print summary to console
     print("\nSemantic Similarity Results (sorted by average similarity):")
-    print("=" * 75)
-    print(f"{'Model':<50} | {'Average Similarity':<20}")
-    print("-" * 75)
+    print("=" * 85)
+    print(f"{'Model':<60} | {'Average Similarity':<20}")
+    print("-" * 85)
     for model, avg_similarity in sorted_models:
-        print(f"{model:<50} | {avg_similarity:.6f}")
+        print(f"{model:<60} | {avg_similarity:.6f}")
 
     print(f"\nDone! Summary results saved to {output_file}")
 
