@@ -2,10 +2,13 @@ Model,Average Similarity
 o1,0.9188606806679125
 gpt-4.5-preview,0.9123326707652627
 llama-3.3-70B-Instruct_exl2_6.0bpw-maui,0.907072939886118
+llama4-maverick-fireworks,0.904334177658938
 deepseek-r1-0528-dsapi,0.9023570555271485
 gpt4o,0.9019126509025209
 deepseek-v3-0324-dsapi,0.8991142676537149
+llama4-scout-fireworks,0.8982856717632733
 gemma-3-27b-it-qat-mlx-maui,0.8978499200858641
+qwen3-235b-a22b-think-parser-fireworks,0.895793554324458
 gpt-4o-mini-finetuned,0.8857264206818021
 llama-3.3,0.8831149689419359
 qwq-32b-awq-maui,0.8825158839544291
@@ -13,6 +16,7 @@ mistral-Small-3.1-24B-ud-q4kxl-maui,0.8822492608583176
 QwQ-32B-exl2-6_5bpw-maui,0.8801704102254403
 gpt-4o-mini,0.8786649816077213
 gemini-2.0-flash-thinking,0.8773336117211397
+qwen3-32b-fp8-think-parser-deepinfra,0.8707612670891873
 gemma-3n-e4b-it-gguf-q4kxl-32k-maui,0.8529385431399351
 pmf-train-1-8k-all-fornander-gemma-3-4b-it-mlx-4bit-maui,0.8295837783256005
 pmf-kumubotv1-gemma-3-4b-it-mlx-4bit-maui,0.8130509614271064
