@@ -5,6 +5,7 @@ import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from constants import prompt
+import re
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -28,6 +29,7 @@ if not BASE_URL:
 MODEL_NAME = os.getenv("OPENAI_MODEL_NAME", "gpt-4o")
 MAX_PARALLEL = int(os.getenv("MAX_PARALLEL", "1"))
 MAX_TOKENS = int(os.getenv("MAX_TOKENS", "1024"))
+SELF_REASONING_PARSER = os.getenv("SELF_REASONING_PARSER", False)
 
 os.makedirs("translations/" + OUTPUT_DIR, exist_ok=True)
 
@@ -47,7 +49,11 @@ def translate_text(hawaiian_text: str) -> str | None:
     url = BASE_URL.rstrip("/") + "/chat/completions"
     response = requests.post(url, headers=headers, json=payload)
     if response.status_code == 200:
-        return response.json()["choices"][0]["message"]["content"]
+        llm_content = response.json()["choices"][0]["message"]["content"]
+        if SELF_REASONING_PARSER:
+            print("now stripping <think> content")
+            llm_content = re.sub(r'<think>.*?</think>', '', llm_content, flags=re.DOTALL)
+        return llm_content
     print(f"Error: {response.status_code}, {response.text}")
     return None
 
