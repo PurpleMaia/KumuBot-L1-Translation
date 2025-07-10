@@ -52,7 +52,9 @@ def translate_text(hawaiian_text: str) -> str | None:
         llm_content = response.json()["choices"][0]["message"]["content"]
         if SELF_REASONING_PARSER:
             print("now stripping <think> content")
-            llm_content = re.sub(r'<think>.*?</think>', '', llm_content, flags=re.DOTALL)
+            llm_content = re.sub(
+                r"<think>.*?</think>", "", llm_content, flags=re.DOTALL
+            )
         return llm_content
     print(f"Error: {response.status_code}, {response.text}")
     return None
