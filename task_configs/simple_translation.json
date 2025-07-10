@@ -1,0 +1,35 @@
+{
+  "task_name": "simple_translation",
+  "task_type": "translation",
+  "description": "Direct Hawaiian to English translation of individual sentences",
+  
+  "dataset": {
+    "path": "data/simple_translation/dataset.csv",
+    "source_column": "Hawaiian",
+    "reference_column": "English",
+    "id_column": "row_id"
+  },
+  
+  "output": {
+    "format": "single_translation",
+    "fields": ["translation"],
+    "parsing": {
+      "translation": "translation"
+    }
+  },
+  
+  "prompt": {
+    "system": "You are an expert translator specializing in Hawaiian to English translation. Your goal is to provide accurate, natural-sounding English translations while preserving the cultural context and nuances of the Hawaiian language.",
+    "user_template": "Please translate the following Hawaiian text to English:\n\n{source_text}\n\nProvide your translation within <translation></translation> tags."
+  },
+  
+  "processing": {
+    "batch_size": 1,
+    "max_parallel": 3
+  },
+  
+  "evaluation": {
+    "metrics": ["semantic_similarity", "llm_judge"],
+    "reference_required": true
+  }
+}

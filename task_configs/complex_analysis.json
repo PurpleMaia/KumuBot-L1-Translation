@@ -1,0 +1,53 @@
+{
+  "task_name": "complex_analysis",
+  "task_type": "analysis",
+  "description": "Hawaiian to English translation with commentary and overall summary",
+  
+  "dataset": {
+    "path": "data/complex_analysis/namakaokapaoo_dataset.csv",
+    "source_column": "hawaiian_text",
+    "reference_columns": {
+      "translation": "english_translation",
+      "commentary": "commentary",
+      "summary": "overall_summary"
+    },
+    "grouping_columns": ["chapter", "paragraph"],
+    "id_column": "passage_id"
+  },
+  
+  "output": {
+    "format": "multi_component",
+    "fields": ["translation", "commentary", "overall_summary"],
+    "parsing": {
+      "translation": "translation",
+      "commentary": "commentary", 
+      "summary": "summary"
+    }
+  },
+  
+  "prompt": {
+    "system": "You are an expert in Hawaiian language, culture, and history. You are tasked with:\n1. Translating Hawaiian passages to English\n2. Providing detailed commentary on cultural, historical, and linguistic aspects\n3. Creating an overall summary of the context and significance\n\nYour analysis should be thorough and academically rigorous while remaining accessible.",
+    "user_template": "Please analyze the following Hawaiian passages from Chapter {chapter}:\n\n{passages}\n\nFor each passage:\n1. Provide an accurate English translation\n2. Write detailed commentary explaining cultural context, linguistic features, and historical significance\n\nAfter analyzing all passages, provide an overall summary of the chapter's themes and significance.\n\nFormat your response as follows:\n- Use <translation></translation> tags for each passage translation\n- Use <commentary></commentary> tags for each passage commentary\n- Use <summary></summary> tags for the overall chapter summary",
+    "passage_format": "Paragraph {paragraph}:\n{hawaiian_text}"
+  },
+  
+  "processing": {
+    "batch_size": "chapter",
+    "max_parallel": 1
+  },
+  
+  "evaluation": {
+    "metrics": ["semantic_similarity", "commentary_quality", "summary_coherence"],
+    "reference_required": true,
+    "custom_metrics": {
+      "commentary_quality": {
+        "evaluator": "gpt-4",
+        "criteria": ["cultural_accuracy", "historical_context", "linguistic_analysis"]
+      },
+      "summary_coherence": {
+        "evaluator": "gpt-4",
+        "criteria": ["thematic_synthesis", "completeness", "clarity"]
+      }
+    }
+  }
+}
