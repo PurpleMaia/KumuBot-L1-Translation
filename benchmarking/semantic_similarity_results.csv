@@ -24,4 +24,5 @@ pmf-all-fornander-gemma-3-4b-it-mlx-4bit-maui,0.8095434451895563
 qwen3-30b-a3b-maui-awq,0.801118343017148
 deepseek-r1-distill-llama-70b,0.7989829392565233
 gemma-3-4b-it-mlx-4bit-maui,0.793647884161947
-gemma-3-4b-qat-gguf-maui,0.7858080610700774
+gemma-3-4b-qat-gguf-maui,0.7888977797681767
+qwen3-4b-awq-40k-maui,0.7478933803331441
