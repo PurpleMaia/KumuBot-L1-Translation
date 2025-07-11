@@ -114,6 +114,7 @@ The hybrid approach combines two processing modes:
 - Generates chapter-level summaries after all passages are processed
 - Includes exponential backoff for failed requests
 - Supports streaming responses to avoid timeouts
+- **Debug mode**: Use `--debug` flag to show LLM response content (translations and commentary) during processing
 
 #### Extraction (`extract_hybrid_complex_analysis.py`)
 - Extracts individual passage JSON files into consolidated CSV format
@@ -130,6 +131,9 @@ The hybrid approach combines two processing modes:
 ```bash
 # Run hybrid complex analysis (individual steps)
 OPENAI_MODEL_NAME=gpt-4 OPENAI_API_BASE_URL=https://api.example.com/v1 MAX_PARALLEL=5 python translations/custom-model-parallel-v2.py --task hybrid_complex_analysis
+
+# Run with debug output to see LLM response content (translations and commentary)
+python translations/custom-model-parallel-v2.py --task hybrid_complex_analysis --debug
 
 # Extract hybrid results to CSV
 python translations/extract_hybrid_complex_analysis.py --output-dir model_name
@@ -178,10 +182,18 @@ Hybrid complex analysis uses a structured approach:
 ### Special Features
 
 - **Automatic Retry**: Failed passages are automatically retried with exponential backoff
-- **Grouped Commentary**: Handles special cases where multiple paragraphs share commentary
+- **Grouped Commentary**: Handles special cases where multiple paragraphs share commentary (e.g., paragraphs 10-14 in the reference dataset)
+  - **Important Fix**: As of the latest update, grouped commentary passages now correctly save individual JSON files
 - **Streaming Support**: Uses streaming responses to avoid Cloudflare timeouts
 - **Parallel Processing**: Configurable parallelization with timeout handling
 - **Individual Passage Recovery**: Malformed responses can be fixed by creating subset datasets and reprocessing specific passages
+- **Debug Mode Control**: By default, shows all status messages and progress indicators but hides LLM response content. Use `--debug` to see LLM response content (translations and commentary) during processing
+
+### Current Model Performance
+
+Latest complex analysis semantic similarity results:
+- **qwen3-30b-a3b-awq-128k-maui**: Composite score 0.7668 (Translation: 0.8533, Commentary: 0.6902, Summary: 0.7470)
+- **qwen3-4b-awq-40k-maui**: Composite score 0.7301 (Translation: 0.8085, Commentary: 0.6221, Summary: 0.7891)
 
 ## Testing
 
@@ -196,3 +208,8 @@ Currently, there are no automated tests in the repository. When adding new funct
 - Always use uv pip to work with packages instead of just pip
 - When running scripts and testing code, use the .env settings OPENAI_API_BASE_URL and OPENAI_API_EMBEDDING_BASE_URL and OPENAI_MODEL_NAME don't try to mock a server response. and use the real data files
 instead of making example test data files (but it is ok if you want to temporarily use a subset of the real data for tests if that makes sense at times)
+
+## Guidance Notes
+
+- **Timeout Handling**:
+  - When running bash commands or executing .sh scripts please use at least a 10 minute timeout instead of 2 minutes

@@ -15,6 +15,7 @@ import requests
 import argparse
 import re
 import time
+import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from dotenv import load_dotenv
@@ -45,8 +46,9 @@ USE_STREAMING = os.getenv("USE_STREAMING", "false").lower() in [
 class TaskProcessor:
     """Process translations/analysis based on task configuration."""
 
-    def __init__(self, task_config: TaskConfig):
+    def __init__(self, task_config: TaskConfig, debug: bool = False):
         self.config = task_config
+        self.debug = debug
         self.validate_environment()
         self.setup_output_directory()
 
@@ -130,10 +132,14 @@ class TaskProcessor:
                                         if "content" in delta:
                                             content_chunk = delta["content"]
                                             llm_content += content_chunk
-                                            print(content_chunk, end="", flush=True)
+                                            if self.debug:
+                                                print(content_chunk, end="", flush=True)
                                 except json.JSONDecodeError:
                                     continue
-                    print()  # New line after streaming
+                    if self.debug:
+                        print()  # New line after streaming
+                    else:
+                        print("✓ Response received")
                 else:
                     # Handle non-streaming response
                     llm_content = response.json()["choices"][0]["message"]["content"]
@@ -144,6 +150,12 @@ class TaskProcessor:
                     llm_content = re.sub(
                         r"<think>.*?</think>", "", llm_content, flags=re.DOTALL
                     )
+
+                # Debug: Show LLM response content
+                if self.debug:
+                    print(f"\n--- LLM Response ---")
+                    print(llm_content)
+                    print(f"--- End Response ---\n")
 
                 return llm_content
             else:
@@ -377,7 +389,10 @@ class TaskProcessor:
         processing_config = self.config.config.get("processing", {})
         stages = processing_config.get("stages", [])
         passage_stage = next((s for s in stages if s["name"] == "passage_analysis"), {})
-        max_workers = passage_stage.get("max_parallel", 5)
+        config_max_parallel = passage_stage.get("max_parallel", 5)
+
+        # Use environment variable if set, otherwise use config value
+        max_workers = min(MAX_PARALLEL, config_max_parallel)
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = []
@@ -390,12 +405,17 @@ class TaskProcessor:
             # Collect results
             for paragraph, future in futures:
                 try:
+                    print(f"  ⏳ Waiting for passage {paragraph} to complete...")
                     result = future.result(
                         timeout=120
                     )  # Set timeout for future.result()
                     if result:
                         results.append(result)
                         print(f"  ✓ Completed passage {paragraph}")
+                    else:
+                        print(
+                            f"  ⚠️  Passage {paragraph} returned None result in parallel mode"
+                        )
                 except concurrent.futures.TimeoutError:
                     print(
                         f"  ⏱️  Timeout processing passage {paragraph} in parallel mode"
@@ -460,7 +480,7 @@ class TaskProcessor:
                                 break
                             else:
                                 print(
-                                    f"  ⚠️  Attempt {attempt + 1} failed for passage {paragraph}"
+                                    f"  ⚠️  Attempt {attempt + 1} failed for passage {paragraph} - no result returned"
                                 )
                         except Exception as e:
                             print(
@@ -557,6 +577,9 @@ class TaskProcessor:
         if "commentary" in row and pd.notna(row["commentary"]):
             output["reference_commentary"] = row["commentary"]
 
+        # Save passage-level output (this was missing!)
+        self.save_output(output, f"passage_{chapter}_{paragraph}")
+
         return output
 
     def _get_grouped_commentary(self, group: Dict[str, Any]) -> str:
@@ -615,9 +638,12 @@ class TaskProcessor:
         paragraph = row["paragraph"]
         passage_id = row.get("passage_id", f"ch{chapter}_p{paragraph}")
 
+        print(f"    📝 Starting processing for passage {paragraph}")
+
         # Check if this passage is in a special group
         special_case_result = self._handle_special_case_passage(row, chapter)
         if special_case_result:
+            print(f"    ✅ Special case handling completed for passage {paragraph}")
             return special_case_result
 
         # Get passage analysis prompts
@@ -633,12 +659,24 @@ class TaskProcessor:
         )
 
         # Call LLM with full prompt
+        print(f"    🔄 Calling LLM for passage {paragraph}")
         response = self.call_llm(user_prompt, system_prompt)
         if not response:
+            print(f"    ❌ No response from LLM for passage {paragraph}")
             return None
+        print(f"    ✅ LLM response received for passage {paragraph}")
 
         # Parse response
         parsed = self._parse_passage_response(response)
+
+        # Check if parsing was successful
+        if not parsed.get("translation") and not parsed.get("commentary"):
+            print(
+                f"    ❌ Failed to parse translation/commentary from response for passage {paragraph}"
+            )
+            # Always show first 200 chars of response for parsing failures to help diagnose issues
+            print(f"    Raw response preview: {response[:200]}...")
+            return None
 
         # Prepare output
         output = {
@@ -754,6 +792,20 @@ class TaskProcessor:
             if commentary_match:
                 parsed["commentary"] = commentary_match.group(1).strip()
 
+        # Debug parsing results
+        if not parsed.get("translation") and not parsed.get("commentary"):
+            print(
+                f"    🔍 Parsing debug: translation={'✓' if parsed.get('translation') else '✗'}, commentary={'✓' if parsed.get('commentary') else '✗'}"
+            )
+            # Check if there are any XML-like tags at all
+            if (
+                "<translation>" in response.lower()
+                or "<commentary>" in response.lower()
+            ):
+                print(f"    🔍 Found XML tags in response but failed to parse content")
+            else:
+                print(f"    🔍 No XML tags found in response")
+
         return parsed
 
     def _parse_summary_response(self, response: str) -> Dict[str, str]:
@@ -784,6 +836,11 @@ def main():
         required=True,
         help="Task configuration name (e.g., simple_translation, complex_analysis)",
     )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable debug output (show LLM response content including translations and commentary)",
+    )
 
     args = parser.parse_args()
 
@@ -800,7 +857,7 @@ def main():
         return
 
     # Process dataset
-    processor = TaskProcessor(task_config)
+    processor = TaskProcessor(task_config, debug=args.debug)
     processor.process_dataset()
 
 

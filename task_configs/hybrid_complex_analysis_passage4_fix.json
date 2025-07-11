@@ -1,0 +1,51 @@
+{
+  "task_name": "hybrid_complex_analysis_passage4_fix",
+  "task_type": "hybrid_analysis",
+  "description": "Reprocess passage 4 only to debug parsing issues",
+  "dataset": {
+    "path": "data/complex_analysis/namakaokapaoo_dataset_passage4_only.csv",
+    "source_column": "hawaiian_text"
+  },
+  "grouping_columns": ["chapter"],
+  "reference_columns": {
+    "translation": "english_translation",
+    "commentary": "commentary",
+    "summary": "overall_summary"
+  },
+  "system_prompt": "You are a Hawaiian language and cultural expert specializing in traditional Hawaiian stories and historical context analysis.",
+  "processing": {
+    "max_parallel": 3,
+    "stages": [
+      {
+        "name": "passage_analysis",
+        "max_parallel": 5,
+        "timeout": 300
+      },
+      {
+        "name": "chapter_summary",
+        "max_parallel": 1,
+        "timeout": 600
+      }
+    ]
+  },
+  "prompts": {
+    "passage_analysis": {
+      "system": "You are a Hawaiian language and cultural expert. Analyze the given Hawaiian text passage and provide both an accurate English translation and detailed cultural/historical commentary.",
+      "user_template": "Please analyze this Hawaiian text passage from Chapter {chapter}, Paragraph {paragraph}:\n\n**Hawaiian Text:**\n{hawaiian_text}\n\n**Instructions:**\n1. Provide an accurate English translation that preserves the meaning and cultural context\n2. Detailed commentary explaining cultural context, linguistic features, and historical significance\n\n**Required Output Format:**\n- Use <translation></translation> tags for the English translation\n- Use <commentary></commentary> tags for the analytical commentary\n\n**Important:** Your response must include both translation and commentary sections with the specified XML tags."
+    },
+    "chapter_summary": {
+      "system": "You are a Hawaiian cultural expert. Create a comprehensive summary of the chapter based on all passage translations provided.",
+      "user_template": "Based on all the passage translations below from Chapter {chapter}, provide a comprehensive summary that synthesizes the key themes, cultural elements, and narrative progression:\n\n**All Passage Translations:**\n{all_translations}\n\n**Instructions:**\n1. Synthesize the main themes and cultural elements across all passages\n2. Highlight the narrative progression and character development\n3. Explain the cultural and historical significance of the chapter\n\n**Required Output Format:**\n- Use <summary></summary> tags for the chapter summary\n\n**Important:** Focus on the overarching themes and cultural significance rather than just summarizing individual passages."
+    }
+  },
+  "output_format": {
+    "translation": "string",
+    "commentary": "string",
+    "summary": "string"
+  },
+  "special_cases": {
+    "grouped_commentary": {
+      "enabled": false
+    }
+  }
+}

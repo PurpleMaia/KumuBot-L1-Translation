@@ -110,11 +110,23 @@ The hybrid complex analysis approach has been successfully implemented and teste
 - **Reference dataset fixed** and properly structured
 - **Complete documentation** added to CLAUDE.md
 
-### 📊 Performance Metrics (qwen3-4b-awq-40k-maui)
-- **Translation similarity**: 77.87% (14/14 valid passages) ⬆️ IMPROVED
-- **Commentary similarity**: 62.38% (14/14 valid passages) ⬆️ IMPROVED
+### 📊 Performance Metrics 
+#### qwen3-4b-awq-40k-maui
+- **Translation similarity**: 80.85% (14/14 valid passages)
+- **Commentary similarity**: 62.21% (14/14 valid passages)
 - **Summary similarity**: 78.91% (1/1 valid comparison - chapter-level)
+- **Composite score**: 0.7301
 - **Processing completion**: 100% (14/14 passages)
+
+#### qwen3-30b-a3b-awq-128k-maui (NEW)
+- **Translation similarity**: 85.33% (14/14 valid passages)
+- **Commentary similarity**: 69.02% (14/14 valid passages)
+- **Summary similarity**: 74.70% (1/1 valid comparison - chapter-level)
+- **Composite score**: 0.7668
+- **Processing completion**: 100% (14/14 passages)
+
+### 🐛 Recent Bug Fixes
+- **Grouped commentary passages (10-14)**: Fixed missing JSON file saves in `_process_grouped_commentary_passage`
 - **Data format standardization**: ✅ Summaries now standardized to passage 1
 - **Passage recovery**: ✅ Fixed malformed passage 7 using subset reprocessing
 

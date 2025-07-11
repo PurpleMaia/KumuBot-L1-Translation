@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Source .env file if it exists to load environment variables
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
+fi
+
 # Enhanced pipeline script that supports multiple task types
 # Usage:
 #   ./run_pipeline_v2.sh simple_translation
