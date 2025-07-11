@@ -149,6 +149,15 @@ Hybrid complex analysis uses a structured approach:
 - **Output**: Consolidated CSV with translation, commentary, and summary components
 - **Evaluation**: Component-specific similarity metrics
 
+#### Data Format Standards
+
+**Summary Placement**: Chapter-level summaries are always placed in **passage 1** to match the reference dataset structure. This ensures consistent comparison during benchmarking.
+
+**Component Distribution**:
+- **Translation & Commentary**: Available for each individual passage (1-14)
+- **Summary**: Only in passage 1 (chapter-level analysis)
+- **Missing Data**: Properly handled as NaN/empty for failed extractions
+
 ### Special Features
 
 - **Automatic Retry**: Failed passages are automatically retried with exponential backoff

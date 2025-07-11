@@ -46,7 +46,7 @@
     },
     "summary": {
       "similarities": [
-        NaN,
+        0.7890676335149623,
         NaN,
         NaN,
         NaN,
@@ -61,9 +61,9 @@
         NaN,
         NaN
       ],
-      "average_similarity": 0.0,
-      "valid_count": 0,
-      "missing_count": 14
+      "average_similarity": 0.7890676335149623,
+      "valid_count": 1,
+      "missing_count": 13
     }
   }
 }

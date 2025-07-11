@@ -113,8 +113,9 @@ The hybrid complex analysis approach has been successfully implemented and teste
 ### 📊 Performance Metrics (qwen3-4b-awq-40k-maui)
 - **Translation similarity**: 77.71% (13/14 valid passages)
 - **Commentary similarity**: 61.93% (13/14 valid passages)  
-- **Summary similarity**: 0.0% (0/14 valid - expected as summaries are chapter-level)
+- **Summary similarity**: 78.91% (1/1 valid comparison - chapter-level)
 - **Processing completion**: 100% (14/14 passages)
+- **Data format standardization**: ✅ Summaries now standardized to passage 1
 
 ### 🚀 Ready for Production
 The hybrid complex analysis system is now ready for:
@@ -122,9 +123,14 @@ The hybrid complex analysis system is now ready for:
 - Comparative analysis across different LLMs
 - Production deployment for Hawaiian text analysis
 
+### 🐛 Known Issues
+- **Passage 7 malformed response**: One passage (qwen3-4b-awq-40k-maui) has a malformed response with excessive repetition that failed extraction. This is a model generation issue, not a system bug. The 13/14 valid passages metric correctly reflects this data quality issue.
+
 ## Medium Priority Tasks
 
-### Task 12: Create Summary Coherence and Completeness Metrics
+### Task 12: Create Summary Coherence and Completeness Metrics (🎯 ENHANCED)
+- [x] **Semantic similarity evaluation implemented** for summaries (78.91% achieved)
+- [x] **Data format standardized** - summaries now properly compared in passage 1
 - [ ] Evaluate how well summaries capture main themes from all passages
 - [ ] Check for logical flow and thematic synthesis
 - [ ] Measure completeness against reference summaries:

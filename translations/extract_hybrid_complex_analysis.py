@@ -85,17 +85,17 @@ def extract_to_dataframe(
 
     df = pd.DataFrame(rows)
 
-    # Add chapter summary to the last row of each chapter
+    # Add chapter summary to the first row of each chapter (standardized format)
     chapter_manifest = load_chapter_manifest(output_dir)
     if chapter_manifest and f"{output_dir}_summary" in chapter_manifest:
-        # Find the last row of the chapter and add the summary
-        last_row_idx = df.index[-1]  # Assuming single chapter for now
-        df.loc[last_row_idx, f"{output_dir}_summary"] = chapter_manifest[
+        # Find the first row of the chapter and add the summary
+        first_row_idx = df.index[0]  # Assuming single chapter for now
+        df.loc[first_row_idx, f"{output_dir}_summary"] = chapter_manifest[
             f"{output_dir}_summary"
         ]
 
         if "reference_summary" in chapter_manifest:
-            df.loc[last_row_idx, "reference_summary"] = chapter_manifest[
+            df.loc[first_row_idx, "reference_summary"] = chapter_manifest[
                 "reference_summary"
             ]
 
