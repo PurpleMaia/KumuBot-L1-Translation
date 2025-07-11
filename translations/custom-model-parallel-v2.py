@@ -359,7 +359,9 @@ class TaskProcessor:
             passage_results = self._process_passages_parallel(chapter_df, chapter)
 
             # Stage 1.5: Check for missing passages and retry them
-            passage_results = self._check_and_retry_missing_passages(chapter, chapter_df, passage_results)
+            passage_results = self._check_and_retry_missing_passages(
+                chapter, chapter_df, passage_results
+            )
 
             # Stage 2: Generate chapter summary using all translations
             if passage_results:
@@ -388,76 +390,212 @@ class TaskProcessor:
             # Collect results
             for paragraph, future in futures:
                 try:
-                    result = future.result(timeout=120)  # Set timeout for future.result()
+                    result = future.result(
+                        timeout=120
+                    )  # Set timeout for future.result()
                     if result:
                         results.append(result)
                         print(f"  ✓ Completed passage {paragraph}")
                 except concurrent.futures.TimeoutError:
-                    print(f"  ⏱️  Timeout processing passage {paragraph} in parallel mode")
+                    print(
+                        f"  ⏱️  Timeout processing passage {paragraph} in parallel mode"
+                    )
                 except Exception as e:
                     print(f"  ✗ Error processing passage {paragraph}: {e}")
 
         return results
 
     def _check_and_retry_missing_passages(
-        self, chapter: str, chapter_df: pd.DataFrame, passage_results: List[Dict[str, Any]]
+        self,
+        chapter: str,
+        chapter_df: pd.DataFrame,
+        passage_results: List[Dict[str, Any]],
     ) -> List[Dict[str, Any]]:
         """Check for missing passages and retry them individually with backoff."""
         # Get expected passages from the dataset
         expected_passages = set(chapter_df["paragraph"].tolist())
-        
+
         # Get completed passages from results
         completed_passages = set()
         for result in passage_results:
             if result and "paragraph" in result:
                 completed_passages.add(int(result["paragraph"]))
-        
+
         # Find missing passages
         missing_passages = expected_passages - completed_passages
-        
+
         if missing_passages:
             print(f"\n⚠️  Missing passages detected: {sorted(missing_passages)}")
             print("Switching to individual processing mode for failed passages...")
-            
+
             # Retry missing passages individually with exponential backoff
             for paragraph in sorted(missing_passages):
                 print(f"  🔄 Retrying passage {paragraph} individually...")
-                
+
                 # Get the specific row for this passage
                 passage_row = chapter_df[chapter_df["paragraph"] == paragraph]
                 if not passage_row.empty:
                     success = False
                     max_retries = 3
-                    
+
                     for attempt in range(max_retries):
                         try:
                             if attempt > 0:
                                 # Exponential backoff: wait 2^attempt seconds
-                                wait_time = 2 ** attempt
-                                print(f"    ⏳ Waiting {wait_time}s before retry attempt {attempt + 1}...")
+                                wait_time = 2**attempt
+                                print(
+                                    f"    ⏳ Waiting {wait_time}s before retry attempt {attempt + 1}..."
+                                )
                                 time.sleep(wait_time)
-                            
-                            result = self._process_single_passage_with_retry(passage_row.iloc[0], chapter)
+
+                            result = self._process_single_passage_with_retry(
+                                passage_row.iloc[0], chapter
+                            )
                             if result:
                                 passage_results.append(result)
-                                print(f"  ✅ Successfully retried passage {paragraph} on attempt {attempt + 1}")
+                                print(
+                                    f"  ✅ Successfully retried passage {paragraph} on attempt {attempt + 1}"
+                                )
                                 success = True
                                 break
                             else:
-                                print(f"  ⚠️  Attempt {attempt + 1} failed for passage {paragraph}")
+                                print(
+                                    f"  ⚠️  Attempt {attempt + 1} failed for passage {paragraph}"
+                                )
                         except Exception as e:
-                            print(f"  ❌ Error on attempt {attempt + 1} for passage {paragraph}: {e}")
-                    
+                            print(
+                                f"  ❌ Error on attempt {attempt + 1} for passage {paragraph}: {e}"
+                            )
+
                     if not success:
                         print(f"  💥 All retry attempts failed for passage {paragraph}")
                 else:
                     print(f"  ❌ No data found for passage {paragraph}")
         else:
             print(f"✅ All passages completed successfully")
-        
+
         return passage_results
 
-    def _process_single_passage_with_retry(self, row: pd.Series, chapter: str) -> Dict[str, Any]:
+    def _handle_special_case_passage(
+        self, row: pd.Series, chapter: str
+    ) -> Dict[str, Any]:
+        """Handle special cases like grouped commentary for paragraphs 10-14."""
+        # Check if special cases are enabled
+        special_cases = self.config.config.get("special_cases", {})
+        grouped_commentary = special_cases.get("grouped_commentary", {})
+
+        if not grouped_commentary.get("enabled", False):
+            return None
+
+        # Check if this passage is in a special group
+        groups = grouped_commentary.get("groups", [])
+        for group in groups:
+            if group.get("chapter") == int(chapter) and int(
+                row["paragraph"]
+            ) in group.get("paragraphs", []):
+                print(
+                    f"  📋 Processing special case: paragraph {row['paragraph']} uses grouped commentary"
+                )
+                return self._process_grouped_commentary_passage(row, chapter, group)
+
+        return None
+
+    def _process_grouped_commentary_passage(
+        self, row: pd.Series, chapter: str, group: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Process a passage that uses grouped commentary from another paragraph."""
+        hawaiian_text = row[self.config.source_column]
+        paragraph = row["paragraph"]
+        passage_id = row.get("passage_id", f"ch{chapter}_p{paragraph}")
+
+        # Generate translation (but not commentary) for this passage
+        prompts = self.config.config.get("prompts", {})
+        passage_prompts = prompts.get("passage_analysis", {})
+
+        system_prompt = passage_prompts.get("system", "")
+        user_template = passage_prompts.get("user_template", "")
+
+        # Create a modified prompt that only asks for translation
+        modified_template = user_template.replace(
+            "2. Detailed commentary explaining cultural context, linguistic features, and historical significance",
+            "2. Brief note that this passage is part of a larger narrative section",
+        ).replace(
+            "- <commentary></commentary> tags for the analytical commentary",
+            "- <commentary></commentary> tags for a brief note about the narrative context",
+        )
+
+        user_prompt = modified_template.format(
+            chapter=chapter, paragraph=paragraph, hawaiian_text=hawaiian_text
+        )
+
+        # Call LLM
+        response = self.call_llm(user_prompt, system_prompt)
+        if not response:
+            return None
+
+        # Parse response
+        parsed = self._parse_passage_response(response)
+
+        # Get the grouped commentary from the reference data
+        grouped_commentary_text = self._get_grouped_commentary(group)
+
+        # Prepare output
+        output = {
+            "chapter": chapter,
+            "paragraph": paragraph,
+            "passage_id": passage_id,
+            "hawaiian_text": hawaiian_text,
+            f"{OUTPUT_DIR}_translation": parsed.get("translation", ""),
+            f"{OUTPUT_DIR}_commentary": grouped_commentary_text,
+            "raw_response": response,
+            "special_case": "grouped_commentary",
+        }
+
+        # Add reference data if available
+        if "english_translation" in row:
+            output["reference_translation"] = row["english_translation"]
+        if "commentary" in row and pd.notna(row["commentary"]):
+            output["reference_commentary"] = row["commentary"]
+
+        return output
+
+    def _get_grouped_commentary(self, group: Dict[str, Any]) -> str:
+        """Extract grouped commentary from the dataset."""
+        try:
+            # Load the full dataset to get the grouped commentary
+            dataset_path = self.config.config.get("dataset", {}).get("path", "")
+            if not dataset_path:
+                return f"[Grouped commentary for paragraphs {group.get('paragraphs', [])} - see paragraph {group.get('commentary_location', '')}]"
+
+            df = pd.read_csv(dataset_path)
+
+            # Extract paragraph number from commentary_location (e.g., "paragraph_8" -> 8)
+            commentary_location = group.get("commentary_location", "")
+            if commentary_location.startswith("paragraph_"):
+                commentary_paragraph = int(commentary_location.split("_")[1])
+
+                # Find the row with the commentary
+                commentary_row = df[df["paragraph"] == commentary_paragraph]
+                if not commentary_row.empty and "commentary" in commentary_row.columns:
+                    commentary_text = commentary_row["commentary"].iloc[0]
+                    if pd.notna(commentary_text):
+                        # Extract the specific section for paragraphs 10-14
+                        if "**Paragraphs 10—14**" in commentary_text:
+                            # Extract everything after "**Paragraphs 10—14**"
+                            parts = commentary_text.split("**Paragraphs 10—14**")
+                            if len(parts) > 1:
+                                return f"**Paragraphs 10—14**{parts[1]}"
+                        return commentary_text
+
+            return f"[Grouped commentary for paragraphs {group.get('paragraphs', [])} - see paragraph {group.get('commentary_location', '')}]"
+
+        except Exception as e:
+            print(f"    ⚠️  Error loading grouped commentary: {e}")
+            return f"[Grouped commentary for paragraphs {group.get('paragraphs', [])} - see paragraph {group.get('commentary_location', '')}]"
+
+    def _process_single_passage_with_retry(
+        self, row: pd.Series, chapter: str
+    ) -> Dict[str, Any]:
         """Process a single passage with enhanced error handling for individual retries."""
         try:
             return self._process_single_passage(row, chapter)
@@ -476,6 +614,11 @@ class TaskProcessor:
         hawaiian_text = row[self.config.source_column]
         paragraph = row["paragraph"]
         passage_id = row.get("passage_id", f"ch{chapter}_p{paragraph}")
+
+        # Check if this passage is in a special group
+        special_case_result = self._handle_special_case_passage(row, chapter)
+        if special_case_result:
+            return special_case_result
 
         # Get passage analysis prompts
         prompts = self.config.config.get("prompts", {})
