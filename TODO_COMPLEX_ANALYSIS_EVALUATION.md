@@ -2,6 +2,52 @@
 
 This document outlines the tasks needed to implement comprehensive evaluation metrics for the complex Hawaiian passage analysis task (translation + commentary + summary).
 
+## Recently Completed Tasks (✅)
+
+### Identified Issues with Current Implementation
+- [x] Discovered that only 3/14 passages showed commentary due to extraction script parsing issue
+- [x] Analyzed that the model actually generated commentary for all 14 paragraphs
+- [x] Identified that current approach sends entire chapter to LLM at once
+- [x] Determined that reference dataset has inconsistent commentary grouping (paragraphs 10-14 grouped)
+
+## New Priority Tasks - Hybrid Approach Implementation
+
+### Task 16: Design Hybrid Complex Analysis Approach
+- [x] Create new task type: `"hybrid_analysis"` in task configuration system
+- [x] Design two-stage processing: passage-level then chapter-level
+- [x] Define passage-level outputs for translation and commentary
+- [x] Define chapter-level output for summary generation
+- [x] Maintain backward compatibility with existing `"analysis"` type
+
+### Task 17: Implement Passage-Level Processing
+- [x] Create passage-level prompt templates for translation
+- [x] Create passage-level prompt templates for commentary
+- [x] Update `custom-model-parallel-v2.py` with `process_hybrid_analysis()` method
+- [x] Implement parallel processing for individual passages
+- [x] Store passage-level results in separate JSON files
+- [ ] Handle special case for paragraphs 10-14 grouped commentary
+
+### Task 18: Implement Chapter-Level Summary Generation
+- [x] Create chapter-level prompt template for summary
+- [x] Collect all passage translations as context for summary
+- [x] Generate cohesive chapter summary after all passages complete
+- [x] Store summary in chapter-level manifest file
+- [x] Link passage files to chapter manifest
+
+### Task 19: Update Data Extraction for Hybrid Outputs
+- [ ] Modify `extract_complex_analysis.py` to read passage-level files
+- [ ] Map translations and commentary to correct dataset rows
+- [ ] Handle chapter-level summary appropriately
+- [ ] Ensure compatibility with existing benchmarking tools
+- [ ] Fix the commentary detection issue (was only finding 3/14)
+
+### Task 20: Test and Validate Hybrid Approach
+- [ ] Test with real model using OPENAI_MODEL_NAME and OPENAI_API_BASE_URL from .env
+- [ ] Verify all 14 passages have commentary in output
+- [ ] Validate parallel processing performance
+- [ ] Ensure summary quality with full context
+- [ ] Compare results with current full-chapter approach
+
 ## High Priority Tasks
 
 ### Task 9: Create Multi-Component Semantic Similarity Evaluator
@@ -116,3 +162,11 @@ This document outlines the tasks needed to implement comprehensive evaluation me
 - Reports provide actionable insights for model improvement
 - System handles edge cases without failing
 - Evaluation process is reproducible and consistent
+
+### Hybrid Approach Benefits
+- Enables parallel processing of passages for better performance
+- Matches reference dataset structure more closely
+- Fixes commentary extraction issues (all 14 passages will have commentary)
+- Maintains context for high-quality summary generation
+- More suitable for models with smaller context windows
+- Easier debugging and evaluation of individual components

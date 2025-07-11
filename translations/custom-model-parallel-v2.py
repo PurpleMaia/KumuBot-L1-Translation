@@ -69,15 +69,20 @@ class TaskProcessor:
         self.output_dir = f"translations/{OUTPUT_DIR}"
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def call_llm(self, prompt: str) -> Optional[str]:
+    def call_llm(self, prompt: str, system_prompt: str = None) -> Optional[str]:
         """Call the LLM API with the given prompt."""
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {API_KEY}",
         }
 
+        # Use provided system prompt or fall back to config
+        system_msg = (
+            system_prompt if system_prompt is not None else self.config.system_prompt
+        )
+
         messages = [
-            {"role": "system", "content": self.config.system_prompt},
+            {"role": "system", "content": system_msg},
             {"role": "user", "content": prompt},
         ]
 
@@ -90,19 +95,16 @@ class TaskProcessor:
         }
 
         url = BASE_URL.rstrip("/") + "/chat/completions"
-        
+
         # Set longer timeout for complex analysis tasks
         timeout_seconds = 600  # 10 minutes
-        
+
         try:
             print(f"Making API request with {timeout_seconds}s timeout...")
             response = requests.post(
-                url, 
-                headers=headers, 
-                json=payload,
-                timeout=timeout_seconds
+                url, headers=headers, json=payload, timeout=timeout_seconds
             )
-            
+
             if response.status_code == 200:
                 if USE_STREAMING:
                     # Handle streaming response
@@ -110,39 +112,46 @@ class TaskProcessor:
                     print("Receiving streaming response...")
                     for line in response.iter_lines():
                         if line:
-                            line_text = line.decode('utf-8')
-                            if line_text.startswith('data: '):
+                            line_text = line.decode("utf-8")
+                            if line_text.startswith("data: "):
                                 data_text = line_text[6:]  # Remove 'data: ' prefix
-                                if data_text.strip() == '[DONE]':
+                                if data_text.strip() == "[DONE]":
                                     break
                                 try:
                                     chunk_data = json.loads(data_text)
-                                    if 'choices' in chunk_data and len(chunk_data['choices']) > 0:
-                                        delta = chunk_data['choices'][0].get('delta', {})
-                                        if 'content' in delta:
-                                            content_chunk = delta['content']
+                                    if (
+                                        "choices" in chunk_data
+                                        and len(chunk_data["choices"]) > 0
+                                    ):
+                                        delta = chunk_data["choices"][0].get(
+                                            "delta", {}
+                                        )
+                                        if "content" in delta:
+                                            content_chunk = delta["content"]
                                             llm_content += content_chunk
-                                            print(content_chunk, end='', flush=True)
+                                            print(content_chunk, end="", flush=True)
                                 except json.JSONDecodeError:
                                     continue
                     print()  # New line after streaming
                 else:
                     # Handle non-streaming response
                     llm_content = response.json()["choices"][0]["message"]["content"]
-                
+
                 # Apply self-reasoning parser if enabled
                 if SELF_REASONING_PARSER:
                     print("Stripping <think> content...")
                     llm_content = re.sub(
                         r"<think>.*?</think>", "", llm_content, flags=re.DOTALL
                     )
-                
+
                 return llm_content
             else:
                 print(f"API Error: {response.status_code}")
-                print(f"Response: {response.text[:1000]}...")  # Truncate long error messages
+                print(
+                    f"Response: {response.text[:1000]}..."
+                )  # Truncate long error messages
                 return None
-                
+
         except requests.exceptions.Timeout:
             print(f"Request timed out after {timeout_seconds} seconds")
             return None
@@ -265,6 +274,8 @@ class TaskProcessor:
             self._process_simple_dataset(df)
         elif self.config.task_type == "analysis":
             self._process_complex_dataset(df)
+        elif self.config.task_type == "hybrid_analysis":
+            self._process_hybrid_dataset(df)
         else:
             raise ValueError(f"Unknown task type: {self.config.task_type}")
 
@@ -332,6 +343,205 @@ class TaskProcessor:
         result = self.process_complex_analysis(group_df)
         if result:
             self.save_output(result, f"chapter_{group_key}")
+
+    def _process_hybrid_dataset(self, df: pd.DataFrame):
+        """Process dataset using hybrid approach (passage-level then chapter-level)."""
+        print("Processing using hybrid approach...")
+
+        # Group by chapter
+        chapter_groups = df.groupby("chapter")
+
+        for chapter, chapter_df in chapter_groups:
+            print(f"\nProcessing Chapter {chapter}...")
+
+            # Stage 1: Process passages in parallel
+            passage_results = self._process_passages_parallel(chapter_df, chapter)
+
+            # Stage 2: Generate chapter summary using all translations
+            if passage_results:
+                self._generate_chapter_summary(chapter, passage_results)
+
+    def _process_passages_parallel(
+        self, chapter_df: pd.DataFrame, chapter: str
+    ) -> List[Dict[str, Any]]:
+        """Process individual passages in parallel for translation and commentary."""
+        results = []
+
+        # Get max parallel workers from config
+        processing_config = self.config.config.get("processing", {})
+        stages = processing_config.get("stages", [])
+        passage_stage = next((s for s in stages if s["name"] == "passage_analysis"), {})
+        max_workers = passage_stage.get("max_parallel", 5)
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = []
+
+            for idx, row in chapter_df.iterrows():
+                # Submit passage for processing
+                future = executor.submit(self._process_single_passage, row, chapter)
+                futures.append((row["paragraph"], future))
+
+            # Collect results
+            for paragraph, future in futures:
+                try:
+                    result = future.result()
+                    if result:
+                        results.append(result)
+                        print(f"  ✓ Completed passage {paragraph}")
+                except Exception as e:
+                    print(f"  ✗ Error processing passage {paragraph}: {e}")
+
+        return results
+
+    def _process_single_passage(self, row: pd.Series, chapter: str) -> Dict[str, Any]:
+        """Process a single passage for translation and commentary."""
+        hawaiian_text = row[self.config.source_column]
+        paragraph = row["paragraph"]
+        passage_id = row.get("passage_id", f"ch{chapter}_p{paragraph}")
+
+        # Get passage analysis prompts
+        prompts = self.config.config.get("prompts", {})
+        passage_prompts = prompts.get("passage_analysis", {})
+
+        # Format the prompt
+        system_prompt = passage_prompts.get("system", "")
+        user_template = passage_prompts.get("user_template", "")
+
+        user_prompt = user_template.format(
+            chapter=chapter, paragraph=paragraph, hawaiian_text=hawaiian_text
+        )
+
+        # Call LLM with full prompt
+        response = self.call_llm(user_prompt, system_prompt)
+        if not response:
+            return None
+
+        # Parse response
+        parsed = self._parse_passage_response(response)
+
+        # Prepare output
+        output = {
+            "chapter": chapter,
+            "paragraph": paragraph,
+            "passage_id": passage_id,
+            "hawaiian_text": hawaiian_text,
+            f"{OUTPUT_DIR}_translation": parsed.get("translation", ""),
+            f"{OUTPUT_DIR}_commentary": parsed.get("commentary", ""),
+            "raw_response": response,
+        }
+
+        # Add reference data if available
+        if "english_translation" in row:
+            output["reference_translation"] = row["english_translation"]
+        if "commentary" in row and pd.notna(row["commentary"]):
+            output["reference_commentary"] = row["commentary"]
+
+        # Save passage-level output
+        self.save_output(output, f"passage_{chapter}_{paragraph}")
+
+        return output
+
+    def _generate_chapter_summary(
+        self, chapter: str, passage_results: List[Dict[str, Any]]
+    ):
+        """Generate chapter summary using all passage translations."""
+        print(f"\nGenerating summary for Chapter {chapter}...")
+
+        # Collect all translations
+        all_translations = []
+        for result in sorted(passage_results, key=lambda x: int(x["paragraph"])):
+            translation = result.get(f"{OUTPUT_DIR}_translation", "")
+            if translation:
+                all_translations.append(
+                    f"Paragraph {result['paragraph']}:\n{translation}"
+                )
+
+        if not all_translations:
+            print("  ✗ No translations found for summary generation")
+            return
+
+        # Get chapter summary prompts
+        prompts = self.config.config.get("prompts", {})
+        summary_prompts = prompts.get("chapter_summary", {})
+
+        # Format the prompt
+        system_prompt = summary_prompts.get("system", "")
+        user_template = summary_prompts.get("user_template", "")
+
+        all_translations_text = "\n\n".join(all_translations)
+        user_prompt = user_template.format(
+            chapter=chapter, all_translations=all_translations_text
+        )
+
+        # Call LLM for summary
+        response = self.call_llm(user_prompt, system_prompt)
+        if not response:
+            print("  ✗ Failed to generate summary")
+            return
+
+        # Parse summary
+        parsed = self._parse_summary_response(response)
+
+        # Create chapter manifest
+        manifest = {
+            "chapter": chapter,
+            "passage_count": len(passage_results),
+            "passage_references": [
+                f"hybrid_complex_analysis_passage_{chapter}_{r['paragraph']}.json"
+                for r in sorted(passage_results, key=lambda x: int(x["paragraph"]))
+            ],
+            f"{OUTPUT_DIR}_summary": parsed.get("summary", ""),
+            "raw_summary_response": response,
+        }
+
+        # Add reference summary if available
+        chapter_df = pd.DataFrame(passage_results)
+        if "reference_summary" in chapter_df.columns:
+            summary_rows = chapter_df[chapter_df["reference_summary"].notna()]
+            if not summary_rows.empty:
+                manifest["reference_summary"] = summary_rows.iloc[0][
+                    "reference_summary"
+                ]
+
+        # Save manifest
+        self.save_output(manifest, f"chapter_{chapter}_manifest")
+        print(f"  ✓ Summary generated for Chapter {chapter}")
+
+    def _parse_passage_response(self, response: str) -> Dict[str, str]:
+        """Parse passage-level response for translation and commentary."""
+        parsed = {}
+
+        # Extract translation
+        translation_match = re.search(
+            r"<translation>(.*?)</translation>", response, re.DOTALL | re.IGNORECASE
+        )
+        if translation_match:
+            parsed["translation"] = translation_match.group(1).strip()
+
+        # Extract commentary
+        commentary_match = re.search(
+            r"<commentary>(.*?)</commentary>", response, re.DOTALL | re.IGNORECASE
+        )
+        if commentary_match:
+            parsed["commentary"] = commentary_match.group(1).strip()
+
+        return parsed
+
+    def _parse_summary_response(self, response: str) -> Dict[str, str]:
+        """Parse chapter summary response."""
+        parsed = {}
+
+        # Extract summary
+        summary_match = re.search(
+            r"<summary>(.*?)</summary>", response, re.DOTALL | re.IGNORECASE
+        )
+        if summary_match:
+            parsed["summary"] = summary_match.group(1).strip()
+        else:
+            # If no tags, use entire response as summary
+            parsed["summary"] = response.strip()
+
+        return parsed
 
 
 def main():

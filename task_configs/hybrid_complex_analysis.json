@@ -1,0 +1,93 @@
+{
+  "task_name": "hybrid_complex_analysis",
+  "task_type": "hybrid_analysis",
+  "description": "Hawaiian to English translation with commentary (passage-level) and overall summary (chapter-level)",
+  
+  "dataset": {
+    "path": "data/complex_analysis/namakaokapaoo_dataset.csv",
+    "source_column": "hawaiian_text",
+    "reference_columns": {
+      "translation": "english_translation",
+      "commentary": "commentary",
+      "summary": "overall_summary"
+    },
+    "grouping_columns": ["chapter"],
+    "passage_column": "paragraph",
+    "id_column": "passage_id"
+  },
+  
+  "processing": {
+    "stages": [
+      {
+        "name": "passage_analysis",
+        "type": "parallel",
+        "unit": "passage",
+        "max_parallel": 5,
+        "outputs": ["translation", "commentary"]
+      },
+      {
+        "name": "chapter_summary",
+        "type": "sequential",
+        "unit": "chapter",
+        "requires": ["passage_analysis"],
+        "outputs": ["summary"]
+      }
+    ]
+  },
+  
+  "prompts": {
+    "passage_analysis": {
+      "system": "You are an expert in Hawaiian language, culture, and history. You are tasked with translating a Hawaiian passage to English and providing detailed commentary on its cultural, historical, and linguistic aspects.\n\nYour analysis should be thorough and academically rigorous while remaining accessible.",
+      "user_template": "Please analyze the following Hawaiian passage from Chapter {chapter}, Paragraph {paragraph}:\n\n{hawaiian_text}\n\nProvide:\n1. An accurate English translation\n2. Detailed commentary explaining cultural context, linguistic features, and historical significance\n\nFormat your response with:\n- <translation></translation> tags for the English translation\n- <commentary></commentary> tags for the analytical commentary"
+    },
+    "chapter_summary": {
+      "system": "You are an expert in Hawaiian language, culture, and history. You have just analyzed multiple passages from a Hawaiian text. Your task is to synthesize these analyses into a comprehensive chapter summary.",
+      "user_template": "Based on the following translations from Chapter {chapter}, provide an overall summary of the chapter's themes and significance.\n\n{all_translations}\n\nCreate a comprehensive summary that:\n1. Identifies major themes across all passages\n2. Explains the historical and cultural context\n3. Discusses the chapter's significance in Hawaiian literature\n4. Synthesizes insights from individual passages into a cohesive narrative\n\nFormat your response with <summary></summary> tags."
+    }
+  },
+  
+  "output": {
+    "structure": "hierarchical",
+    "passage_level": {
+      "format": "individual_json",
+      "fields": ["translation", "commentary"],
+      "filename_template": "passage_{chapter}_{paragraph}.json"
+    },
+    "chapter_level": {
+      "format": "manifest_json",
+      "fields": ["summary", "passage_references"],
+      "filename_template": "chapter_{chapter}_manifest.json"
+    }
+  },
+  
+  "special_cases": {
+    "grouped_commentary": {
+      "enabled": true,
+      "detection": "reference_based",
+      "handling": "distribute_to_passages",
+      "groups": [
+        {
+          "chapter": 1,
+          "paragraphs": [10, 11, 12, 13, 14],
+          "commentary_location": "paragraph_8"
+        }
+      ]
+    }
+  },
+  
+  "evaluation": {
+    "metrics": ["semantic_similarity", "commentary_quality", "summary_coherence"],
+    "reference_required": true,
+    "passage_level_eval": true,
+    "custom_metrics": {
+      "commentary_quality": {
+        "evaluator": "gpt-4",
+        "criteria": ["cultural_accuracy", "historical_context", "linguistic_analysis", "academic_rigor"]
+      },
+      "summary_coherence": {
+        "evaluator": "gpt-4",
+        "criteria": ["thematic_synthesis", "completeness", "clarity", "passage_integration"]
+      }
+    }
+  }
+}
