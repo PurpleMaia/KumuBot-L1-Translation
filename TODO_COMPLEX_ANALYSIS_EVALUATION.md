@@ -111,11 +111,12 @@ The hybrid complex analysis approach has been successfully implemented and teste
 - **Complete documentation** added to CLAUDE.md
 
 ### 📊 Performance Metrics (qwen3-4b-awq-40k-maui)
-- **Translation similarity**: 77.71% (13/14 valid passages)
-- **Commentary similarity**: 61.93% (13/14 valid passages)  
+- **Translation similarity**: 77.87% (14/14 valid passages) ⬆️ IMPROVED
+- **Commentary similarity**: 62.38% (14/14 valid passages) ⬆️ IMPROVED
 - **Summary similarity**: 78.91% (1/1 valid comparison - chapter-level)
 - **Processing completion**: 100% (14/14 passages)
 - **Data format standardization**: ✅ Summaries now standardized to passage 1
+- **Passage recovery**: ✅ Fixed malformed passage 7 using subset reprocessing
 
 ### 🚀 Ready for Production
 The hybrid complex analysis system is now ready for:
@@ -123,8 +124,8 @@ The hybrid complex analysis system is now ready for:
 - Comparative analysis across different LLMs
 - Production deployment for Hawaiian text analysis
 
-### 🐛 Known Issues
-- **Passage 7 malformed response**: One passage (qwen3-4b-awq-40k-maui) has a malformed response with excessive repetition that failed extraction. This is a model generation issue, not a system bug. The 13/14 valid passages metric correctly reflects this data quality issue.
+### ✅ Resolved Issues
+- **Passage 7 malformed response**: ✅ **FIXED** - Successfully reprocessed using subset dataset approach, achieving 14/14 valid passages with improved similarity scores
 
 ## Medium Priority Tasks
 

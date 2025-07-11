@@ -164,6 +164,7 @@ Hybrid complex analysis uses a structured approach:
 - **Grouped Commentary**: Handles special cases where multiple paragraphs share commentary
 - **Streaming Support**: Uses streaming responses to avoid Cloudflare timeouts
 - **Parallel Processing**: Configurable parallelization with timeout handling
+- **Individual Passage Recovery**: Malformed responses can be fixed by creating subset datasets and reprocessing specific passages
 
 ## Testing
 
