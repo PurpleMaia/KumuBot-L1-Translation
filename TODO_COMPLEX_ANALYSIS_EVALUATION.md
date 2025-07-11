@@ -207,6 +207,92 @@ The hybrid complex analysis system is now ready for:
 - [ ] Create executive summaries for model performance
 - [ ] Export reports in multiple formats (MD, PDF, HTML)
 
+## Commentary Quality Improvement Recommendations
+
+### Analysis of Reference vs Model Commentary Patterns
+
+Based on analysis of the reference commentary and current model outputs, several patterns emerge that explain the ~68% commentary similarity scores:
+
+#### **Key Differences Identified:**
+
+1. **Structure & Organization**:
+   - **Reference**: Uses numbered bullet points (•) with clear hierarchical structure
+   - **Models**: Use academic essay format with headers and sections
+   - **Impact**: Different organizational patterns reduce semantic similarity
+
+2. **Content Focus**:
+   - **Reference**: Highly specific allegorical interpretation (e.g., "Nā-maka-o-ka-pāo'o represents progressive-minded Hawaiian")
+   - **Models**: General cultural/historical context without specific allegorical claims
+   - **Impact**: Models miss the interpretive depth that characterizes the reference
+
+3. **Citation Style**:
+   - **Reference**: Includes specific academic citations (e.g., "Pukui, Haertig, Lee (1972:114)")
+   - **Models**: Rarely include specific citations or footnote references
+   - **Impact**: Missing scholarly apparatus reduces similarity to academic reference style
+
+4. **Specific Details**:
+   - **Reference**: Includes precise contextual details (e.g., "'Ai Kapu era," "post-1820 Protestant Christian bias")
+   - **Models**: Often provide general cultural context without specific historical periods
+   - **Impact**: Less precise temporal and cultural grounding
+
+#### **Recommended Prompt Improvements:**
+
+### Task 15a: Enhanced Commentary Prompt Template
+
+```
+Please analyze the following Hawaiian passage and provide commentary that follows this specific structure:
+
+**Paragraph {paragraph}:**
+• [Bullet point 1: Character/plot analysis with allegorical interpretation]
+  – [Sub-point: Cultural/historical context with specific time periods]
+• [Bullet point 2: Linguistic/cultural practices analysis]
+  – [Sub-point: Specific cultural concepts with Hawaiian terms]
+• [Bullet point 3: Historical significance and symbolism]
+  – [Sub-point: References to specific cultural eras like 'Ai Kapu period]
+
+Requirements:
+1. Use bullet points (•) and sub-points (–) for organization
+2. Include specific allegorical interpretations where characters represent broader concepts
+3. Reference specific historical periods (e.g., 'Ai Kapu era, post-1819, post-1820)
+4. Include Hawaiian cultural terms in italics with brief explanations
+5. When possible, reference scholarly sources (Pukui, Elbert, Haertig, etc.)
+6. Focus on symbolic meaning beyond literal interpretation
+```
+
+### Task 15b: Include Reference Examples in Prompts
+
+Add exemplar commentary excerpts to guide model behavior:
+
+```
+Example of expected commentary style:
+
+"**Paragraph 3:**• A new character is introduced, Pua-(a)li'i (child/descendant of a chief/chiefly line), described as a good man, arrived from inland at Līhu'e (Wāhiāwā)...
+– In the 'Ai Kapu era, everyone walked on land to every destination and it was normal to call in to the house of strangers..."
+```
+
+### Task 15c: Specific Cultural Context Requirements
+
+```
+Your commentary must address:
+1. **Allegorical Interpretation**: What do characters/events symbolically represent?
+2. **Historical Period Context**: Reference specific eras ('Ai Kapu, post-contact, etc.)
+3. **Cultural Practices**: Explain specific Hawaiian customs mentioned
+4. **Linguistic Analysis**: Hawaiian terms, name meanings, cultural significance
+5. **Scholarly Grounding**: Reference established Hawaiian cultural scholarship when relevant
+```
+
+### Task 15d: Implement Few-Shot Learning Approach
+
+- Include 2-3 complete reference commentary examples in the prompt
+- Show the exact bullet-point structure and allegorical interpretation style
+- Demonstrate the level of specific cultural detail expected
+
+### **Expected Impact:**
+- Improve commentary similarity from ~68% to target 75-80%
+- Better alignment with academic Hawaiian cultural scholarship
+- More consistent structural organization matching reference style
+- Enhanced allegorical and symbolic interpretation depth
+
 ## Low Priority Tasks
 
 ### Task 15: Integrate Complex Analysis Evaluation into run_pipeline_v2.sh (✅ COMPLETED)
