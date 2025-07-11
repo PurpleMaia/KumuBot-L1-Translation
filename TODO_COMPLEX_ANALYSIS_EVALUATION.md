@@ -110,19 +110,41 @@ The hybrid complex analysis approach has been successfully implemented and teste
 - **Reference dataset fixed** and properly structured
 - **Complete documentation** added to CLAUDE.md
 
-### 📊 Performance Metrics 
+### 📊 Performance Metrics (Latest 5 Models)
+
+#### 🥇 qwen3-235b-a22b-think-parser-fireworks (BEST)
+- **Translation similarity**: 93.65% (14/14 valid passages)
+- **Commentary similarity**: 68.85% (14/14 valid passages)
+- **Summary similarity**: 82.76% (1/1 valid comparison - chapter-level)
+- **Composite score**: 0.8155
+- **Processing completion**: 100% (14/14 passages)
+
+#### 🥈 gemma-3-27b-it-qat-mlx-maui
+- **Translation similarity**: 93.93% (14/14 valid passages) 
+- **Commentary similarity**: 68.56% (14/14 valid passages)
+- **Summary similarity**: 80.42% (1/1 valid comparison - chapter-level)
+- **Composite score**: 0.8108
+- **Processing completion**: 100% (14/14 passages)
+
+#### 🥉 llama4-maverick-fireworks
+- **Translation similarity**: 93.86% (14/14 valid passages)
+- **Commentary similarity**: 68.16% (14/14 valid passages)
+- **Summary similarity**: 74.10% (1/1 valid comparison - chapter-level)
+- **Composite score**: 0.7963
+- **Processing completion**: 100% (14/14 passages)
+
+#### qwen3-30b-a3b-awq-128k-maui
+- **Translation similarity**: 85.33% (14/14 valid passages)
+- **Commentary similarity**: 69.02% (14/14 valid passages)
+- **Summary similarity**: 74.70% (1/1 valid comparison - chapter-level)
+- **Composite score**: 0.7668
+- **Processing completion**: 100% (14/14 passages)
+
 #### qwen3-4b-awq-40k-maui
 - **Translation similarity**: 80.85% (14/14 valid passages)
 - **Commentary similarity**: 62.21% (14/14 valid passages)
 - **Summary similarity**: 78.91% (1/1 valid comparison - chapter-level)
 - **Composite score**: 0.7301
-- **Processing completion**: 100% (14/14 passages)
-
-#### qwen3-30b-a3b-awq-128k-maui (NEW)
-- **Translation similarity**: 85.33% (14/14 valid passages)
-- **Commentary similarity**: 69.02% (14/14 valid passages)
-- **Summary similarity**: 74.70% (1/1 valid comparison - chapter-level)
-- **Composite score**: 0.7668
 - **Processing completion**: 100% (14/14 passages)
 
 ### 🐛 Recent Bug Fixes
