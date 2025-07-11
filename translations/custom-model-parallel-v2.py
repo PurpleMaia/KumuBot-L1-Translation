@@ -34,6 +34,11 @@ SELF_REASONING_PARSER = os.getenv("SELF_REASONING_PARSER", "").lower() in [
     "1",
     "yes",
 ]
+USE_STREAMING = os.getenv("USE_STREAMING", "false").lower() in [
+    "true",
+    "1",
+    "yes",
+]
 
 
 class TaskProcessor:
@@ -81,25 +86,69 @@ class TaskProcessor:
             "messages": messages,
             "temperature": 0,
             "max_tokens": MAX_TOKENS,
+            "stream": USE_STREAMING,
         }
 
         url = BASE_URL.rstrip("/") + "/chat/completions"
-        response = requests.post(url, headers=headers, json=payload)
-
-        if response.status_code == 200:
-            llm_content = response.json()["choices"][0]["message"]["content"]
-
-            # Apply self-reasoning parser if enabled
-            if SELF_REASONING_PARSER:
-                print("Stripping <think> content...")
-                llm_content = re.sub(
-                    r"<think>.*?</think>", "", llm_content, flags=re.DOTALL
-                )
-
-            return llm_content
-
-        print(f"Error: {response.status_code}, {response.text}")
-        return None
+        
+        # Set longer timeout for complex analysis tasks
+        timeout_seconds = 600  # 10 minutes
+        
+        try:
+            print(f"Making API request with {timeout_seconds}s timeout...")
+            response = requests.post(
+                url, 
+                headers=headers, 
+                json=payload,
+                timeout=timeout_seconds
+            )
+            
+            if response.status_code == 200:
+                if USE_STREAMING:
+                    # Handle streaming response
+                    llm_content = ""
+                    print("Receiving streaming response...")
+                    for line in response.iter_lines():
+                        if line:
+                            line_text = line.decode('utf-8')
+                            if line_text.startswith('data: '):
+                                data_text = line_text[6:]  # Remove 'data: ' prefix
+                                if data_text.strip() == '[DONE]':
+                                    break
+                                try:
+                                    chunk_data = json.loads(data_text)
+                                    if 'choices' in chunk_data and len(chunk_data['choices']) > 0:
+                                        delta = chunk_data['choices'][0].get('delta', {})
+                                        if 'content' in delta:
+                                            content_chunk = delta['content']
+                                            llm_content += content_chunk
+                                            print(content_chunk, end='', flush=True)
+                                except json.JSONDecodeError:
+                                    continue
+                    print()  # New line after streaming
+                else:
+                    # Handle non-streaming response
+                    llm_content = response.json()["choices"][0]["message"]["content"]
+                
+                # Apply self-reasoning parser if enabled
+                if SELF_REASONING_PARSER:
+                    print("Stripping <think> content...")
+                    llm_content = re.sub(
+                        r"<think>.*?</think>", "", llm_content, flags=re.DOTALL
+                    )
+                
+                return llm_content
+            else:
+                print(f"API Error: {response.status_code}")
+                print(f"Response: {response.text[:1000]}...")  # Truncate long error messages
+                return None
+                
+        except requests.exceptions.Timeout:
+            print(f"Request timed out after {timeout_seconds} seconds")
+            return None
+        except requests.exceptions.RequestException as e:
+            print(f"Request failed: {e}")
+            return None
 
     def process_simple_translation(self, row: pd.Series, idx: int) -> Dict[str, Any]:
         """Process a single row for simple translation task."""
@@ -135,8 +184,8 @@ class TaskProcessor:
         passages = []
         for _, row in group.iterrows():
             passage_data = {
-                "paragraph": row["paragraph"],
-                "hawaiian_text": row[self.config.source_column],
+                "paragraph": str(row["paragraph"]),
+                "hawaiian_text": str(row[self.config.source_column]),
             }
             passages.append(passage_data)
 
@@ -144,7 +193,7 @@ class TaskProcessor:
         formatted_passages = self.config.format_passages(passages)
 
         # Get chapter info
-        chapter = group.iloc[0]["chapter"]
+        chapter = str(group.iloc[0]["chapter"])
 
         # Format the prompt
         prompt = self.config.format_user_prompt(

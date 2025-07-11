@@ -5,37 +5,37 @@ This document outlines the tasks needed to implement comprehensive evaluation me
 ## High Priority Tasks
 
 ### Task 9: Create Multi-Component Semantic Similarity Evaluator
-- [ ] Create `benchmarking/complex_semantic_similarity.py`
-- [ ] Implement separate embedding generation for:
-  - [ ] Translation components
-  - [ ] Commentary components  
-  - [ ] Summary components
-- [ ] Compare each component against its reference independently
-- [ ] Generate component-specific similarity scores
-- [ ] Handle missing/partial components gracefully
-- [ ] Support batch processing for efficiency
+- [x] Create `benchmarking/complex_semantic_similarity.py`
+- [x] Implement separate embedding generation for:
+  - [x] Translation components
+  - [x] Commentary components  
+  - [x] Summary components
+- [x] Compare each component against its reference independently
+- [x] Generate component-specific similarity scores
+- [x] Handle missing/partial components gracefully
+- [x] Support batch processing for efficiency
 
 ### Task 10: Design Translation Quality Scoring for Complex Analysis
-- [ ] Implement semantic similarity specifically for Hawaiian→English translations within complex passages
-- [ ] Account for passage context and cultural nuances
-- [ ] Compare model translations against reference translations paragraph by paragraph
-- [ ] Handle multi-paragraph translation scoring with weighted averages
-- [ ] Create translation-specific quality metrics:
-  - [ ] Semantic accuracy
-  - [ ] Cultural preservation
-  - [ ] Fluency scoring
+- [x] Implement semantic similarity specifically for Hawaiian→English translations within complex passages
+- [x] Account for passage context and cultural nuances
+- [x] Compare model translations against reference translations paragraph by paragraph
+- [x] Handle multi-paragraph translation scoring with weighted averages
+- [x] Create translation-specific quality metrics:
+  - [x] Semantic accuracy
+  - [x] Cultural preservation
+  - [x] Fluency scoring
 
 ### Task 11: Implement Commentary Quality Evaluation Using LLM Judge
-- [ ] Design LLM judge prompts for evaluating cultural/historical commentary quality
-- [ ] Implement evaluation criteria:
-  - [ ] Cultural accuracy (1-5 scale)
-  - [ ] Historical context depth (1-5 scale)
-  - [ ] Linguistic analysis quality (1-5 scale)
-  - [ ] Academic rigor (1-5 scale)
-- [ ] Create rubric-based scoring system
-- [ ] Generate detailed feedback on commentary strengths/weaknesses
-- [ ] Handle rate limiting for LLM judge API calls
-- [ ] Store evaluation results in structured format
+- [x] Design LLM judge prompts for evaluating cultural/historical commentary quality
+- [x] Implement evaluation criteria:
+  - [x] Cultural accuracy (1-5 scale)
+  - [x] Historical context depth (1-5 scale)
+  - [x] Linguistic analysis quality (1-5 scale)
+  - [x] Academic rigor (1-5 scale)
+- [x] Create rubric-based scoring system
+- [x] Generate detailed feedback on commentary strengths/weaknesses
+- [x] Handle rate limiting for LLM judge API calls
+- [x] Store evaluation results in structured format
 
 ## Medium Priority Tasks
 

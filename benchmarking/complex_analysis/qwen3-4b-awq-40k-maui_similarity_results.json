@@ -1,0 +1,69 @@
+{
+  "model": "qwen3-4b-awq-40k-maui",
+  "total_passages": 14,
+  "components": {
+    "translation": {
+      "similarities": [
+        0.6113012840832309,
+        0.5571772896977361,
+        0.6062302433482256,
+        0.5897786533807465,
+        0.5155861923469169,
+        0.5354567637717981,
+        0.6015141672997562,
+        0.5830151513553625,
+        0.6275220393062325,
+        0.6003599671329661,
+        0.5263100886366059,
+        0.5633076924966395,
+        0.6004091322839084,
+        0.6369886322801478
+      ],
+      "average_similarity": 0.5824969498157337,
+      "valid_count": 14,
+      "missing_count": 0
+    },
+    "commentary": {
+      "similarities": [
+        0.6236563737973092,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        0.7342709697949482,
+        NaN,
+        0.7035562627676717,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN
+      ],
+      "average_similarity": 0.6871612021199764,
+      "valid_count": 3,
+      "missing_count": 11
+    },
+    "summary": {
+      "similarities": [
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        0.7328461310722887
+      ],
+      "average_similarity": 0.7328461310722887,
+      "valid_count": 1,
+      "missing_count": 13
+    }
+  }
+}

@@ -1,0 +1,4 @@
+model,component,average_similarity,valid_count,missing_count
+qwen3-4b-awq-40k-maui,translation,0.5824969498157337,14,0
+qwen3-4b-awq-40k-maui,commentary,0.6871612021199764,3,11
+qwen3-4b-awq-40k-maui,summary,0.7328461310722887,1,13
