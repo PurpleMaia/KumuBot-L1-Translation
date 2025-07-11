@@ -92,12 +92,18 @@ class MultiComponentEvaluator:
 
     def load_complex_analysis_data(self, output_dir: str) -> pd.DataFrame:
         """Load extracted complex analysis data from CSV."""
-        csv_path = f"data/complex_analysis/{output_dir}_extracted.csv"
+        # Try hybrid extracted first, then regular extracted
+        hybrid_csv_path = f"data/complex_analysis/{output_dir}_hybrid_extracted.csv"
+        regular_csv_path = f"data/complex_analysis/{output_dir}_extracted.csv"
 
-        if not os.path.exists(csv_path):
-            raise FileNotFoundError(f"Complex analysis data not found: {csv_path}")
-
-        return pd.read_csv(csv_path)
+        if os.path.exists(hybrid_csv_path):
+            return pd.read_csv(hybrid_csv_path)
+        elif os.path.exists(regular_csv_path):
+            return pd.read_csv(regular_csv_path)
+        else:
+            raise FileNotFoundError(
+                f"Complex analysis data not found: {hybrid_csv_path} or {regular_csv_path}"
+            )
 
     def load_reference_data(self) -> pd.DataFrame:
         """Load reference data for complex analysis."""
@@ -243,12 +249,17 @@ def discover_complex_analysis_outputs() -> List[str]:
     if not data_dir.exists():
         return []
 
-    outputs = []
+    outputs = set()  # Use set to avoid duplicates
+    # Look for both regular and hybrid extracted files
     for file in data_dir.glob("*_extracted.csv"):
         output_name = file.stem.replace("_extracted", "")
-        outputs.append(output_name)
+        outputs.add(output_name)
 
-    return sorted(outputs)
+    for file in data_dir.glob("*_hybrid_extracted.csv"):
+        output_name = file.stem.replace("_hybrid_extracted", "")
+        outputs.add(output_name)
+
+    return sorted(list(outputs))
 
 
 def main():

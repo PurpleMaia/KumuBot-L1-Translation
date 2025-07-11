@@ -91,6 +91,71 @@ All translation scripts follow a similar pattern:
 - **LLM Judge**: Uses GPT-4 to evaluate translation quality on multiple criteria
 - Results are aggregated and summarized for comparison
 
+## Hybrid Complex Analysis Approach
+
+The project includes a hybrid complex analysis system for processing longer texts (such as Hawaiian stories) that require both passage-level and chapter-level analysis.
+
+### Hybrid Processing Architecture
+
+The hybrid approach combines two processing modes:
+1. **Passage-level Processing**: Individual paragraphs are processed for translation and commentary
+2. **Chapter-level Processing**: Overall summaries are generated after all passages are complete
+
+### Key Components
+
+#### Configuration System
+- Uses JSON task configuration files (e.g., `config/tasks/hybrid_complex_analysis.json`)
+- Supports both passage-level and chapter-level prompts
+- Configurable parallel processing limits
+
+#### Translation Script (`custom-model-parallel-v2.py`)
+- Implements hybrid processing mode with automatic retry logic
+- Handles passage-level translation and commentary generation
+- Generates chapter-level summaries after all passages are processed
+- Includes exponential backoff for failed requests
+- Supports streaming responses to avoid timeouts
+
+#### Extraction (`extract_hybrid_complex_analysis.py`)
+- Extracts individual passage JSON files into consolidated CSV format
+- Handles both passage-level and chapter-level outputs
+- Manages special cases (e.g., grouped commentary for paragraphs 10-14)
+
+#### Benchmarking (`complex_semantic_similarity.py`)
+- Evaluates semantic similarity for multiple components (translation, commentary, summary)
+- Supports both regular and hybrid extracted files
+- Provides component-specific evaluation metrics
+
+### Usage Commands
+
+```bash
+# Run hybrid complex analysis
+OPENAI_MODEL_NAME=gpt-4 OPENAI_API_BASE_URL=https://api.example.com/v1 MAX_PARALLEL=5 python translations/custom-model-parallel-v2.py
+
+# Extract hybrid results to CSV
+python translations/extract_hybrid_complex_analysis.py
+
+# Evaluate semantic similarity for complex analysis
+python benchmarking/complex_semantic_similarity.py --model model_name
+
+# List available models for evaluation
+python benchmarking/complex_semantic_similarity.py --list
+```
+
+### Data Structure
+
+Hybrid complex analysis uses a structured approach:
+- **Input**: Complex analysis dataset with passages, chapters, and reference translations
+- **Processing**: Individual passage JSON files saved per paragraph
+- **Output**: Consolidated CSV with translation, commentary, and summary components
+- **Evaluation**: Component-specific similarity metrics
+
+### Special Features
+
+- **Automatic Retry**: Failed passages are automatically retried with exponential backoff
+- **Grouped Commentary**: Handles special cases where multiple paragraphs share commentary
+- **Streaming Support**: Uses streaming responses to avoid Cloudflare timeouts
+- **Parallel Processing**: Configurable parallelization with timeout handling
+
 ## Testing
 
 Currently, there are no automated tests in the repository. When adding new functionality:
