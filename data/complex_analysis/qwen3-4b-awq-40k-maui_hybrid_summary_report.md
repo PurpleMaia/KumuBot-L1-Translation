@@ -3,16 +3,16 @@
 
 ### Statistics
 - Total chapters analyzed: 1
-- Total passages analyzed: 9
-- Passages with translations: 9
-- Passages with commentary: 9
+- Total passages analyzed: 14
+- Passages with translations: 14
+- Passages with commentary: 14
 - Chapters with summaries: 1
 
 ### Completion Rates
-- Translation completion: 9/9 (100.0%)
-- Commentary completion: 9/9 (100.0%)
-- Average translation length: 364 characters
-- Average commentary length: 3667 characters
+- Translation completion: 14/14 (100.0%)
+- Commentary completion: 14/14 (100.0%)
+- Average translation length: 398 characters
+- Average commentary length: 3805 characters
 
 ### Sample Outputs
 
