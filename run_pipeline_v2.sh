@@ -5,6 +5,11 @@ set -euo pipefail
 # Usage:
 #   ./run_pipeline_v2.sh simple_translation
 #   ./run_pipeline_v2.sh complex_analysis
+#   OUTPUT_DIR=model-name ./run_pipeline_v2.sh hybrid_complex_analysis
+#
+# For hybrid complex analysis with different models:
+#   OUTPUT_DIR=gpt-4 OPENAI_MODEL_NAME=gpt-4 ./run_pipeline_v2.sh hybrid_complex_analysis
+#   OUTPUT_DIR=claude-3 OPENAI_MODEL_NAME=claude-3-sonnet ./run_pipeline_v2.sh hybrid_complex_analysis
 
 # Check if task type is provided
 if [ $# -eq 0 ]; then
@@ -38,11 +43,26 @@ elif [ "$TASK_TYPE" = "complex_analysis" ]; then
     python translations/extract_complex_analysis.py
     
     echo "Step 3: Evaluating complex analysis..."
-    # TODO: Add evaluation metrics for complex analysis
-    echo "Note: Complex analysis evaluation metrics not yet implemented"
+    python benchmarking/complex_semantic_similarity.py
+    
+elif [ "$TASK_TYPE" = "hybrid_complex_analysis" ]; then
+    echo "Step 2: Extracting hybrid complex analysis outputs..."
+    if [ -z "${OUTPUT_DIR:-}" ]; then
+        echo "Error: OUTPUT_DIR environment variable must be set for hybrid complex analysis"
+        echo "Example: OUTPUT_DIR=my-model ./run_pipeline_v2.sh hybrid_complex_analysis"
+        exit 1
+    fi
+    python translations/extract_hybrid_complex_analysis.py --output-dir "$OUTPUT_DIR"
+    
+    echo "Step 3: Evaluating hybrid complex analysis..."
+    python benchmarking/complex_semantic_similarity.py --model "$OUTPUT_DIR"
+    
+    echo "Step 4: Generating complex analysis summary..."
+    python benchmarking/complex_semantic_similarity_summary.py
     
 else
     echo "Unknown task type: $TASK_TYPE"
+    echo "Available task types: simple_translation, complex_analysis, hybrid_complex_analysis"
     exit 1
 fi
 

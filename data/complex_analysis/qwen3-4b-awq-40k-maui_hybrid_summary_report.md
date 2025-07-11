@@ -11,8 +11,8 @@
 ### Completion Rates
 - Translation completion: 14/14 (100.0%)
 - Commentary completion: 14/14 (100.0%)
-- Average translation length: 467 characters
-- Average commentary length: 4102 characters
+- Average translation length: 463 characters
+- Average commentary length: 4013 characters
 
 ### Sample Outputs
 
@@ -20,18 +20,16 @@
 **Passage ID:** namakaokapaoo_ch1_p1
 
 **Hawaiian Text:**
-Ka‘ao no Nāmakaokapāo‘o  MOKUNA I.  UHUKI NĀMAKAOKAPĀO‘O I KA MĀLA ‘UALA A  PUALI‘I.—HO‘OWELI ‘O IA E ‘OKI I KE PO‘O O KE  KEIKI, MAKE NA‘E ‘O IA.—HO‘OUNA ‘AMA‘U, KE   ALII, I KE KOA E PEPEHI IĀ IA.—LUKU ‘O IA IĀ  LĀKOU ME KA MŌ‘Ī.
+He keiki ‘u‘uku loa ‘o **a)** Nāmakaokapāo‘o, a he  keiki ikaika loa i kona wā ‘ōpiopio, ‘a‘ohe ona lua  ma kēia mau mokupuni mai Hawai‘i ā Ni‘ihau, i ka  ‘u‘uku a me ke koa loa. **b1)** ‘O Kauluakaha‘i, kona   makua kāne, **c)** no Kahikipapaialewa, he ‘āina i  Kahikinu‘u. **b2)** ‘O Pōka‘ī ka maku...
 
 **Translation:**
-Ka‘ao no Nāmakaokapāo‘o MOKUNA I. UHUKI NĀMAKAOKAPĀO‘O I KA MĀLA ‘UALA A PUALI‘I.—HO‘OWELI ‘O IA E ‘OKI I KE PO‘O O KE KEIKI, MAKE NA‘E ‘O IA.—HO‘OUNA ‘AMA‘U, KE ALII, I KE KOA E PEPEHI IĀ IA.—LUKU ‘O IA IĀ LĀKOU ME KA MŌ‘Ī.
+The child **a)** Nāmakaokapāo‘o, and the child **b1)** Kauluakaha‘i, who is the son of **c)** Kahikipapaialewa, is the **b2)** Pōka‘ī, who is the **c)** high-ranking chief (ali‘i nui) of **b1)** Kauluakaha‘i, and **c)** the **āina** (land) of **Kahikinu‘u**.
 
 **Commentary:**
-This passage is a genealogical or historical text from the *Mākua* (genealogical) tradition of the Hawaiian Islands, likely from the 19th century. It reflects the hierarchical social structure, titles, and familial relationships central to Hawaiian society. Below is a detailed breakdown:  
+This passage is a genealogical or historical text from the Hawaiian Islands, structured as a list of relationships and titles. Here’s a breakdown of its cultural, historical, and linguistic significance:  
 
-### **1. Translation and Interpretation**  
-**"Ka‘ao no Nāmakaokapāo‘o MOKUNA I."**  
-"**The one who is Nāmakaokapāo‘o Mokuna I.**"  
-- *Ka‘ao* (to be) is a verb form, often used in genealogical records to de...
+### **Cultural Context**  
+1. **Genealogical Structure**: The text follows a traditional Hawaiian genealogical format, listing individuals and their roles in a hierarchical manner. This reflects the Hawaiian emphasis on **kaʻano** (genealogy) as a means of preserving lineage, status, and cult...
 
 ### Chapter Summary Sample
 The chapter explores the intricate web of lineage, status, and power dynamics within Hawaiian society, emphasizing the interplay between individuals, their ancestors, and the natural and spiritual realms. Central to the narrative is the figure of **Nāmakaokapāo‘o**, a revered chief whose lineage and status are repeatedly referenced as markers of authority and identity. The text weaves together themes of **lineage and ancestry**, **political hierarchy**, and **cultural symbolism** (e.g., the sea,...

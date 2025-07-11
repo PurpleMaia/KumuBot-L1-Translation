@@ -128,17 +128,34 @@ The hybrid approach combines two processing modes:
 ### Usage Commands
 
 ```bash
-# Run hybrid complex analysis
-OPENAI_MODEL_NAME=gpt-4 OPENAI_API_BASE_URL=https://api.example.com/v1 MAX_PARALLEL=5 python translations/custom-model-parallel-v2.py
+# Run hybrid complex analysis (individual steps)
+OPENAI_MODEL_NAME=gpt-4 OPENAI_API_BASE_URL=https://api.example.com/v1 MAX_PARALLEL=5 python translations/custom-model-parallel-v2.py --task hybrid_complex_analysis
 
 # Extract hybrid results to CSV
-python translations/extract_hybrid_complex_analysis.py
+python translations/extract_hybrid_complex_analysis.py --output-dir model_name
 
 # Evaluate semantic similarity for complex analysis
 python benchmarking/complex_semantic_similarity.py --model model_name
 
 # List available models for evaluation
 python benchmarking/complex_semantic_similarity.py --list
+
+# Generate summary comparison across all models
+python benchmarking/complex_semantic_similarity_summary.py --detailed
+```
+
+### Pipeline Commands
+
+```bash
+# Run complete pipeline for hybrid complex analysis
+OUTPUT_DIR=model-name ./run_pipeline_v2.sh hybrid_complex_analysis
+
+# Compare multiple models using pipeline
+./compare_models.sh model1 model2 model3
+
+# Examples with different models
+OUTPUT_DIR=gpt-4 OPENAI_MODEL_NAME=gpt-4 ./run_pipeline_v2.sh hybrid_complex_analysis
+OUTPUT_DIR=claude-3 OPENAI_MODEL_NAME=claude-3-sonnet ./run_pipeline_v2.sh hybrid_complex_analysis
 ```
 
 ### Data Structure

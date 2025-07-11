@@ -1,0 +1,2 @@
+model,composite_score,translation_similarity,translation_valid,commentary_similarity,commentary_valid,summary_similarity,summary_valid
+qwen3-4b-awq-40k-maui,0.7300812901121756,0.8085222567421771,14,0.6221471517807807,14,0.7890676335149623,1
