@@ -22,7 +22,7 @@
         "name": "passage_analysis",
         "type": "parallel",
         "unit": "passage",
-        "max_parallel": 5,
+        "max_parallel": 10,
         "outputs": ["translation", "commentary"]
       },
       {

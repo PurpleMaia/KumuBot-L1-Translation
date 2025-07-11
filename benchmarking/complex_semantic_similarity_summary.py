@@ -129,7 +129,7 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
     print("\nComplex Analysis Results (sorted by composite score):")
     print("=" * 120)
     print(
-        f"{'Model':<30} | {'Composite':<10} | {'Translation':<12} | {'Commentary':<12} | {'Summary':<10} | {'Valid Passages':<15}"
+        f"{'Model':<40} | {'Composite':<10} | {'Translation':<12} | {'Commentary':<12} | {'Summary':<10} | {'Valid Passages':<15}"
     )
     print("-" * 120)
 
@@ -147,7 +147,7 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
         summary_str = f"{summary:.4f}" if not np.isnan(summary) else "N/A"
 
         print(
-            f"{model:<30} | {composite_str:<10} | {translation_str:<12} | {commentary_str:<12} | {summary_str:<10} | {valid_passages:<15}"
+            f"{model:<40} | {composite_str:<10} | {translation_str:<12} | {commentary_str:<12} | {summary_str:<10} | {valid_passages:<15}"
         )
 
     print(f"\nLegend:")
