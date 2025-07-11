@@ -102,3 +102,5 @@ Currently, there are no automated tests in the repository. When adding new funct
 ## Workflow Tips
 
 - Always use uv pip to work with packages instead of just pip
+- When running scripts and testing code, use the .env settings OPENAI_API_BASE_URL and OPENAI_API_EMBEDDING_BASE_URL and OPENAI_MODEL_NAME don't try to mock a server response. and use the real data files
+instead of making example test data files (but it is ok if you want to temporarily use a subset of the real data for tests if that makes sense at times)

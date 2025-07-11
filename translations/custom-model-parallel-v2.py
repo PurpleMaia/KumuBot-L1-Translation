@@ -14,6 +14,7 @@ import os
 import requests
 import argparse
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from dotenv import load_dotenv
@@ -357,6 +358,9 @@ class TaskProcessor:
             # Stage 1: Process passages in parallel
             passage_results = self._process_passages_parallel(chapter_df, chapter)
 
+            # Stage 1.5: Check for missing passages and retry them
+            passage_results = self._check_and_retry_missing_passages(chapter, chapter_df, passage_results)
+
             # Stage 2: Generate chapter summary using all translations
             if passage_results:
                 self._generate_chapter_summary(chapter, passage_results)
@@ -384,14 +388,88 @@ class TaskProcessor:
             # Collect results
             for paragraph, future in futures:
                 try:
-                    result = future.result()
+                    result = future.result(timeout=120)  # Set timeout for future.result()
                     if result:
                         results.append(result)
                         print(f"  ✓ Completed passage {paragraph}")
+                except concurrent.futures.TimeoutError:
+                    print(f"  ⏱️  Timeout processing passage {paragraph} in parallel mode")
                 except Exception as e:
                     print(f"  ✗ Error processing passage {paragraph}: {e}")
 
         return results
+
+    def _check_and_retry_missing_passages(
+        self, chapter: str, chapter_df: pd.DataFrame, passage_results: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Check for missing passages and retry them individually with backoff."""
+        # Get expected passages from the dataset
+        expected_passages = set(chapter_df["paragraph"].tolist())
+        
+        # Get completed passages from results
+        completed_passages = set()
+        for result in passage_results:
+            if result and "paragraph" in result:
+                completed_passages.add(int(result["paragraph"]))
+        
+        # Find missing passages
+        missing_passages = expected_passages - completed_passages
+        
+        if missing_passages:
+            print(f"\n⚠️  Missing passages detected: {sorted(missing_passages)}")
+            print("Switching to individual processing mode for failed passages...")
+            
+            # Retry missing passages individually with exponential backoff
+            for paragraph in sorted(missing_passages):
+                print(f"  🔄 Retrying passage {paragraph} individually...")
+                
+                # Get the specific row for this passage
+                passage_row = chapter_df[chapter_df["paragraph"] == paragraph]
+                if not passage_row.empty:
+                    success = False
+                    max_retries = 3
+                    
+                    for attempt in range(max_retries):
+                        try:
+                            if attempt > 0:
+                                # Exponential backoff: wait 2^attempt seconds
+                                wait_time = 2 ** attempt
+                                print(f"    ⏳ Waiting {wait_time}s before retry attempt {attempt + 1}...")
+                                time.sleep(wait_time)
+                            
+                            result = self._process_single_passage_with_retry(passage_row.iloc[0], chapter)
+                            if result:
+                                passage_results.append(result)
+                                print(f"  ✅ Successfully retried passage {paragraph} on attempt {attempt + 1}")
+                                success = True
+                                break
+                            else:
+                                print(f"  ⚠️  Attempt {attempt + 1} failed for passage {paragraph}")
+                        except Exception as e:
+                            print(f"  ❌ Error on attempt {attempt + 1} for passage {paragraph}: {e}")
+                    
+                    if not success:
+                        print(f"  💥 All retry attempts failed for passage {paragraph}")
+                else:
+                    print(f"  ❌ No data found for passage {paragraph}")
+        else:
+            print(f"✅ All passages completed successfully")
+        
+        return passage_results
+
+    def _process_single_passage_with_retry(self, row: pd.Series, chapter: str) -> Dict[str, Any]:
+        """Process a single passage with enhanced error handling for individual retries."""
+        try:
+            return self._process_single_passage(row, chapter)
+        except requests.exceptions.Timeout:
+            print(f"    ⏱️  Timeout occurred - this is expected for individual retry")
+            return None
+        except requests.exceptions.ConnectionError as e:
+            print(f"    🔌 Connection error - retrying: {e}")
+            return None
+        except Exception as e:
+            print(f"    ❌ Unexpected error: {e}")
+            return None
 
     def _process_single_passage(self, row: pd.Series, chapter: str) -> Dict[str, Any]:
         """Process a single passage for translation and commentary."""
@@ -519,11 +597,19 @@ class TaskProcessor:
             parsed["translation"] = translation_match.group(1).strip()
 
         # Extract commentary
+        # Try to find commentary with both opening and closing tags first
         commentary_match = re.search(
             r"<commentary>(.*?)</commentary>", response, re.DOTALL | re.IGNORECASE
         )
         if commentary_match:
             parsed["commentary"] = commentary_match.group(1).strip()
+        else:
+            # If no closing tag, extract everything from opening tag to end of response
+            commentary_match = re.search(
+                r"<commentary>(.*)", response, re.DOTALL | re.IGNORECASE
+            )
+            if commentary_match:
+                parsed["commentary"] = commentary_match.group(1).strip()
 
         return parsed
 
