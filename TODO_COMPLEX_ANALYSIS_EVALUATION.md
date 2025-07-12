@@ -139,12 +139,13 @@ The hybrid complex analysis approach has been successfully implemented and teste
 - **Improved prompts**: Translation 82.98%, Commentary 68.39%, Summary 77.72%, Composite 0.7609
 - **Processing completion**: 100% (14/14 passages) for all variants
 
-#### qwen3-4b-awq-40k-maui
-- **Translation similarity**: 80.85% (14/14 valid passages)
-- **Commentary similarity**: 62.21% (14/14 valid passages)
-- **Summary similarity**: 78.91% (1/1 valid comparison - chapter-level)
-- **Composite score**: 0.7301
+#### qwen3-4b-awq-40k-maui (hybrid_complex_analysis_original)
+- **Translation similarity**: 79.75% (14/14 valid passages)
+- **Commentary similarity**: 71.13% (14/14 valid passages)
+- **Summary similarity**: 66.57% (1/1 valid comparison - chapter-level)
+- **Composite score**: 0.7366
 - **Processing completion**: 100% (14/14 passages)
+- **Note**: Fixed corrupted passage 13 translation using individual passage repair approach
 
 ### 🐛 Recent Bug Fixes
 - **Grouped commentary passages (10-14)**: Fixed missing JSON file saves in `_process_grouped_commentary_passage`
@@ -162,7 +163,9 @@ The hybrid complex analysis system is now ready for:
 
 ### ✅ Resolved Issues
 - **Passage 7 malformed response**: ✅ **FIXED** - Successfully reprocessed using subset dataset approach, achieving 14/14 valid passages with improved similarity scores
+- **Passage 13 corrupted translation**: ✅ **FIXED** - Corrupted JSON with empty translation field and repetitive raw response fixed using individual passage repair approach (`hybrid_complex_analysis_passage13_fix` task)
 - **Formatting bias in similarity scores**: ✅ **FIXED** - Implemented text normalization to focus on content rather than formatting differences
+- **Duplicate model entries in results**: ✅ **FIXED** - Removed base `qwen3-4b-awq-40k-maui` results files, keeping only the more specific `(hybrid_complex_analysis_original)` variant
 
 ## Medium Priority Tasks
 
