@@ -293,6 +293,86 @@ Your commentary must address:
 - More consistent structural organization matching reference style
 - Enhanced allegorical and symbolic interpretation depth
 
+### Task 15e: Additional Prompt Refinements Based on Testing
+
+**Testing Results with Initial Improvements:**
+- qwen3-30b-a3b-awq-128k-maui showed minimal improvement:
+  - Commentary: 0.6902 → 0.6909 (+0.0007)
+  - Translation: 0.8533 → 0.8356 (-0.0177) 
+  - Summary: 0.7470 → 0.6992 (-0.0478)
+
+**Issues Identified in Generated Output:**
+1. **Bracketed Headers**: Model added [bracketed headers] not present in reference
+2. **Speculative Interpretations**: Some allegorical meanings were too speculative
+3. **Missing Citations**: While concepts were mentioned, specific citations were absent
+4. **Over-structured**: The prompt may be too prescriptive, affecting natural flow
+
+**Recommended Refinements:**
+
+1. **Remove Bracketed Header Instruction**:
+   - Don't include [brackets] in example structures
+   - Let bullet points flow naturally without headers
+
+2. **Ground Interpretations More Concretely**:
+   ```
+   When providing allegorical interpretations:
+   - Base interpretations on known Hawaiian cultural concepts
+   - Connect to established mo'olelo (story) traditions
+   - Avoid speculative meanings without cultural grounding
+   ```
+
+3. **Simplify Citation Guidance**:
+   ```
+   Include citations where you have specific knowledge:
+   - Hawaiian dictionaries (Pukui & Elbert)
+   - Cultural texts (Nānā I Ke Kumu)
+   - Historical sources
+   Don't invent citations, but reference known works when relevant
+   ```
+
+4. **Balance Structure with Natural Flow**:
+   ```
+   Use this structure as a guide, not a rigid template:
+   • Main cultural/historical points
+     – Supporting details and context
+   • Linguistic analysis where relevant
+     – Etymology and meanings
+   
+   Focus on matching the analytical depth rather than exact formatting
+   ```
+
+5. **Add Negative Examples**:
+   ```
+   Avoid:
+   - Generic cultural statements without specifics
+   - Modern interpretations not grounded in tradition
+   - Over-analyzing every detail
+   - Headers or labels for sections
+   ```
+
+6. **Consider Prompt Length**:
+   - Current enhanced prompt may be too long
+   - Consider creating a shorter, more focused version
+   - Test both detailed and concise versions
+
+### Task 15f: Alternative Prompting Strategies
+
+1. **Chain-of-Thought Approach**:
+   - First ask for name etymology analysis
+   - Then cultural/historical context
+   - Finally allegorical interpretation
+   - Combine into bullet-point format
+
+2. **Reference-Guided Generation**:
+   - Provide one full reference example
+   - Ask model to match style and depth
+   - Less prescriptive about exact structure
+
+3. **Component-Specific Prompts**:
+   - Separate prompts for translation vs commentary
+   - Allow more focused generation for each
+   - May improve both components
+
 ## Low Priority Tasks
 
 ### Task 15: Integrate Complex Analysis Evaluation into run_pipeline_v2.sh (✅ COMPLETED)
