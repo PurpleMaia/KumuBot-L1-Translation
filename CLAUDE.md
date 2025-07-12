@@ -228,6 +228,15 @@ Testing with qwen3-30b-a3b-awq-128k-maui demonstrated:
 - **Improved prompts**: Balanced gains with modest commentary improvement (+1.3%) and minimal impact on other components
 - **Task-aware pipeline**: Successfully implemented to handle multiple prompt variations without file conflicts
 
+### Text Normalization in Benchmarking
+
+The semantic similarity evaluation now includes text normalization (as of latest update) to focus on content rather than formatting differences:
+- **Applied equally** to both reference and model texts before computing embeddings
+- **Normalizations include**: bullet standardization, markdown removal, whitespace cleanup, header formatting
+- **Impact**: Revealed true semantic similarities by removing formatting "false positives"
+- **Key finding**: Original model summaries showed 3.7% drop after normalization, revealing that formatting was masking content differences
+- **Few-shot improvement**: Commentary improved by 3.73% after normalization, showing genuine content alignment
+
 ## Testing
 
 Currently, there are no automated tests in the repository. When adding new functionality:

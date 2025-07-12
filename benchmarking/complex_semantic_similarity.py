@@ -18,6 +18,7 @@ import argparse
 from tqdm import tqdm
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+import re
 
 # Load environment variables
 load_dotenv()
@@ -44,14 +45,97 @@ class MultiComponentEvaluator:
     def __init__(self):
         self.embedding_cache = {}
 
+    def normalize_text(self, text: str) -> str:
+        """Normalize text for more meaningful semantic similarity comparison.
+        
+        This normalization is applied to both reference and model texts to focus
+        on semantic content rather than formatting differences.
+        """
+        if not text or pd.isna(text):
+            return ""
+            
+        # Convert to string if needed
+        text = str(text)
+        
+        # 1. Standardize bullet points - convert various bullet styles to •
+        bullet_patterns = [
+            (r'^(\s*)-\s+', r'\1• '),  # Dash bullets
+            (r'^(\s*)\*\s+', r'\1• '),  # Asterisk bullets
+            (r'^(\s*)◦\s+', r'\1• '),  # Circle bullets
+            (r'^(\s*)▪\s+', r'\1• '),  # Square bullets
+            (r'^(\s*)·\s+', r'\1• '),  # Middle dot bullets
+            (r'^(\s*)\d+\)\s+', r'\1• '),  # Numbered lists like 1), 2)
+            (r'^(\s*)\d+\.\s+', r'\1• '),  # Numbered lists like 1., 2.
+        ]
+        for pattern, replacement in bullet_patterns:
+            text = re.sub(pattern, replacement, text, flags=re.MULTILINE)
+        
+        # 2. Normalize headers - various formats to consistent style
+        # **Paragraph X:** → Paragraph X:
+        text = re.sub(r'\*\*Paragraph\s+(\d+):\*\*', r'Paragraph \1:', text)
+        # [Paragraph X] → Paragraph X:
+        text = re.sub(r'\[Paragraph\s+(\d+)\]', r'Paragraph \1:', text)
+        # ### Paragraph X → Paragraph X:
+        text = re.sub(r'###\s*Paragraph\s+(\d+)', r'Paragraph \1:', text)
+        
+        # 3. Remove/standardize markdown formatting
+        # Remove bold markers
+        text = re.sub(r'\*\*([^*]+)\*\*', r'\1', text)
+        # Remove italic markers (but preserve Hawaiian ʻokina)
+        text = re.sub(r'(?<![ʻ])\*([^*ʻ]+)\*(?![ʻ])', r'\1', text)
+        # Remove code blocks
+        text = re.sub(r'```[^`]*```', '', text)
+        text = re.sub(r'`([^`]+)`', r'\1', text)
+        
+        # 4. Normalize whitespace
+        # Replace multiple spaces with single space
+        text = re.sub(r' +', ' ', text)
+        # Replace multiple newlines with double newline
+        text = re.sub(r'\n\s*\n\s*\n+', '\n\n', text)
+        # Remove trailing whitespace on each line
+        text = re.sub(r' +$', '', text, flags=re.MULTILINE)
+        # Remove leading whitespace on each line (except for bullets)
+        text = re.sub(r'^(?![\s•])[ \t]+', '', text, flags=re.MULTILINE)
+        
+        # 5. Normalize punctuation
+        # Smart quotes to regular quotes
+        text = text.replace('"', '"').replace('"', '"')
+        text = text.replace(''', "'").replace(''', "'")
+        # Various dashes to standard dash
+        text = text.replace('—', '-').replace('–', '-')
+        # Ellipsis normalization
+        text = re.sub(r'\.{3,}', '...', text)
+        
+        # 6. Normalize Hawaiian characters (ensure consistency)
+        # This ensures ʻokina is consistent
+        text = text.replace('`', 'ʻ').replace('ʽ', 'ʻ')
+        
+        # 7. Normalize bracketed references
+        # (Footnote: ...) remains as is, but normalize brackets
+        text = text.replace('【', '(').replace('】', ')')
+        text = text.replace('［', '[').replace('］', ']')
+        
+        # 8. Final cleanup
+        # Strip leading/trailing whitespace
+        text = text.strip()
+        
+        return text
+
     def get_embedding(self, text: str) -> Optional[List[float]]:
-        """Get embedding for text with caching and rate limiting."""
+        """Get embedding for text with caching and rate limiting.
+        
+        Text is normalized before embedding to focus on semantic content
+        rather than formatting differences.
+        """
         if not text or pd.isna(text):
             return None
 
-        # Use cache to avoid redundant API calls
-        if text in self.embedding_cache:
-            return self.embedding_cache[text]
+        # Normalize text before processing
+        normalized_text = self.normalize_text(text)
+        
+        # Use normalized text for cache lookup
+        if normalized_text in self.embedding_cache:
+            return self.embedding_cache[normalized_text]
 
         max_retries = 5
         retry_delay = 1
@@ -60,11 +144,11 @@ class MultiComponentEvaluator:
             try:
                 response = client.embeddings.create(
                     model=embedding_model,
-                    input=text,
+                    input=normalized_text,  # Use normalized text for embedding
                     dimensions=768,
                 )
                 embedding = response.data[0].embedding
-                self.embedding_cache[text] = embedding
+                self.embedding_cache[normalized_text] = embedding  # Cache with normalized key
                 return embedding
             except Exception as e:
                 if "rate limit" in str(e).lower() and attempt < max_retries - 1:

@@ -110,7 +110,7 @@ The hybrid complex analysis approach has been successfully implemented and teste
 - **Reference dataset fixed** and properly structured
 - **Complete documentation** added to CLAUDE.md
 
-### 📊 Performance Metrics (Latest 5 Models)
+### 📊 Performance Metrics (Latest Models - Post-Normalization)
 
 #### 🥇 qwen3-235b-a22b-think-parser-fireworks (BEST)
 - **Translation similarity**: 93.65% (14/14 valid passages)
@@ -133,12 +133,11 @@ The hybrid complex analysis approach has been successfully implemented and teste
 - **Composite score**: 0.7963
 - **Processing completion**: 100% (14/14 passages)
 
-#### qwen3-30b-a3b-awq-128k-maui
-- **Translation similarity**: 85.33% (14/14 valid passages)
-- **Commentary similarity**: 69.02% (14/14 valid passages)
-- **Summary similarity**: 74.70% (1/1 valid comparison - chapter-level)
-- **Composite score**: 0.7668
-- **Processing completion**: 100% (14/14 passages)
+#### qwen3-30b-a3b-awq-128k-maui (with prompt variations)
+- **Few-shot prompts**: Translation 85.12%, Commentary 71.75%, Summary 70.68%, Composite 0.7689
+- **Original prompts**: Translation 85.89%, Commentary 69.42%, Summary 73.52%, Composite 0.7683
+- **Improved prompts**: Translation 82.98%, Commentary 68.39%, Summary 77.72%, Composite 0.7609
+- **Processing completion**: 100% (14/14 passages) for all variants
 
 #### qwen3-4b-awq-40k-maui
 - **Translation similarity**: 80.85% (14/14 valid passages)
@@ -159,9 +158,11 @@ The hybrid complex analysis system is now ready for:
 - Production deployment for Hawaiian text analysis
 - **Complete end-to-end pipeline** from translation to benchmarking
 - **Multi-model comparison and ranking** with composite scoring
+- **Text normalization in benchmarking** for fairer semantic similarity evaluation
 
 ### ✅ Resolved Issues
 - **Passage 7 malformed response**: ✅ **FIXED** - Successfully reprocessed using subset dataset approach, achieving 14/14 valid passages with improved similarity scores
+- **Formatting bias in similarity scores**: ✅ **FIXED** - Implemented text normalization to focus on content rather than formatting differences
 
 ## Medium Priority Tasks
 
@@ -377,6 +378,24 @@ Your commentary must address:
    - Separate prompts for translation vs commentary
    - Allow more focused generation for each
    - May improve both components
+
+## Completed Tasks
+
+### Task 16: Implement Text Normalization for Semantic Similarity (✅ COMPLETED)
+- [x] **Created normalize_text() function** in complex_semantic_similarity.py
+- [x] **Normalizations implemented**:
+  - [x] Bullet point standardization (•, -, *, 1., etc. → •)
+  - [x] Markdown removal (bold, italic, code blocks)
+  - [x] Header normalization (various formats → consistent)
+  - [x] Whitespace normalization
+  - [x] Punctuation standardization
+  - [x] Hawaiian character consistency
+- [x] **Applied to both reference and model texts** before embedding
+- [x] **Impact measured**:
+  - [x] Commentary improvements: Original +2.13%, Few-shot +3.73%
+  - [x] Revealed formatting "false positives" in similarity scores
+  - [x] Original summary dropped 3.7%, exposing content differences
+- [x] **Key insight**: Formatting was creating artificial similarity that masked actual content alignment differences
 
 ## Low Priority Tasks
 
