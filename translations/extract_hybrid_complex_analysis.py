@@ -16,7 +16,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def load_passage_outputs(output_dir: str, task_name: str = "hybrid_complex_analysis") -> List[Dict[str, Any]]:
+def load_passage_outputs(
+    output_dir: str, task_name: str = "hybrid_complex_analysis"
+) -> List[Dict[str, Any]]:
     """Load all passage JSON outputs from the specified directory for a specific task."""
     passage_files = []
     output_path = Path(f"translations/{output_dir}")
@@ -45,12 +47,12 @@ def load_passage_outputs(output_dir: str, task_name: str = "hybrid_complex_analy
     return passage_files
 
 
-def load_chapter_manifest(output_dir: str, task_name: str = "hybrid_complex_analysis") -> Dict[str, Any]:
+def load_chapter_manifest(
+    output_dir: str, task_name: str = "hybrid_complex_analysis"
+) -> Dict[str, Any]:
     """Load chapter manifest if it exists for a specific task."""
     output_path = Path(f"translations/{output_dir}")
-    manifest_files = list(
-        output_path.glob(f"{task_name}_chapter_*_manifest.json")
-    )
+    manifest_files = list(output_path.glob(f"{task_name}_chapter_*_manifest.json"))
 
     if manifest_files:
         with open(manifest_files[0], "r", encoding="utf-8") as f:
@@ -59,7 +61,9 @@ def load_chapter_manifest(output_dir: str, task_name: str = "hybrid_complex_anal
 
 
 def extract_to_dataframe(
-    passage_outputs: List[Dict[str, Any]], output_dir: str, task_name: str = "hybrid_complex_analysis"
+    passage_outputs: List[Dict[str, Any]],
+    output_dir: str,
+    task_name: str = "hybrid_complex_analysis",
 ) -> pd.DataFrame:
     """Extract data from passage outputs into a DataFrame."""
     rows = []
@@ -105,7 +109,9 @@ def extract_to_dataframe(
     return df
 
 
-def create_summary_report(df: pd.DataFrame, output_dir: str, task_name: str = "hybrid_complex_analysis") -> str:
+def create_summary_report(
+    df: pd.DataFrame, output_dir: str, task_name: str = "hybrid_complex_analysis"
+) -> str:
     """Create a summary report of the hybrid complex analysis."""
     report = []
     report.append(f"# Hybrid Complex Analysis Summary Report")

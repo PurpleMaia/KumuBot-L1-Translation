@@ -1,0 +1,27 @@
+{
+  "embedding_model": "snowflake-arctic-embed2",
+  "dimensions": 1024,
+  "results": [
+    {
+      "model": "qwen3-30b-a3b-awq-128k-maui",
+      "component": "translation",
+      "average_similarity": 0.7283489620880872,
+      "valid_count": 14,
+      "missing_count": 0
+    },
+    {
+      "model": "qwen3-30b-a3b-awq-128k-maui",
+      "component": "commentary",
+      "average_similarity": 0.3832862351730233,
+      "valid_count": 14,
+      "missing_count": 0
+    },
+    {
+      "model": "qwen3-30b-a3b-awq-128k-maui",
+      "component": "summary",
+      "average_similarity": 0.1736305400755928,
+      "valid_count": 1,
+      "missing_count": 13
+    }
+  ]
+}

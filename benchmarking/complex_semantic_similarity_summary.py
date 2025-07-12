@@ -26,19 +26,19 @@ def discover_complex_analysis_results():
     models = []
     for file in results_dir.glob("*_similarity_summary.csv"):
         stem = file.stem.replace("_similarity_summary", "")
-        
+
         # Parse model name and task name
         # Patterns:
         # 1. model_similarity_summary.csv -> (model, None)
         # 2. model_taskname_similarity_summary.csv -> (model, taskname)
-        
+
         # Check for known task patterns - order matters for proper matching
         if "_hybrid_complex_analysis_" in stem:
             # Task-specific format with multiple parts: model_hybrid_complex_analysis_variant
             # Find the start of the task pattern
             task_start = stem.find("_hybrid_complex_analysis_")
             model_name = stem[:task_start]
-            task_name = stem[task_start + 1:]  # Skip the leading underscore
+            task_name = stem[task_start + 1 :]  # Skip the leading underscore
             models.append((model_name, task_name))
         elif "_hybrid_complex_analysis" in stem:
             model_name = stem.replace("_hybrid_complex_analysis", "")
@@ -57,7 +57,9 @@ def load_model_results(model_name, task_name=None):
     if task_name:
         summary_file = f"benchmarking/complex_analysis/{model_name}_{task_name}_similarity_summary.csv"
     else:
-        summary_file = f"benchmarking/complex_analysis/{model_name}_similarity_summary.csv"
+        summary_file = (
+            f"benchmarking/complex_analysis/{model_name}_similarity_summary.csv"
+        )
 
     if not Path(summary_file).exists():
         return None
@@ -115,7 +117,7 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
         results = load_model_results(model_name, task_name)
         if results:
             composite_score = calculate_composite_score(results)
-            
+
             # Create display name that includes task if present
             display_name = model_name
             if task_name:

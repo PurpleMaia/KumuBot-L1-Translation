@@ -1,0 +1,7 @@
+test_model,embedding_model,embedding_dims,context_tokens,component,similarity,valid_count
+qwen3-30b-a3b-awq-128k-maui,nomic-embed-text,768,2048,translation,0.8589493355411717,14
+qwen3-30b-a3b-awq-128k-maui,nomic-embed-text,768,2048,commentary,0.6941743620697384,14
+qwen3-30b-a3b-awq-128k-maui,nomic-embed-text,768,2048,summary,0.7352199942353299,1
+qwen3-30b-a3b-awq-128k-maui,snowflake-arctic-embed2-8k,1024,8192,translation,0.7283489620880872,14
+qwen3-30b-a3b-awq-128k-maui,snowflake-arctic-embed2-8k,1024,8192,commentary,0.3832862351730233,14
+qwen3-30b-a3b-awq-128k-maui,snowflake-arctic-embed2-8k,1024,8192,summary,0.1736305400755928,1
