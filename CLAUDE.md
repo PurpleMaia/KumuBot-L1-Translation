@@ -214,10 +214,19 @@ Latest complex analysis semantic similarity results (ranked by composite score):
 1. **qwen3-235b-a22b-think-parser-fireworks**: Composite score 0.8155 (Translation: 0.9365, Commentary: 0.6885, Summary: 0.8276)
 2. **gemma-3-27b-it-qat-mlx-maui**: Composite score 0.8108 (Translation: 0.9393, Commentary: 0.6856, Summary: 0.8042)
 3. **llama4-maverick-fireworks**: Composite score 0.7963 (Translation: 0.9386, Commentary: 0.6816, Summary: 0.7410)
-4. **qwen3-30b-a3b-awq-128k-maui**: Composite score 0.7668 (Translation: 0.8533, Commentary: 0.6902, Summary: 0.7470)
-5. **qwen3-4b-awq-40k-maui**: Composite score 0.7301 (Translation: 0.8085, Commentary: 0.6221, Summary: 0.7891)
+4. **qwen3-30b-a3b-awq-128k-maui (few-shot)**: Composite score 0.7684 (Translation: 0.8512, Commentary: 0.7182, Summary: 0.7031)
+5. **qwen3-30b-a3b-awq-128k-maui (original)**: Composite score 0.7672 (Translation: 0.8589, Commentary: 0.6729, Summary: 0.7722)
+6. **qwen3-30b-a3b-awq-128k-maui (improved)**: Composite score 0.7611 (Translation: 0.8298, Commentary: 0.6855, Summary: 0.7747)
+7. **qwen3-4b-awq-40k-maui**: Composite score 0.7301 (Translation: 0.8085, Commentary: 0.6221, Summary: 0.7891)
 
 All models achieved 100% completion rate (14/14 passages) with successful handling of grouped commentary passages (10-14).
+
+### Prompt Engineering Results
+
+Testing with qwen3-30b-a3b-awq-128k-maui demonstrated:
+- **Few-shot learning**: Best commentary improvement (+4.5% over baseline) but reduced summary quality
+- **Improved prompts**: Balanced gains with modest commentary improvement (+1.3%) and minimal impact on other components
+- **Task-aware pipeline**: Successfully implemented to handle multiple prompt variations without file conflicts
 
 ## Testing
 

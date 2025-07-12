@@ -16,8 +16,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def load_passage_outputs(output_dir: str) -> List[Dict[str, Any]]:
-    """Load all passage JSON outputs from the specified directory."""
+def load_passage_outputs(output_dir: str, task_name: str = "hybrid_complex_analysis") -> List[Dict[str, Any]]:
+    """Load all passage JSON outputs from the specified directory for a specific task."""
     passage_files = []
     output_path = Path(f"translations/{output_dir}")
 
@@ -25,10 +25,10 @@ def load_passage_outputs(output_dir: str) -> List[Dict[str, Any]]:
         print(f"Output directory {output_path} does not exist")
         return []
 
-    # Find all hybrid_complex_analysis_passage JSON files
-    pattern = re.compile(r"hybrid_complex_analysis_passage_(\d+)_(\d+)\.json")
+    # Find all task-specific passage JSON files
+    pattern = re.compile(rf"{re.escape(task_name)}_passage_(\d+)_(\d+)\.json")
 
-    for json_file in output_path.glob("hybrid_complex_analysis_passage_*.json"):
+    for json_file in output_path.glob(f"{task_name}_passage_*.json"):
         match = pattern.search(json_file.name)
         if match:
             chapter = int(match.group(1))
@@ -45,11 +45,11 @@ def load_passage_outputs(output_dir: str) -> List[Dict[str, Any]]:
     return passage_files
 
 
-def load_chapter_manifest(output_dir: str) -> Dict[str, Any]:
-    """Load chapter manifest if it exists."""
+def load_chapter_manifest(output_dir: str, task_name: str = "hybrid_complex_analysis") -> Dict[str, Any]:
+    """Load chapter manifest if it exists for a specific task."""
     output_path = Path(f"translations/{output_dir}")
     manifest_files = list(
-        output_path.glob("hybrid_complex_analysis_chapter_*_manifest.json")
+        output_path.glob(f"{task_name}_chapter_*_manifest.json")
     )
 
     if manifest_files:
@@ -59,7 +59,7 @@ def load_chapter_manifest(output_dir: str) -> Dict[str, Any]:
 
 
 def extract_to_dataframe(
-    passage_outputs: List[Dict[str, Any]], output_dir: str
+    passage_outputs: List[Dict[str, Any]], output_dir: str, task_name: str = "hybrid_complex_analysis"
 ) -> pd.DataFrame:
     """Extract data from passage outputs into a DataFrame."""
     rows = []
@@ -89,7 +89,7 @@ def extract_to_dataframe(
     df = pd.DataFrame(rows)
 
     # Add chapter summary to the first row of each chapter (standardized format)
-    chapter_manifest = load_chapter_manifest(output_dir)
+    chapter_manifest = load_chapter_manifest(output_dir, task_name)
     if chapter_manifest and f"{output_dir}_summary" in chapter_manifest:
         # Find the first row of the chapter and add the summary
         first_row_idx = df.index[0]  # Assuming single chapter for now
@@ -105,11 +105,12 @@ def extract_to_dataframe(
     return df
 
 
-def create_summary_report(df: pd.DataFrame, output_dir: str) -> str:
+def create_summary_report(df: pd.DataFrame, output_dir: str, task_name: str = "hybrid_complex_analysis") -> str:
     """Create a summary report of the hybrid complex analysis."""
     report = []
     report.append(f"# Hybrid Complex Analysis Summary Report")
-    report.append(f"## Model: {output_dir}\n")
+    report.append(f"## Model: {output_dir}")
+    report.append(f"## Task: {task_name}\n")
 
     # Statistics
     report.append("### Statistics")
@@ -202,6 +203,12 @@ def main():
         type=str,
         help="Output directory name (defaults to OUTPUT_DIR env var)",
     )
+    parser.add_argument(
+        "--task-name",
+        type=str,
+        default="hybrid_complex_analysis",
+        help="Task name to extract (defaults to 'hybrid_complex_analysis')",
+    )
 
     args = parser.parse_args()
 
@@ -213,29 +220,30 @@ def main():
         )
         return
 
-    print(f"Extracting hybrid complex analysis outputs from: {output_dir}")
+    task_name = args.task_name
+    print(f"Extracting {task_name} outputs from: {output_dir}")
 
     # Load passage outputs
-    passage_outputs = load_passage_outputs(output_dir)
+    passage_outputs = load_passage_outputs(output_dir, task_name)
     print(f"Found {len(passage_outputs)} passage files")
 
     if not passage_outputs:
-        print("No passage outputs found to extract")
+        print(f"No passage outputs found for task '{task_name}' to extract")
         return
 
     # Extract to DataFrame
-    df = extract_to_dataframe(passage_outputs, output_dir)
+    df = extract_to_dataframe(passage_outputs, output_dir, task_name)
     print(f"Extracted {len(df)} passages")
 
-    # Save extracted data
-    output_csv = f"data/complex_analysis/{output_dir}_hybrid_extracted.csv"
+    # Save extracted data with task-specific filename
+    output_csv = f"data/complex_analysis/{output_dir}_{task_name}_extracted.csv"
     os.makedirs(os.path.dirname(output_csv), exist_ok=True)
     df.to_csv(output_csv, index=False)
     print(f"Saved extracted data to: {output_csv}")
 
     # Create summary report
-    report = create_summary_report(df, output_dir)
-    report_file = f"data/complex_analysis/{output_dir}_hybrid_summary_report.md"
+    report = create_summary_report(df, output_dir, task_name)
+    report_file = f"data/complex_analysis/{output_dir}_{task_name}_summary_report.md"
     with open(report_file, "w", encoding="utf-8") as f:
         f.write(report)
     print(f"Saved summary report to: {report_file}")

@@ -296,16 +296,21 @@ Your commentary must address:
 ### Task 15e: Additional Prompt Refinements Based on Testing
 
 **Testing Results with Initial Improvements:**
-- qwen3-30b-a3b-awq-128k-maui showed minimal improvement:
-  - Commentary: 0.6902 → 0.6909 (+0.0007)
-  - Translation: 0.8533 → 0.8356 (-0.0177) 
-  - Summary: 0.7470 → 0.6992 (-0.0478)
+- qwen3-30b-a3b-awq-128k-maui showed improvement in the latest runs:
+  - Original prompts: Commentary 0.6729, Translation 0.8589, Summary 0.7722
+  - Improved prompts: Commentary 0.6855 (+0.0126), Translation 0.8298 (-0.0291), Summary 0.7747 (+0.0025)
+  - Few-shot prompts: Commentary 0.7182 (+0.0453), Translation 0.8512 (-0.0077), Summary 0.7031 (-0.0691)
 
 **Issues Identified in Generated Output:**
 1. **Bracketed Headers**: Model added [bracketed headers] not present in reference
 2. **Speculative Interpretations**: Some allegorical meanings were too speculative
 3. **Missing Citations**: While concepts were mentioned, specific citations were absent
 4. **Over-structured**: The prompt may be too prescriptive, affecting natural flow
+
+**Key Findings:**
+1. **Few-shot learning achieved best commentary results** (0.7182) - a 4.5% improvement over original prompts
+2. **Trade-off between components**: Improved commentary came at the cost of translation accuracy and summary quality
+3. **Improved prompts showed balanced results** with modest gains in commentary without major losses elsewhere
 
 **Recommended Refinements:**
 

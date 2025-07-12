@@ -92,7 +92,6 @@ class TaskProcessor:
         payload = {
             "model": MODEL_NAME,
             "messages": messages,
-            "temperature": 0,
             "max_tokens": MAX_TOKENS,
             "stream": USE_STREAMING,
         }

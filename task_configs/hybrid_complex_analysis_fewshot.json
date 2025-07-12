@@ -1,0 +1,93 @@
+{
+  "task_name": "hybrid_complex_analysis_fewshot",
+  "task_type": "hybrid_analysis", 
+  "description": "Hawaiian to English translation with commentary (passage-level) and overall summary (chapter-level) using few-shot learning",
+  
+  "dataset": {
+    "path": "data/complex_analysis/namakaokapaoo_dataset.csv",
+    "source_column": "hawaiian_text",
+    "reference_columns": {
+      "translation": "english_translation",
+      "commentary": "commentary",
+      "summary": "overall_summary"
+    },
+    "grouping_columns": ["chapter"],
+    "passage_column": "paragraph",
+    "id_column": "passage_id"
+  },
+  
+  "processing": {
+    "stages": [
+      {
+        "name": "passage_analysis",
+        "type": "parallel",
+        "unit": "passage",
+        "max_parallel": 10,
+        "outputs": ["translation", "commentary"]
+      },
+      {
+        "name": "chapter_summary",
+        "type": "sequential",
+        "unit": "chapter",
+        "requires": ["passage_analysis"],
+        "outputs": ["summary"]
+      }
+    ]
+  },
+  
+  "prompts": {
+    "passage_analysis": {
+      "system": "You are an expert in Hawaiian language, culture, and history. You analyze Hawaiian passages with scholarly depth, providing accurate translations and detailed cultural commentary.\n\nYour commentary should follow the style and depth shown in these examples:",
+      "user_template": "Here are examples of the expected commentary style:\n\nEXAMPLE 1:\n\nHawaiian: \"He keiki 'u'uku loa 'o Nāmakaokapāo'o, a he keiki ikaika loa i kona wā 'ōpiopio, 'a'ohe ona lua ma kēia mau mokupuni mai Hawai'i ā Ni'ihau, i ka 'u'uku a me ke koa loa. 'O Kauluakaha'i, kona makua kāne, no Kahikipapaialewa, he 'āina i Kahikinu'u. 'O Pōka'ī ka makuahine. He ali'i nui kona makua kāne no Kahikipapaialewa, a he 'ao'ao akua kekahi ona.\"\n\nTranslation: \"Nāmakaokapāo'o was a little boy and incredibly strong when he was very young. There was no one like him from Hawai'i all the way to Ni'ihau in his small stature and bravery. Kauluakaha'i was his father from Kahikipapaialewa, a place in Kahikinu'u. Pōka'ī was his mother. His father was a high chief of Kahikipapaialewa, who was also part god.\"\n\nCommentary: \"**Paragraph 1:**• It is very common in Hawaiian storytelling to open by disclosing: **a)** the name of the main protagonist/s, and sometimes a description of their (aproximate) age and/or physique/physical attributes; **b)** the name of the parent/s, grandparent/s, caregiver/s of the main protagonist/s, and sometimes a description; **c)** the name of the place the main protagonist/s grew up or are living in at the time the story takes place; • The main protagonists described in the first paragraph are: 1) Nā-maka-o-ka-pāo'o (m) (the eyes of the pāo'o fish): an incredibly strong, young boy, with no comparison from Hawai'i to Ni'ihau for his small stature and strength; 2) Ka-ulu-a-kaha'i (m) (the inspiration of Kaha'i (Footnote: Pukui & Elbert (1977:385): Kaha'i: \"A hero who traveled to 'Upolu, Samoa, and brought back breadfruit to Haki-pu'u, Oahu (according to some versions) or to Pu'u-loa, Kohala, Hawaii (HM 97). He was born at 'Ī-ao, Maui. He went to Kahiki to find his father, Hema, who had lost his eyes (HM 248). See Nā-maka-o-Kaha'i.), Nā maka-o-ka-pāo'o's father; a high chief of Kahiki-papa ia-lewa (Kahiki stratum in the sky, likely a foreign country), a place in Kahiki-nu'u (Kahiki at the summit, a foreign country); he is a demigod; 3) Pō-ka-'ī (f) (perhaps ʻnight falls upon the high chief'): Nā-maka-o-ka-pāo'o's mother; no further description;\"\n\nEXAMPLE 2:\n\nCommentary: \"**Paragraph 6:**• The numbers referred to in this paragraph are interesting and likely a riddle to solve, with esoteric meaning: 2, 4, 40. Nā-maka-o-ka-pāo'o is a child, but behaves like a mature adult, albeit destructive and spiteful, but calculating. This has allegorical meaning and likely relates to wastefulness and the need to dismantle 'Ai Kapu practices. • Pua-li'i was so enraged by Nā-maka-o-ka-pāo'o's destruction of the sweet potato patches that he threatened to eat his head (po'o) and eyes (nā maka) with sweet potato in place of ulua fish. The head of the ulua or of a person likely represents the sweet potato tuber and the eyes likely represent the sweet potato vine cutting (maka) that is used to replant and perpetuate the crop, symbolically, the people of the land. This also explains the meaning of ʻmaka' in the name, Nā-maka-o-ka-pāo'o, with ʻpāo'o' being used as a poetic reference to ʻpo'o' (head). – Ulua was used as a substitute for human sacrifice on the heiau in the 'Ai Kapu culture (footnote: Pukui & Elbert (1986:369) *ulua*: \"This fish was substituted for human sacrifices when the latter were not available , probably because of word magic and the meaning of *ulua 2* [to grow/increase; to be possessed by a god]. Since an *ulua* replaces a man, *ulua* also means \"man, sweetheart,\" especially in love songs.\"). In this case, Pua-li'i threatens to eat the human head and eyes of Nā-maka-o-ka-pāo'o in place of the ulua: the opposite of normal 'Ai Kapu custom. This appears to allude to Pua-li'i's holding on to the 'Ai Kapu customs, going back in time allegorically, rather than forward in time, where humans are no longer sacrificed in the Western culture. Nā-maka-o-ka-pāo'o, on the other hand, represents going forward in time, a time of progressive thinking and abandonment of the 'Ai Kapu;\"\n\nNow analyze this Hawaiian passage from Chapter {chapter}, Paragraph {paragraph}:\n\n{hawaiian_text}\n\nProvide:\n1. An accurate English translation\n2. Detailed commentary following the same style and depth as the examples above\n\nFormat your response with:\n- <translation></translation> tags for the English translation\n- <commentary></commentary> tags for the analytical commentary\n\nMatch the natural scholarly style of the examples - use bullet points (•) and sub-points (–) naturally, include etymology with hyphens when analyzing names, reference cultural concepts and historical periods like the 'Ai Kapu era, and provide allegorical interpretations grounded in Hawaiian tradition."
+    },
+    "chapter_summary": {
+      "system": "You are an expert in Hawaiian language, culture, and history. You have just analyzed multiple passages from a Hawaiian text. Your task is to synthesize these analyses into a comprehensive chapter summary.",
+      "user_template": "Based on the following translations from Chapter {chapter}, provide an overall summary of the chapter's themes and significance.\n\n{all_translations}\n\nCreate a comprehensive summary that:\n1. Identifies major themes across all passages\n2. Explains the historical and cultural context\n3. Discusses the chapter's significance in Hawaiian literature\n4. Synthesizes insights from individual passages into a cohesive narrative\n\nFormat your response with <summary></summary> tags."
+    }
+  },
+  
+  "output": {
+    "structure": "hierarchical",
+    "passage_level": {
+      "format": "individual_json",
+      "fields": ["translation", "commentary"],
+      "filename_template": "passage_{chapter}_{paragraph}.json"
+    },
+    "chapter_level": {
+      "format": "manifest_json",
+      "fields": ["summary", "passage_references"],
+      "filename_template": "chapter_{chapter}_manifest.json"
+    }
+  },
+  
+  "special_cases": {
+    "grouped_commentary": {
+      "enabled": true,
+      "detection": "reference_based",
+      "handling": "distribute_to_passages",
+      "groups": [
+        {
+          "chapter": 1,
+          "paragraphs": [10, 11, 12, 13, 14],
+          "commentary_location": "paragraph_8"
+        }
+      ]
+    }
+  },
+  
+  "evaluation": {
+    "metrics": ["semantic_similarity", "commentary_quality", "summary_coherence"],
+    "reference_required": true,
+    "passage_level_eval": true,
+    "custom_metrics": {
+      "commentary_quality": {
+        "evaluator": "gpt-4",
+        "criteria": ["cultural_accuracy", "historical_context", "linguistic_analysis", "academic_rigor"]
+      },
+      "summary_coherence": {
+        "evaluator": "gpt-4",
+        "criteria": ["thematic_synthesis", "completeness", "clarity", "passage_integration"]
+      }
+    }
+  }
+}

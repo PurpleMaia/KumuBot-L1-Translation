@@ -1,0 +1,4 @@
+model,component,average_similarity,valid_count,missing_count
+qwen3-30b-a3b-awq-128k-maui,translation,0.8589493355411717,14,0
+qwen3-30b-a3b-awq-128k-maui,commentary,0.672909490337973,14,0
+qwen3-30b-a3b-awq-128k-maui,summary,0.7722381503915758,1,13

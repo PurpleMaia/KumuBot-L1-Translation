@@ -50,24 +50,24 @@ elif [ "$TASK_TYPE" = "complex_analysis" ]; then
     echo "Step 3: Evaluating complex analysis..."
     python benchmarking/complex_semantic_similarity.py
     
-elif [ "$TASK_TYPE" = "hybrid_complex_analysis" ]; then
+elif [[ "$TASK_TYPE" == "hybrid_complex_analysis"* ]]; then
     echo "Step 2: Extracting hybrid complex analysis outputs..."
     if [ -z "${OUTPUT_DIR:-}" ]; then
         echo "Error: OUTPUT_DIR environment variable must be set for hybrid complex analysis"
         echo "Example: OUTPUT_DIR=my-model ./run_pipeline_v2.sh hybrid_complex_analysis"
         exit 1
     fi
-    python translations/extract_hybrid_complex_analysis.py --output-dir "$OUTPUT_DIR"
+    python translations/extract_hybrid_complex_analysis.py --output-dir "$OUTPUT_DIR" --task-name "$TASK_TYPE"
     
     echo "Step 3: Evaluating hybrid complex analysis..."
-    python benchmarking/complex_semantic_similarity.py --model "$OUTPUT_DIR"
+    python benchmarking/complex_semantic_similarity.py --model "$OUTPUT_DIR" --task-name "$TASK_TYPE"
     
     echo "Step 4: Generating complex analysis summary..."
     python benchmarking/complex_semantic_similarity_summary.py
     
 else
     echo "Unknown task type: $TASK_TYPE"
-    echo "Available task types: simple_translation, complex_analysis, hybrid_complex_analysis"
+    echo "Available task types: simple_translation, complex_analysis, hybrid_complex_analysis (or variants)"
     exit 1
 fi
 

@@ -23,17 +23,41 @@ def discover_complex_analysis_results():
     if not results_dir.exists():
         return []
 
-    models = set()
+    models = []
     for file in results_dir.glob("*_similarity_summary.csv"):
-        model_name = file.stem.replace("_similarity_summary", "")
-        models.add(model_name)
+        stem = file.stem.replace("_similarity_summary", "")
+        
+        # Parse model name and task name
+        # Patterns:
+        # 1. model_similarity_summary.csv -> (model, None)
+        # 2. model_taskname_similarity_summary.csv -> (model, taskname)
+        
+        # Check for known task patterns - order matters for proper matching
+        if "_hybrid_complex_analysis_" in stem:
+            # Task-specific format with multiple parts: model_hybrid_complex_analysis_variant
+            # Find the start of the task pattern
+            task_start = stem.find("_hybrid_complex_analysis_")
+            model_name = stem[:task_start]
+            task_name = stem[task_start + 1:]  # Skip the leading underscore
+            models.append((model_name, task_name))
+        elif "_hybrid_complex_analysis" in stem:
+            model_name = stem.replace("_hybrid_complex_analysis", "")
+            models.append((model_name, "hybrid_complex_analysis"))
+        else:
+            # No task suffix
+            models.append((stem, None))
 
-    return sorted(list(models))
+    # Sort by model name and task name
+    return sorted(models, key=lambda x: (x[0], x[1] or ""))
 
 
-def load_model_results(model_name):
-    """Load results for a specific model."""
-    summary_file = f"benchmarking/complex_analysis/{model_name}_similarity_summary.csv"
+def load_model_results(model_name, task_name=None):
+    """Load results for a specific model and task."""
+    # Build filename based on task
+    if task_name:
+        summary_file = f"benchmarking/complex_analysis/{model_name}_{task_name}_similarity_summary.csv"
+    else:
+        summary_file = f"benchmarking/complex_analysis/{model_name}_similarity_summary.csv"
 
     if not Path(summary_file).exists():
         return None
@@ -87,13 +111,18 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
     # Collect all results
     all_results = []
 
-    for model in models:
-        results = load_model_results(model)
+    for model_name, task_name in models:
+        results = load_model_results(model_name, task_name)
         if results:
             composite_score = calculate_composite_score(results)
+            
+            # Create display name that includes task if present
+            display_name = model_name
+            if task_name:
+                display_name = f"{model_name} ({task_name})"
 
             model_data = {
-                "model": model,
+                "model": display_name,
                 "composite_score": composite_score,
                 "translation_similarity": results.get("translation", {}).get(
                     "average_similarity", np.nan
@@ -127,11 +156,11 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
 
     # Print summary to console
     print("\nComplex Analysis Results (sorted by composite score):")
-    print("=" * 120)
+    print("=" * 150)
     print(
-        f"{'Model':<40} | {'Composite':<10} | {'Translation':<12} | {'Commentary':<12} | {'Summary':<10} | {'Valid Passages':<15}"
+        f"{'Model':<70} | {'Composite':<10} | {'Translation':<12} | {'Commentary':<12} | {'Summary':<10} | {'Valid Passages':<15}"
     )
-    print("-" * 120)
+    print("-" * 150)
 
     for result in all_results:
         model = result["model"]
@@ -147,7 +176,7 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
         summary_str = f"{summary:.4f}" if not np.isnan(summary) else "N/A"
 
         print(
-            f"{model:<40} | {composite_str:<10} | {translation_str:<12} | {commentary_str:<12} | {summary_str:<10} | {valid_passages:<15}"
+            f"{model:<70} | {composite_str:<10} | {translation_str:<12} | {commentary_str:<12} | {summary_str:<10} | {valid_passages:<15}"
         )
 
     print(f"\nLegend:")
