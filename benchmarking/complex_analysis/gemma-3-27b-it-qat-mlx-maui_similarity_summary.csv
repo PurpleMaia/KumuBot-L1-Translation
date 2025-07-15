@@ -1,4 +1,0 @@
-model,component,average_similarity,valid_count,missing_count
-gemma-3-27b-it-qat-mlx-maui,translation,0.9393429153842764,14,0
-gemma-3-27b-it-qat-mlx-maui,commentary,0.6855749083372874,14,0
-gemma-3-27b-it-qat-mlx-maui,summary,0.804207389479983,1,13
