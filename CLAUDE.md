@@ -34,6 +34,9 @@ python translations/gemini-1.5-pro.py
 # Run custom model with environment variables
 OUTPUT_DIR=my_output OPENAI_MODEL_NAME=gpt-4 MAX_PARALLEL=5 python translations/custom-model-parallel.py
 
+# Manual CLI testing with web-based LLMs (no API required)
+OUTPUT_DIR=model-name python translations/custom-model-v2-cli.py --task hybrid_complex_analysis_enhanced_fewshot
+
 # Run the complete pipeline (translation + benchmarking)
 ./run_pipeline.sh
 ```
@@ -216,12 +219,16 @@ Latest complex analysis semantic similarity results with enhanced few-shot promp
 3. **Gemma 3 4B QAT** (enhanced few-shot): Composite 0.8362 (Translation: 93.9%, Commentary: **72.6%**, Summary: **85.3%**)
 4. **DeepSeek V3** (enhanced few-shot): Composite 0.8322 (Translation: 95.3%, Commentary: 72.3%, Summary: 81.0%)
 5. **Gemma 3 27B QAT** (enhanced few-shot): Composite 0.8271 (Translation: 95.0%, Commentary: 72.5%, Summary: 78.5%)
-6. **Llama4 Scout** (enhanced few-shot): Composite 0.8240 (Translation: 95.9%, Commentary: 68.3%, Summary: 83.6%)
-7. **Gemma 3N E4B** (enhanced few-shot): Composite 0.8105 (Translation: 94.1%, Commentary: 69.7%, Summary: 77.7%)
-8. **Qwen3 30B** (enhanced few-shot): Composite 0.8079 (Translation: 86.8%, Commentary: 71.0%, Summary: **88.4%** 🥇)
+6. **Qwen3 235B Think-Parser** (original): Composite 0.8244 (Translation: 91.2%, Commentary: 74.7%, Summary: 80.3%)
+7. **Llama4 Scout** (enhanced few-shot): Composite 0.8240 (Translation: 95.9%, Commentary: 68.3%, Summary: 83.6%)
+8. **Gemma 3 27B Manual CLI** (enhanced few-shot): Composite 0.8187 (Translation: 95.3%, Commentary: 71.4%, Summary: 75.9%)
+9. **Gemma 3N E4B** (enhanced few-shot): Composite 0.8105 (Translation: 94.1%, Commentary: 69.7%, Summary: 77.7%)
+10. **Qwen3 30B** (enhanced few-shot): Composite 0.8079 (Translation: 86.8%, Commentary: 71.0%, Summary: **88.4%** 🥇)
 
 **Enhanced few-shot success rate**: 82% of tested models (9/11) showed significant improvement
 All models achieved 100% completion rate (14/14 passages) with successful handling of grouped commentary passages (10-14).
+
+**Manual CLI Validation**: Direct comparison between API (Gemma 3 27B QAT MLX-maui: 0.8271) and web browser manual CLI (Gemma 3 27B Manual CLI: 0.8187) shows consistent performance with only 0.84 point difference, validating manual testing methodology.
 
 ### Prompt Engineering Results
 
@@ -244,6 +251,49 @@ All models achieved 100% completion rate (14/14 passages) with successful handli
 - **Performance degradation**: Consistently worst scores across all tested architectures
 - **Translation quality drops**: 2-4% reduction due to cognitive overload
 - **Over-engineering evidence**: Complex constraints reduce natural language generation
+
+## Manual CLI Testing Tool
+
+The project includes a manual CLI testing tool (`translations/custom-model-v2-cli.py`) that enables testing task configurations with web-based LLMs without requiring API access.
+
+### Manual CLI Features
+
+- **Clipboard Integration**: Automatically copies prompts to clipboard for easy pasting into web interfaces
+- **Flexible Input Methods**: Choose between clipboard reading (`c`) or manual paste (`p`) for LLM responses
+- **Progress Tracking**: Shows completion status and allows early exit with `q`
+- **Same Format Output**: Generates identical JSON files compatible with existing extraction and benchmarking pipeline
+- **Special Case Handling**: Supports grouped commentary and all task configuration features
+
+### Manual CLI Usage
+
+```bash
+# Test enhanced few-shot prompts with web LLM
+OUTPUT_DIR=model-name python translations/custom-model-v2-cli.py --task hybrid_complex_analysis_enhanced_fewshot
+
+# Test original prompts
+OUTPUT_DIR=model-name python translations/custom-model-v2-cli.py --task hybrid_complex_analysis_original
+
+# Enable debug output
+python translations/custom-model-v2-cli.py --task hybrid_complex_analysis_enhanced_fewshot --debug
+```
+
+### Manual CLI Workflow
+
+1. Script copies prompt to clipboard automatically
+2. Paste prompt into web LLM interface (Google AI Studio, ChatGPT, etc.)
+3. Copy LLM response back to clipboard
+4. Type `c` to read from clipboard, `p` to manually paste, or `q` to quit
+5. Process repeats for all 14 passages plus chapter summary
+6. Results compatible with existing benchmarking pipeline
+
+### Manual CLI Validation Results
+
+**Gemma 3 27B Performance Comparison:**
+- **API Version** (MLX-maui): Composite 0.8271 (Translation: 95.0%, Commentary: 72.5%, Summary: 78.5%)
+- **Manual CLI Version** (Google AI Studio): Composite 0.8187 (Translation: 95.3%, Commentary: 71.4%, Summary: 75.9%)
+- **Difference**: Only 0.84 points (1% relative difference), validating manual testing methodology
+
+This demonstrates that manual CLI testing provides reliable results for comparing prompt strategies and model capabilities without requiring API access.
 
 #### **Enhanced Few-Shot Implementation**
 - **3 diverse examples**: Character introduction, dialogue, and symbolic action passages

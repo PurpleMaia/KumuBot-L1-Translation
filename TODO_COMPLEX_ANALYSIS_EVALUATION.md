@@ -424,8 +424,20 @@ Based on multi-model testing results, the focus should shift to optimizing few-s
 - [x] **Clear usage guidelines**: Architecture-specific prompt selection based on model reasoning type
 - [x] **Performance benchmarks established**: Top 8 models all use enhanced few-shot; reasoning models use original
 - [x] **Deployment recommendation**: Enhanced few-shot as default, original prompts for `<think>` chain models
+- [x] **Manual CLI testing tool**: Validated methodology for web-based LLM testing without API access
 
 ## Completed Tasks
+
+### Task 17: Manual CLI Testing Tool (✅ COMPLETED)
+- [x] **Created manual CLI version** of translation script (`translations/custom-model-v2-cli.py`)
+- [x] **Clipboard integration** for prompts and responses (macOS/Linux/Windows compatible)
+- [x] **Flexible input methods** with simple `c`/`p`/`q` interface
+- [x] **Progress tracking** and early exit capabilities
+- [x] **Compatible output format** with existing pipeline (JSON files, same structure)
+- [x] **Validation testing** with Gemma 3 27B via Google AI Studio
+- [x] **Performance comparison**: Manual CLI (0.8187) vs API (0.8271) - only 1% difference
+- [x] **Special case support**: Grouped commentary handling for passages 10-14
+- [x] **Methodology validation**: Demonstrates reliable results for web-based LLM testing
 
 ### Task 16: Implement Text Normalization for Semantic Similarity (✅ COMPLETED)
 - [x] **Created normalize_text() function** in complex_semantic_similarity.py
