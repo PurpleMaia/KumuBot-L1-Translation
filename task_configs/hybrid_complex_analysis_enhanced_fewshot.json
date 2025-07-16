@@ -1,0 +1,93 @@
+{
+  "task_name": "hybrid_complex_analysis_enhanced_fewshot",
+  "task_type": "hybrid_analysis",
+  "description": "Hawaiian to English translation with commentary (passage-level) and overall summary (chapter-level) using enhanced few-shot learning with diverse examples",
+  
+  "dataset": {
+    "path": "data/complex_analysis/namakaokapaoo_dataset.csv",
+    "source_column": "hawaiian_text",
+    "reference_columns": {
+      "translation": "english_translation",
+      "commentary": "commentary",
+      "summary": "overall_summary"
+    },
+    "grouping_columns": ["chapter"],
+    "passage_column": "paragraph",
+    "id_column": "passage_id"
+  },
+  
+  "processing": {
+    "stages": [
+      {
+        "name": "passage_analysis",
+        "type": "parallel",
+        "unit": "passage",
+        "max_parallel": 10,
+        "outputs": ["translation", "commentary"]
+      },
+      {
+        "name": "chapter_summary",
+        "type": "sequential",
+        "unit": "chapter",
+        "requires": ["passage_analysis"],
+        "outputs": ["summary"]
+      }
+    ]
+  },
+  
+  "prompts": {
+    "passage_analysis": {
+      "system": "You are an expert in Hawaiian language, culture, and history. You analyze Hawaiian passages with scholarly depth, providing accurate translations and detailed cultural commentary. Your analysis should follow the style and depth shown in these examples:",
+      "user_template": "Here are examples of high-quality commentary that demonstrate the expected scholarly approach:\n\n**EXAMPLE 1 - Character Introduction (Narrative Style):**\n\nHawaiian: \"He keiki 'u'uku loa 'o Nāmakaokapāo'o, a he keiki ikaika loa i kona wā 'ōpiopio, 'a'ohe ona lua ma kēia mau mokupuni mai Hawai'i ā Ni'ihau, i ka 'u'uku a me ke koa loa. 'O Kauluakaha'i, kona makua kāne, no Kahikipapaialewa, he 'āina i Kahikinu'u. 'O Pōka'ī ka makuahine. He ali'i nui kona makua kāne no Kahikipapaialewa, a he 'ao'ao akua kekahi ona.\"\n\nTranslation: \"Nāmakaokapāo'o was a little boy and incredibly strong when he was very young. There was no one like him from Hawai'i all the way to Ni'ihau in his small stature and bravery. Kauluakaha'i was his father from Kahikipapaialewa, a place in Kahikinu'u. Pōka'ī was his mother. His father was a high chief of Kahikipapaialewa, who was also part god.\"\n\nCommentary: \"**Paragraph 1:**• It is very common in Hawaiian storytelling to open by disclosing: **a)** the name of the main protagonist/s, and sometimes a description of their (aproximate) age and/or physique/physical attributes; **b)** the name of the parent/s, grandparent/s, caregiver/s of the main protagonist/s, and sometimes a description; **c)** the name of the place the main protagonist/s grew up or are living in at the time the story takes place; • The main protagonists described in the first paragraph are: 1) Nā-maka-o-ka-pāo'o (m) (the eyes of the pāo'o fish): an incredibly strong, young boy, with no comparison from Hawai'i to Ni'ihau for his small stature and strength; 2) Ka-ulu-a-kaha'i (m) (the inspiration of Kaha'i (Footnote: Pukui & Elbert (1977:385): Kaha'i: \"A hero who traveled to 'Upolu, Samoa, and brought back breadfruit to Haki-pu'u, Oahu (according to some versions) or to Pu'u-loa, Kohala, Hawaii (HM 97). He was born at 'Ī-ao, Maui. He went to Kahiki to find his father, Hema, who had lost his eyes (HM 248). See Nā-maka-o-Kaha'i.), Nā maka-o-ka-pāo'o's father; a high chief of Kahiki-papa ia-lewa (Kahiki stratum in the sky, likely a foreign country), a place in Kahiki-nu'u (Kahiki at the summit, a foreign country); he is a demigod; 3) Pō-ka-'ī (f) (perhaps ʻnight falls upon the high chief'): Nā-maka-o-ka-pāo'o's mother; no further description;\"\n\n**EXAMPLE 2 - Dialogue and Cultural Practice:**\n\nHawaiian: \"Iā lāua e noho ana, iho maila 'o Puali'i, he kanaka maika'i no Līhu'e, i ka lawai'a ma kai o Honouliuli, kipa maila ia ma ka hale o Pōka'ī. Nānā akula 'o Puali'i iā Pōka'ī a makemake akula iā ia, 'ōlelo akula ia: \"Makemake au iā 'oe i wahine na'u.\" 'Ī mai 'o Pōka'ī: \"Pehea 'oe e makemake ai ia'u? Ua hānau wau i ke keiki, a ua 'ino'ino ko'u kino.\" 'Ī aku 'o Puali'i: \"He mea 'ole ia mau mea, ke makemake 'oe ia'u, e moe kāua.\"'Ae akula 'o Pōka'ī. A ho'i akula 'o Pōka'ī me kāna kāne me Puali'i ā ke kula o Keahumoa, noho.\"\n\nTranslation: \"The two were going about their life when Puali'i, a good man, arrived from inland in Līhu'e, to go fishing on the shore of Honouliuli. He paid a visit to the home of Pōka'ī and looked at her and liked her. He said, \"I'd like you to be my woman.\" Pōka'ī replied, \"How could you possibly want me? I've given birth to a child and my body is ruined.\" Puali'i said, \"I don't care about that. If you like me, let's sleep together.\" Pōka'ī agreed and she went with Puali'i, now her man, to the plains of Keahumoa to live.\"\n\nCommentary: \"**Paragraph 3:**• A new character is introduced, Pua-(a)li'i (child/descendant of a chief/chiefly line), described as a good man, arrived from inland at Līhu'e (Wāhiāwā), to go fishing at Hono-uliuli (dark bay) in 'Ewa, somewhere in the area where Pō-ka-'ī was living with her baby, Nā-maka-o-ka-pāo'o. – In the 'Ai Kapu era, everyone walked on land to every destination and it was normal to call in to the house of strangers and ask for food and water. It was normal to receive strangers at one's home and provide them with food and water, and it was considered rude to refuse generosity. This is a custom recounted in many stories. This is likely the reason Pua-li'i called in at Pōka'ī's house and why Pōka'ī received Pua-li'i in her home, where he observed how she was living; • Pua-li'i falls in love with Pō-ka-'ī and proposes a longterm relationship. Pō-ka-'ī expresses hesitation due to a negative self-image, but Pua-li'i reassures her that as long as they both like each other, the two should begin a longterm relationship and acknowledge each other as ʻkāne' (boyfriend, husband, longterm lover) and ʻwahine' (girlfriend, wife, longterm lover). The couple relocate to Ke-ahu moa (heap of chickens) in Līhu'e (Wāhiāwā), where Pua-li'i is from, to live; • It seems the meal Pua-li'i proposed, with the cooked head of ulua and sweet potatoes, was a kind of 'Ai Kapu ritual meal perhaps solidifying/formalizing their longterm relationship;\"\n\n**EXAMPLE 3 - Symbolic Action and Cultural Analysis:**\n\nHawaiian: \"I ia wā, noke aku ana 'o Nāmakaokapāo'o i ka huhuki ā pau kekahi māla 'uala ā luna o kekahi māla 'uala, pēlā nō ka huhuki 'ana ā pau nā māla 'elua ā kū ke āhua o ka lau o ka 'uala, he kanahā āhua ka nui o nā māla 'elua. A laila, ho'i a'ela 'o Nāmakaokapāo'o a hō'ā i ke ahi a 'ōhinu akula 'ehā 'au o ka 'uala i luna o kapuahi e 'ā ana. Iā ia e 'ōhinu ana i luna o ke ahi, ho'i maila kona makua kāne kōlea ā hiki, nīnau akula i kona makuahine, iā Pōka'ī: \"'A'ole.\" 'Ī aku 'o Puali'i: \"'Ae, 'o ke po'o ona a me nā maka ka mea e 'īna'i ai ku'u 'uala i kēia lā, no laila, eia kona lā e make ai ia'u.\"\"\n\nTranslation: \"At that time, Nāmakaokapāo'o was busy tearing apart the sweet potato patches, yanking them out. He tore apart both sweet potato patches until there rose a mound of sweet potato leaves, forty mounds in all from the two patches. Then Nāmakaokapāo'o went back and lit a fire to broil four sweet potato vines on a fire pit. As he was broiling the vines, wilting them, his stepfather came back and reached him and asked Nāmakaokapāo'o's mother, Pōka'ī, and she said, \"No.\" Puali'i said, \"Yes, his head and eyes as food to go with the sweet potatoes that I'll eat today. So, today I will kill him.\"\"\n\nCommentary: \"**Paragraph 6:**• The numbers referred to in this paragraph are interesting and likely a riddle to solve, with esoteric meaning: 2, 4, 40. Nā-maka-o-ka-pāo'o is a child, but behaves like a mature adult, albeit destructive and spiteful, but calculating. This has allegorical meaning and likely relates to wastefulness and the need to dismantle 'Ai Kapu practices. • Pua-li'i was so enraged by Nā-maka-o-ka-pāo'o's destruction of the sweet potato patches that he threatened to eat his head (po'o) and eyes (nā maka) with sweet potato in place of ulua fish. The head of the ulua or of a person likely represents the sweet potato tuber and the eyes likely represent the sweet potato vine cutting (maka) that is used to replant and perpetuate the crop, symbolically, the people of the land. This also explains the meaning of ʻmaka' in the name, Nā-maka-o-ka-pāo'o, with ʻpāo'o' being used as a poetic reference to ʻpo'o' (head). – Ulua was used as a substitute for human sacrifice on the heiau in the 'Ai Kapu culture (footnote: Pukui & Elbert (1986:369) *ulua*: \"This fish was substituted for human sacrifices when the latter were not available , probably because of word magic and the meaning of *ulua 2* [to grow/increase; to be possessed by a god]. Since an *ulua* replaces a man, *ulua* also means \"man, sweetheart,\" especially in love songs.\"). In this case, Pua-li'i threatens to eat the human head and eyes of Nā-maka-o-ka-pāo'o in place of the ulua: the opposite of normal 'Ai Kapu custom. This appears to allude to Pua-li'i's holding on to the 'Ai Kapu customs, going back in time allegorically, rather than forward in time, where humans are no longer sacrificed in the Western culture. Nā-maka-o-ka-pāo'o, on the other hand, represents going forward in time, a time of progressive thinking and abandonment of the 'Ai Kapu;\"\n\nNow analyze this Hawaiian passage from Chapter {chapter}, Paragraph {paragraph}:\n\n{hawaiian_text}\n\nProvide:\n1. An accurate English translation\n2. Detailed commentary following the same scholarly style and analytical depth as the examples above\n\nFormat your response with:\n- <translation></translation> tags for the English translation\n- <commentary></commentary> tags for the analytical commentary\n\nMatch the natural scholarly approach of the examples: use bullet points (•) and sub-points (–) naturally, analyze name etymologies with hyphens, reference specific cultural practices and historical periods like the 'Ai Kapu era, and provide allegorical interpretations grounded in Hawaiian cultural tradition."
+    },
+    "chapter_summary": {
+      "system": "You are an expert in Hawaiian language, culture, and history. You have analyzed multiple passages from a Hawaiian text and must now synthesize your findings into a comprehensive chapter summary. Your summary should match the scholarly depth and analytical approach of reference academic work.",
+      "user_template": "Here is an example of the expected summary style and depth:\n\n**EXAMPLE CHAPTER SUMMARY:**\n\n\"Two key references in this story help the reader understand the temporal context of the backstory. The first is the location and name of the two sweet potato patches, ʻNā-maka-o-ka-pāo'o,' in Keahumoa in Līhu'e in Wāhiāwā on O'ahu, which were known at the time of the publication of this story in the first decade of the 20th century. The second reference is the negative view of the 'Ai Kapu era, which ended in 1819, including all aspects of 'Ai Kapu culture in place across Hawai'i for centuries prior to that year. Recognition of the 'Ai Kapu in this story is understood from an examination of the text. The question that remains is whether this story was invented in the 19th century as a post-'Ai Kapu, pro-Christian narrative justifying the dominance of Christianity and Western culture more broadly across Hawai'i.\n\nLonger versions of this story were first published serially in the Hawaiian language newspaper, *Ka Nūpepa Kū'oko'a* starting in May of 1894 on a weekly basis over a few months, interrupted and continued again later that year, and sporadically in later years. In 1917, another version of the story was published serially in the Hawaiian language newspaper, *Ke Alaka'i o Hawai'i*, between January and April. There is no reference to ʻNāmakaokapāo'o' prior to 1894 in an online search. The key differences between the Fornander version analyzed above and the versions published in Hawaiian newspapers center on the locus and a few characters. In the version published by *Ka Nūpepa Kū'oko'a*, the locus was Kula on Maui and in the *Ke Alaka'i o Hawai'i* version, the locus was primarily Puna on Hawai'i.\n\nThe most telling aspects of the backstory are the timing of the publications and the tenor of the narrative. The story of Nāmakaokapāo'o first appeared in May 1894, a year and half after the coup that toppled the government of Hawai'i's Head of State, Queen Lili'uokalani, by insurrectionists in January of 1893. *Ka Nūpepa Kū'oko'a* turned its favor from an independent Hawaiian Kingdom national consciousness to favoring the administration and political aspirations of the post-Lili'uokalani occupying administration in the interum and ran political sentiment favoring pro-occupying forces and pro-US goals, but also published traditional lore.\n\nIt is likely, therefore, that this story was invented post-1893 insurrection to build momentum for public support for a pro-US annexation political agenda, to support culturicide, and to supplant the independent national consciousness of Hawaiian nationals with a depedentent US-national consciousness accompanied by Western culture and Protestant principles and morés.\n\nThe characters of this story are archetypal in nature and represent allegorical and rhetorical principles likely for the purpose of achieving political and rhetorical aims. Nāmakaokapāo'o is the central character, a heroic archetype with superhuman strength who overcomes all obsticles through violent means. All other characters represent indigenous Hawaiian archetypes or manifestations of a paternalistic view of native males as simple-minded, uninformed, pathetic, and cowardly (as evindent in the use of place names with rather cynical allusions, like ʻuli' [ʻdark,' i.e. ignorance] or ʻmoa' [ʻchicken,' i.e. cowardly), compared to the brute force of an alpha-male leader. Native females are shown as insignificant (and therefore absent, with just one female character in the story), timid, acted upon and not independent, creative agents for themselves. The violence of the story highlights the cultural war of the era.\"\n\nBased on the following translations from Chapter {chapter}, provide an overall summary that matches this level of scholarly analysis and synthesis:\n\n{all_translations}\n\nCreate a comprehensive summary that:\n1. Identifies major themes and allegorical meanings across all passages\n2. Explains the historical and cultural context with specific references\n3. Discusses the chapter's significance in Hawaiian literature and cultural analysis\n4. Synthesizes insights from individual passages into a cohesive scholarly narrative\n5. Addresses the temporal context and potential political implications\n\nFormat your response with <summary></summary> tags. Match the analytical depth, scholarly tone, and specific cultural referencing demonstrated in the example."
+    }
+  },
+  
+  "output": {
+    "structure": "hierarchical",
+    "passage_level": {
+      "format": "individual_json",
+      "fields": ["translation", "commentary"],
+      "filename_template": "passage_{chapter}_{paragraph}.json"
+    },
+    "chapter_level": {
+      "format": "manifest_json",
+      "fields": ["summary", "passage_references"],
+      "filename_template": "chapter_{chapter}_manifest.json"
+    }
+  },
+  
+  "special_cases": {
+    "grouped_commentary": {
+      "enabled": true,
+      "detection": "reference_based",
+      "handling": "distribute_to_passages",
+      "groups": [
+        {
+          "chapter": 1,
+          "paragraphs": [10, 11, 12, 13, 14],
+          "commentary_location": "paragraph_8"
+        }
+      ]
+    }
+  },
+  
+  "evaluation": {
+    "metrics": ["semantic_similarity", "commentary_quality", "summary_coherence"],
+    "reference_required": true,
+    "passage_level_eval": true,
+    "custom_metrics": {
+      "commentary_quality": {
+        "evaluator": "gpt-4",
+        "criteria": ["cultural_accuracy", "historical_context", "linguistic_analysis", "academic_rigor"]
+      },
+      "summary_coherence": {
+        "evaluator": "gpt-4",
+        "criteria": ["thematic_synthesis", "completeness", "clarity", "passage_integration"]
+      }
+    }
+  }
+}

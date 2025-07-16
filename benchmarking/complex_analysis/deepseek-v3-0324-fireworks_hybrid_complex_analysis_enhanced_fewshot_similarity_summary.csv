@@ -1,0 +1,4 @@
+model,component,average_similarity,valid_count,missing_count
+deepseek-v3-0324-fireworks,translation,0.9532900662247303,14,0
+deepseek-v3-0324-fireworks,commentary,0.7225209397229612,14,0
+deepseek-v3-0324-fireworks,summary,0.8095283939720826,1,13

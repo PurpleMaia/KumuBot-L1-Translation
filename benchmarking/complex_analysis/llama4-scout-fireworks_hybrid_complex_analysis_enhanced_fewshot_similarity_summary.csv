@@ -1,0 +1,4 @@
+model,component,average_similarity,valid_count,missing_count
+llama4-scout-fireworks,translation,0.9589050778479636,14,0
+llama4-scout-fireworks,commentary,0.6830968724670173,14,0
+llama4-scout-fireworks,summary,0.836107764949457,1,13
