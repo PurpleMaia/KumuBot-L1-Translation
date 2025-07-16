@@ -30,13 +30,13 @@ API_KEY = os.getenv("OPENAI_API_KEY_KOA")
 BASE_URL = os.getenv("OPENAI_API_BASE_URL")
 MODEL_NAME = os.getenv("OPENAI_MODEL_NAME", "gpt-4o")
 MAX_PARALLEL = int(os.getenv("MAX_PARALLEL", "3"))
-MAX_TOKENS = int(os.getenv("MAX_TOKENS", "1024"))
+MAX_TOKENS = int(os.getenv("MAX_TOKENS", "8096"))
 SELF_REASONING_PARSER = os.getenv("SELF_REASONING_PARSER", "").lower() in [
     "true",
     "1",
     "yes",
 ]
-USE_STREAMING = os.getenv("USE_STREAMING", "false").lower() in [
+USE_STREAMING = os.getenv("USE_STREAMING", "true").lower() in [
     "true",
     "1",
     "yes",
