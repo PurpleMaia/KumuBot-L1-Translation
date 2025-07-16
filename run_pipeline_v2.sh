@@ -10,21 +10,68 @@ fi
 # Usage:
 #   ./run_pipeline_v2.sh simple_translation
 #   ./run_pipeline_v2.sh complex_analysis
-#   OUTPUT_DIR=model-name ./run_pipeline_v2.sh hybrid_complex_analysis
+#   ./run_pipeline_v2.sh hybrid_complex_analysis --model gpt-4 --output-dir my-model
+#   ./run_pipeline_v2.sh hybrid_complex_analysis --model claude-3-sonnet --output-dir claude-3
 #
-# For hybrid complex analysis with different models:
+# Legacy environment variable support still works:
+#   OUTPUT_DIR=model-name ./run_pipeline_v2.sh hybrid_complex_analysis
 #   OUTPUT_DIR=gpt-4 OPENAI_MODEL_NAME=gpt-4 ./run_pipeline_v2.sh hybrid_complex_analysis
-#   OUTPUT_DIR=claude-3 OPENAI_MODEL_NAME=claude-3-sonnet ./run_pipeline_v2.sh hybrid_complex_analysis
+
+# Parse command line arguments
+TASK_TYPE=""
+OVERRIDE_MODEL=""
+OVERRIDE_OUTPUT_DIR=""
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --model)
+            OVERRIDE_MODEL="$2"
+            shift 2
+            ;;
+        --output-dir)
+            OVERRIDE_OUTPUT_DIR="$2"
+            shift 2
+            ;;
+        --help|-h)
+            echo "Usage: $0 <task_type> [options]"
+            echo "Options:"
+            echo "  --model MODEL_NAME        Override OPENAI_MODEL_NAME environment variable"
+            echo "  --output-dir OUTPUT_DIR   Override OUTPUT_DIR environment variable"
+            echo ""
+            echo "Available tasks:"
+            python -c "from translations.task_config import get_available_tasks; print('\n'.join([f'  - {t}' for t in get_available_tasks()]))"
+            exit 0
+            ;;
+        *)
+            if [ -z "$TASK_TYPE" ]; then
+                TASK_TYPE="$1"
+            else
+                echo "Unknown argument: $1"
+                echo "Use --help for usage information"
+                exit 1
+            fi
+            shift
+            ;;
+    esac
+done
 
 # Check if task type is provided
-if [ $# -eq 0 ]; then
-    echo "Usage: $0 <task_type>"
-    echo "Available tasks:"
-    python -c "from translations.task_config import get_available_tasks; print('\n'.join([f'  - {t}' for t in get_available_tasks()]))"
+if [ -z "$TASK_TYPE" ]; then
+    echo "Usage: $0 <task_type> [options]"
+    echo "Use --help for more information"
     exit 1
 fi
 
-TASK_TYPE=$1
+# Override environment variables if command line arguments provided
+if [ -n "$OVERRIDE_MODEL" ]; then
+    export OPENAI_MODEL_NAME="$OVERRIDE_MODEL"
+    echo "Using model: $OPENAI_MODEL_NAME (from command line)"
+fi
+
+if [ -n "$OVERRIDE_OUTPUT_DIR" ]; then
+    export OUTPUT_DIR="$OVERRIDE_OUTPUT_DIR"
+    echo "Using output directory: $OUTPUT_DIR (from command line)"
+fi
 echo "Running pipeline for task: $TASK_TYPE"
 
 # Run translation/analysis using the new task-aware script
