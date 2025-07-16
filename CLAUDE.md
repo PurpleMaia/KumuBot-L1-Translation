@@ -237,7 +237,8 @@ All models achieved 100% completion rate (14/14 passages) with successful handli
 - **✅ Standard models**: Universal success (100% improvement rate)
 - **✅ Implicit reasoning models**: DeepSeek V3 achieved #4 ranking with enhanced few-shot
 - **⚠️ Explicit reasoning models**: R1-style and think-parser models showed degraded performance
-- **Identification rule**: Avoid enhanced few-shot for models that output `<think>` chains
+- **✅ Original prompts for reasoning models**: DeepSeek R1 improved +4.9 points with original prompts (0.7430 → 0.7922)
+- **Identification rule**: Use original prompts for models that output `<think>` chains or have "r1"/"think-parser" in name
 
 #### **"Improved" Prompts: Confirmed Anti-pattern**
 - **Performance degradation**: Consistently worst scores across all tested architectures

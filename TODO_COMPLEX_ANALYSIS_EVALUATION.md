@@ -415,13 +415,15 @@ Based on multi-model testing results, the focus should shift to optimizing few-s
 ### **Model Architecture Compatibility Discovered**
 - ✅ **Standard models**: 100% success rate (8/8 models improved)
 - ✅ **Implicit reasoning models**: DeepSeek V3 achieved excellent results
-- ⚠️ **Explicit reasoning models**: R1-style and think-parser models degraded
+- ⚠️ **Explicit reasoning models**: R1-style and think-parser models degraded with enhanced few-shot
+- ✅ **Original prompts solution**: DeepSeek R1 improved +4.9 points (0.7430 → 0.7922) when using original prompts
 
 ### **Production Deployment Status: READY**
-- [x] **Optimal configuration identified**: `hybrid_complex_analysis_enhanced_fewshot`
-- [x] **Clear usage guidelines**: Avoid for explicit reasoning models only
-- [x] **Performance benchmarks established**: Top 8 models all use enhanced few-shot
-- [x] **Deployment recommendation**: Use enhanced few-shot as default for Hawaiian cultural analysis
+- [x] **Optimal configuration identified**: `hybrid_complex_analysis_enhanced_fewshot` for standard/implicit reasoning models
+- [x] **Alternative configuration**: `hybrid_complex_analysis_original` for explicit reasoning models (R1, think-parser)
+- [x] **Clear usage guidelines**: Architecture-specific prompt selection based on model reasoning type
+- [x] **Performance benchmarks established**: Top 8 models all use enhanced few-shot; reasoning models use original
+- [x] **Deployment recommendation**: Enhanced few-shot as default, original prompts for `<think>` chain models
 
 ## Completed Tasks
 

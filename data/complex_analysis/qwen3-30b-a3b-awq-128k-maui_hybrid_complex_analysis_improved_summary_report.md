@@ -12,8 +12,8 @@
 ### Completion Rates
 - Translation completion: 14/14 (100.0%)
 - Commentary completion: 14/14 (100.0%)
-- Average translation length: 472 characters
-- Average commentary length: 2222 characters
+- Average translation length: 488 characters
+- Average commentary length: 2234 characters
 
 ### Sample Outputs
 
@@ -24,12 +24,15 @@
 He keiki ‘u‘uku loa ‘o **a)** Nāmakaokapāo‘o, a he  keiki ikaika loa i kona wā ‘ōpiopio, ‘a‘ohe ona lua  ma kēia mau mokupuni mai Hawai‘i ā Ni‘ihau, i ka  ‘u‘uku a me ke koa loa. **b1)** ‘O Kauluakaha‘i, kona   makua kāne, **c)** no Kahikipapaialewa, he ‘āina i  Kahikinu‘u. **b2)** ‘O Pōka‘ī ka maku...
 
 **Translation:**
-There was a long ‘u‘uku fish named Nāmakaokapāo‘o, and a strong child in its young days, two of these in these islands of Hawai‘i and Ni‘ihau, in the ‘u‘uku and the koa long. Kauluakaha‘i, his father, for Kahikipapaialewa, a land in Kahikinu‘u. Pōka‘ī is the mother. He is a great chief for Kahikipap...
+He keiki ‘u‘uku loa ‘o Nāmakaokapāo‘o, a he keiki ikaika loa i kona wā ‘ōpiopio, ‘a‘ohe ona lua ma kēia mau mokupuni mai Hawai‘i ā Ni‘ihau, i ka ‘u‘uku a me ke koa loa.  
+‘O Kauluakaha‘i, kona makua kāne, no Kahikipapaialewa, he ‘āina i Kahikinu‘u.  
+‘O Pōka‘ī ka makuahine.  
+He ali‘i nui kona makua...
 
 **Commentary:**
-• The passage uses symbolic names and elements to reflect the tension between traditional Hawaiian cosmology and post-contact social transformations.  
-  – Nāmakaokapāo‘o (Nā-maka-o-ka-pāo‘o) translates to "The Opened One of the Extended Ones," suggesting a metaphor for enlightenment or expansion, possibly tied to the "u‘uku" fish, which in Hawaiian lore symbolizes abundance and spiritual connection.  
-  – The duality of "two of these" (‘a‘ohe ona lua) may allegorically represent the two realms ...
+• [Allegorical representation of lineage and divine authority]  
+  – The passage uses the term "keiki ‘u‘uku loa" (great fish child) to symbolize a figure of immense power and connection to the ocean, a central element in Hawaiian cosmology. The "u‘uku" (fish) is often linked to Mo‘ōpuna (progeny) of the gods, reflecting the sacredness of the sea in Hawaiian creation myths.  
+  – "Ko koa loa" (great koa) references the koa tree, sacred to the warrior class, suggesting the child embodies both spi...
 
 ### Chapter Summary Sample
-This chapter weaves together themes of sacredness, lineage, and the interplay between human and divine realms in Hawaiian culture. Central to the narrative is Nāmakaokapāo‘o, a powerful ‘u‘uku fish and ancestral figure, whose story is intertwined with the spiritual and cultural practices of the islands. The text emphasizes the reverence for taro (kalo), a staple crop and sacred plant symbolizing the connection between humans and the divine, as seen in the naming of taro fields and the ritualisti...
+This chapter weaves together themes of lineage, spiritual significance, and the sacred connection between humans and nature in Hawaiian culture. Central to the narrative is the genealogy of key figures such as Nāmakaokapāo‘o, Pōka‘ī, Kauluakaha‘i, and Puali‘i, emphasizing their roles as ancestors and their ties to specific lands like Ewa, Honouliuli, and Keahumoa. The text highlights the reverence for taro (‘au ‘uala) and the ocean, portrayed as life-giving forces intertwined with human existenc...
