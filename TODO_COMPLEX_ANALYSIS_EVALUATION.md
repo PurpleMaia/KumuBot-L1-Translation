@@ -426,6 +426,54 @@ Based on multi-model testing results, the focus should shift to optimizing few-s
 - [x] **Deployment recommendation**: Enhanced few-shot as default, original prompts for `<think>` chain models
 - [x] **Manual CLI testing tool**: Validated methodology for web-based LLM testing without API access
 
+## API Cost Tracking
+
+### Hybrid Complex Analysis Token Usage
+
+**o4-mini** (hybrid_complex_analysis_enhanced_fewshot):
+- **Cost breakdown**: $0.020 (input) + $0.002 (cached input) + $0.108 (output) = **$0.130**
+- **Performance**: Composite 0.8237 (Translation: 93.9%, Commentary: 71.2%, Summary: 81.6%)
+- **Rank**: 10th overall
+- **Notable**: Highest cost but complete output with solid balanced performance
+
+**GPT-4.1** (hybrid_complex_analysis_enhanced_fewshot):
+- **Input tokens**: 38,371
+- **Output tokens**: 17,900
+- **Total tokens**: 56,271
+- **Cost breakdown**: $0.006 (input) + $0.008 (cached input) + $0.076 (output) = **$0.090**
+- **Performance**: Composite 0.8257 (Translation: **96.6%** 🏆, Commentary: 69.2%, Summary: 81.3%)
+- **Rank**: 6th overall
+- **Notable**: Highest translation quality, now complete with all components
+
+**GPT-4.1-mini** (hybrid_complex_analysis_enhanced_fewshot):
+- **Performance**: Composite 0.8176 (Translation: 95.6%, Commentary: 71.0%, Summary: 75.6%)
+- **Rank**: 12th overall
+- **Estimated cost**: ~$0.026 (based on improved variant: 24,801 tokens)
+
+**GPT-4.1-nano** (hybrid_complex_analysis_enhanced_fewshot):
+- **Performance**: Composite 0.8230 (Translation: 90.6%, Commentary: 71.6%, Summary: **87.0%**)
+- **Rank**: 10th overall
+- **Notable**: Highest summary quality among all OpenAI models tested
+
+**GPT-4.1-mini** (hybrid_complex_analysis_improved) - *Reference baseline*:
+- **Input tokens**: 10,824
+- **Output tokens**: 13,977  
+- **Total tokens**: 24,801
+- **Estimated cost**: $0.026
+- **Performance**: Composite 0.8100 (Translation: 93.5%, Commentary: 71.3%, Summary: 75.5%)
+- **Rank**: 13th overall
+
+**Cost/Performance Analysis**:
+- **o4-mini**: Premium option - highest cost ($0.130) but complete balanced performance
+- **GPT-4.1**: High-end option - 3.5x cost but highest translation quality (96.8%)
+- **GPT-4.1-nano**: Best value - competitive performance with excellent summary quality
+- **GPT-4.1-mini**: Budget option - good performance at lowest pricing ($0.026)
+
+**Enhanced Few-Shot Performance Impact**:
+- GPT-4.1-mini: +0.76 points improvement (0.8100 → 0.8176)
+- GPT-4.1-nano: Strong performance with excellent summary generation capabilities
+- GPT-4.1: Achieved highest translation quality but missing summary data affects ranking
+
 ## Completed Tasks
 
 ### Task 17: Manual CLI Testing Tool (✅ COMPLETED)

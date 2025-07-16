@@ -1,0 +1,4 @@
+model,component,average_similarity,valid_count,missing_count
+gpt-4_1,translation,0.9655907015194022,14,0
+gpt-4_1,commentary,0.6921623777081648,14,0
+gpt-4_1,summary,0.8131097500840244,1,13

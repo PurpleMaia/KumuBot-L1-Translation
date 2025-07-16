@@ -560,10 +560,10 @@ class TaskProcessor:
 
         # Prepare output
         output = {
-            "chapter": chapter,
-            "paragraph": paragraph,
-            "passage_id": passage_id,
-            "hawaiian_text": hawaiian_text,
+            "chapter": str(chapter),
+            "paragraph": int(paragraph),
+            "passage_id": str(passage_id),
+            "hawaiian_text": str(hawaiian_text),
             f"{OUTPUT_DIR}_translation": parsed.get("translation", ""),
             f"{OUTPUT_DIR}_commentary": grouped_commentary_text,
             "raw_response": response,
@@ -572,9 +572,9 @@ class TaskProcessor:
 
         # Add reference data if available
         if "english_translation" in row:
-            output["reference_translation"] = row["english_translation"]
+            output["reference_translation"] = str(row["english_translation"])
         if "commentary" in row and pd.notna(row["commentary"]):
-            output["reference_commentary"] = row["commentary"]
+            output["reference_commentary"] = str(row["commentary"])
 
         # Save passage-level output (this was missing!)
         self.save_output(output, f"passage_{chapter}_{paragraph}")
@@ -679,10 +679,10 @@ class TaskProcessor:
 
         # Prepare output
         output = {
-            "chapter": chapter,
-            "paragraph": paragraph,
-            "passage_id": passage_id,
-            "hawaiian_text": hawaiian_text,
+            "chapter": str(chapter),
+            "paragraph": int(paragraph),
+            "passage_id": str(passage_id),
+            "hawaiian_text": str(hawaiian_text),
             f"{OUTPUT_DIR}_translation": parsed.get("translation", ""),
             f"{OUTPUT_DIR}_commentary": parsed.get("commentary", ""),
             "raw_response": response,
@@ -690,9 +690,9 @@ class TaskProcessor:
 
         # Add reference data if available
         if "english_translation" in row:
-            output["reference_translation"] = row["english_translation"]
+            output["reference_translation"] = str(row["english_translation"])
         if "commentary" in row and pd.notna(row["commentary"]):
-            output["reference_commentary"] = row["commentary"]
+            output["reference_commentary"] = str(row["commentary"])
 
         # Save passage-level output
         self.save_output(output, f"passage_{chapter}_{paragraph}")
@@ -742,7 +742,7 @@ class TaskProcessor:
 
         # Create chapter manifest
         manifest = {
-            "chapter": chapter,
+            "chapter": int(chapter),
             "passage_count": len(passage_results),
             "passage_references": [
                 f"hybrid_complex_analysis_passage_{chapter}_{r['paragraph']}.json"

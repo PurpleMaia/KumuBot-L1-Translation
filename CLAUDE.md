@@ -295,6 +295,37 @@ python translations/custom-model-v2-cli.py --task hybrid_complex_analysis_enhanc
 
 This demonstrates that manual CLI testing provides reliable results for comparing prompt strategies and model capabilities without requiring API access.
 
+## API Cost Analysis
+
+### Complex Analysis Task Costs
+
+**o4-mini** (enhanced few-shot):
+- **Cost**: $0.130 per complete complex analysis run
+- **Performance**: 0.8237 composite score (ranked 10th)
+- **Strengths**: Complete output with balanced performance across all components
+
+**GPT-4.1** (enhanced few-shot):
+- **Cost**: $0.090 per complete complex analysis run (56,271 tokens)
+- **Performance**: 0.8257 composite score (ranked 6th)
+- **Strengths**: **Highest translation quality (96.6%)** among all models tested
+- **Complete**: Now includes all components (translation, commentary, summary)
+
+**GPT-4.1-nano** (enhanced few-shot):
+- **Cost**: ~$0.026 per complete complex analysis run (estimated)
+- **Performance**: 0.8230 composite score (ranked 10th) 
+- **Strengths**: Highest summary quality (87.0%) among OpenAI models
+
+**GPT-4.1-mini** (enhanced few-shot):
+- **Cost**: ~$0.026 per complete complex analysis run (24,801 tokens baseline)
+- **Performance**: 0.8176 composite score (ranked 12th)
+- **Improvement**: +0.76 points over improved prompts
+
+**Cost Comparison**:
+- **o4-mini**: $0.130 (highest cost, balanced performance)
+- **GPT-4.1**: $0.090 (premium translation quality)
+- **GPT-4.1-mini/nano**: $0.026 (most cost-effective)
+- **Cost ratios**: o4-mini is 5x more expensive than mini/nano; GPT-4.1 is 3.5x more expensive
+
 #### **Enhanced Few-Shot Implementation**
 - **3 diverse examples**: Character introduction, dialogue, and symbolic action passages
 - **Chapter summary example**: Demonstrates synthesis and scholarly analysis depth
