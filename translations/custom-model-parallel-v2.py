@@ -84,6 +84,7 @@ class TaskProcessor:
             system_prompt if system_prompt is not None else self.config.system_prompt
         )
 
+        # can make Qwen3 models not think by putting this in the sys prompt: "content": "/no_think "+system_msg
         messages = [
             {"role": "system", "content": system_msg},
             {"role": "user", "content": prompt},

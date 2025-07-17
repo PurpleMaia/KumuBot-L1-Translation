@@ -474,6 +474,51 @@ Based on multi-model testing results, the focus should shift to optimizing few-s
 - GPT-4.1-nano: Strong performance with excellent summary generation capabilities
 - GPT-4.1: Achieved highest translation quality but missing summary data affects ranking
 
+## Summary Performance Analysis Deep Dive
+
+### DeepSeek R1 Summary Performance Investigation (✅ COMPLETED)
+
+**Finding**: DeepSeek R1's summary performance drops dramatically between original (62.2%) and enhanced few-shot (43.9%) prompting.
+
+#### Original Summary Analysis (62.2%)
+- Focused on traditional literary analysis (themes, character development, narrative structure)
+- Treated the story as authentic Hawaiian mythology
+- Provided conventional academic literary commentary
+- **Missing**: No colonial critique, no questioning of authenticity, no political analysis
+
+#### Enhanced Few-Shot Summary Analysis (43.9%) 
+- **Adopted colonial critique perspective** but fundamentally misunderstood it
+- Incorrectly claimed Nāmakaokapāo'o **represents Western colonial power**
+- Argued the story promotes "Western cultural models"
+- Fatal error: Made the Hawaiian hero a symbol of Western colonialism
+
+#### Why Enhanced Few-Shot Failed
+The model absorbed the colonial critique themes but **inverted the analysis**:
+- Reference: Hawaiian story form co-opted for colonial purposes
+- DeepSeek R1: Hawaiian hero IS Western colonialism
+- This fundamental misinterpretation caused the 18.3% drop
+
+### Qwen3-235B Think-Parser Summary Analysis (✅ COMPLETED)
+
+**Finding**: Enhanced few-shot caused a smaller drop (83.2% → 75.8%) but revealed a fascinating disagreement about political interpretation.
+
+#### The Critical Divergence
+Both Qwen3 and the reference applied sophisticated colonial-era analysis, BUT:
+- **Qwen3**: Interprets story as **anti-colonial resistance** ("palimpsest of Hawaiian resistance")
+- **Reference**: Interprets story as **pro-colonial propaganda** (supporting US annexation)
+
+#### Why This Matters
+- The model correctly learned the analytical framework
+- Generated sophisticated literary criticism
+- But reached the **opposite political conclusion**
+- The 7.4% drop reflects fundamental disagreement about intent, not analytical failure
+
+### Key Insights for Reasoning Models
+1. **Explicit reasoning models struggle with nuanced cultural criticism**
+2. **Enhanced few-shot can backfire** when models over-interpret examples
+3. **Political interpretation remains subjective** even with clear analytical frameworks
+4. **Think-parsers may latch onto surface patterns** without deeper understanding
+
 ## Completed Tasks
 
 ### Task 17: Manual CLI Testing Tool (✅ COMPLETED)

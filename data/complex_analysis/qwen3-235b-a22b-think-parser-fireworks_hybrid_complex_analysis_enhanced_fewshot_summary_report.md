@@ -12,8 +12,8 @@
 ### Completion Rates
 - Translation completion: 14/14 (100.0%)
 - Commentary completion: 14/14 (100.0%)
-- Average translation length: 562 characters
-- Average commentary length: 2128 characters
+- Average translation length: 516 characters
+- Average commentary length: 2327 characters
 
 ### Sample Outputs
 
@@ -24,16 +24,14 @@
 He keiki ‘u‘uku loa ‘o **a)** Nāmakaokapāo‘o, a he  keiki ikaika loa i kona wā ‘ōpiopio, ‘a‘ohe ona lua  ma kēia mau mokupuni mai Hawai‘i ā Ni‘ihau, i ka  ‘u‘uku a me ke koa loa. **b1)** ‘O Kauluakaha‘i, kona   makua kāne, **c)** no Kahikipapaialewa, he ‘āina i  Kahikinu‘u. **b2)** ‘O Pōka‘ī ka maku...
 
 **Translation:**
-Nāmakaokapāoʻo was an extremely small child, yet an extraordinarily strong one in his youth, with no equal in these islands from Hawaiʻi to Niʻihau for his diminutive stature and great bravery. Kauluakahaʻi was his father, from Kahikipapaialewa, a land in Kahikinuʻu. Pōkaʻi was his mother. His fathe...
+Nāmakaokapāoʻo was an extremely small child and remarkably strong during his youth. There was no equal to him across the islands from Hawaiʻi to Niʻihau for his small size and unmatched courage. His father was Kauluakahaʻi, from Kahikipapaialewa, a land in Kahikinuʻu. His mother was Pōkaʻi. His fath...
 
 **Commentary:**
 **Paragraph 1:**  
-• This opening exemplifies the prototypical Hawaiian narrative structure, where protagonists are introduced with:  
-– **a)** Name and physical/mental attributes (diminutive yet heroic stature, unmatched strength and courage),  
-– **b1+c)** Genealogical lineage (father’s name, divine status, mother’s name), and  
-– **c)** Geographical context (place of origin, societal rank).  
-• **Name Analysis:**  
-– *Nā-maka-o-ka-pāoʻo* ("The Eyes of the Bass"): The name reveals divine ocean...
+• This iconic opening establishes the foundational elements of Hawaiian narrative structure:  
+ – **a) Introduction of the protagonist**:  
+  • Nā-maka-o-ka-pāoʻo ("the eyes of the pāoʻo fish") is etymologically linked to marine imagery—**pāoʻo** (small fish) mirrors his diminutive stature, while **maka** (eyes) suggests penetrating spiritual insight, a common trope for seers or demigods (cf. Namaka, the ocean deity with prophetic vision).  
+  • His paradoxical traits—**ʻuʻuku...
 
 ### Chapter Summary Sample
-The opening chapter of Nāmakaokapāoʻo’s tale weaves a dense tapestry of Hawaiian mythic tropes, genealogical legitimacy, and allegorical commentary on power dynamics, both mortal and divine. Central themes of *kuleana* (responsibility) and *mana* (spiritual power) permeate the narrative, framed through the protagonist’s paradoxical physical diminutiveness and supernatural strength, a recurring motif in Hawaiian hero cycles. Nāmakaokapāoʻo’s birth mother, Pōkaʻi, and stepfather, Pualiʻi, anchor t...
+This chapter establishes foundational motifs of divine authority, intergenerational conflict, and the symbolic violence of land and lineage, all instrumental in both pre-colonial Hawaiian literary traditions and their politicized reinterpretation in the late 19th and early 20th centuries. The narrative centers on **Nāmakaokapāoʻo**, a demigod protagonist of paradoxical physical frailty and supernatural potency, who embodies the duality of vulnerability and destructive power embedded in kanaka Ma...

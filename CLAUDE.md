@@ -346,6 +346,23 @@ The semantic similarity evaluation now includes text normalization (as of latest
 - **Key finding**: Original model summaries showed 3.7% drop after normalization, revealing that formatting was masking content differences
 - **Few-shot improvement**: Commentary improved by 3.73% after normalization, showing genuine content alignment
 
+### Commentary Performance Insights
+
+Commentary generation appears to be the most challenging component for current LLMs, with scores typically ranging from 68-74%. The reference commentary expects:
+- Specific allegorical interpretations
+- Historical period references (e.g., 'Ai Kapu era)
+- Academic citations
+- Bullet-point structure with hierarchical organization
+
+### Summary Performance Deep Dive
+
+Investigation of low summary scores revealed a critical insight: The reference summary takes a **colonial historiographical perspective**, arguing the story was potentially invented post-1893 as pro-US annexation propaganda. Models struggle with this because:
+
+1. **DeepSeek R1**: Enhanced few-shot prompting caused it to misinterpret the colonial critique, making the Hawaiian hero represent Western colonialism (43.9% score)
+2. **Qwen3-235B**: Correctly adopted colonial-era analysis but reached the opposite conclusion, seeing the story as anti-colonial resistance rather than pro-colonial propaganda (75.8% score)
+
+This highlights how **political interpretation remains subjective** even with clear analytical frameworks, and explicit reasoning models may struggle with nuanced cultural criticism.
+
 ## Testing
 
 Currently, there are no automated tests in the repository. When adding new functionality:

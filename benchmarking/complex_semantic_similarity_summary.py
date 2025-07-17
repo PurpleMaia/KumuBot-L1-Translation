@@ -100,7 +100,7 @@ def calculate_composite_score(results):
         return np.nan
 
 
-def generate_summary_report(output_file="benchmarking/complex_analysis_results.csv"):
+def generate_summary_report(output_file="benchmarking/complex_analysis_results.csv", sort_by="composite"):
     """Generate a comprehensive summary report."""
     models = discover_complex_analysis_results()
 
@@ -143,10 +143,19 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
             }
             all_results.append(model_data)
 
-    # Sort by composite score (descending)
+    # Sort by specified column (descending)
+    sort_mapping = {
+        "composite": "composite_score",
+        "translation": "translation_similarity", 
+        "commentary": "commentary_similarity",
+        "summary": "summary_similarity"
+    }
+    
+    sort_key = sort_mapping.get(sort_by.lower(), "composite_score")
+    
     all_results.sort(
-        key=lambda x: x["composite_score"]
-        if not np.isnan(x["composite_score"])
+        key=lambda x: x[sort_key]
+        if not np.isnan(x[sort_key])
         else -1,
         reverse=True,
     )
@@ -157,7 +166,8 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
     df.to_csv(output_file, index=False)
 
     # Print summary to console
-    print("\nComplex Analysis Results (sorted by composite score):")
+    sort_display = sort_by.lower().replace("_", " ").title()
+    print(f"\nComplex Analysis Results (sorted by {sort_display}):")
     print("=" * 165)
     print(
         f"{'Model':<85} | {'Composite':<10} | {'Translation':<12} | {'Commentary':<12} | {'Summary':<10} | {'Valid Passages':<15}"
@@ -232,11 +242,17 @@ if __name__ == "__main__":
         "--detailed", action="store_true", help="Show detailed component comparison"
     )
     parser.add_argument("--models", nargs="*", help="Specific models to compare")
+    parser.add_argument(
+        "--sort", 
+        default="composite",
+        choices=["composite", "translation", "commentary", "summary"],
+        help="Sort results by specified component (default: composite)"
+    )
 
     args = parser.parse_args()
 
     # Generate main summary
-    results = generate_summary_report()
+    results = generate_summary_report(sort_by=args.sort)
 
     # Show detailed comparison if requested
     if args.detailed:
