@@ -66,6 +66,8 @@ def extract_to_dataframe(
     task_name: str = "hybrid_complex_analysis",
 ) -> pd.DataFrame:
     """Extract data from passage outputs into a DataFrame."""
+    import re
+    
     rows = []
 
     for passage in passage_outputs:
@@ -79,8 +81,19 @@ def extract_to_dataframe(
             "paragraph": paragraph,
             "hawaiian_text": passage.get("hawaiian_text", ""),
             f"{output_dir}_translation": passage.get(f"{output_dir}_translation", ""),
-            f"{output_dir}_commentary": passage.get(f"{output_dir}_commentary", ""),
         }
+        
+        # Handle commentary - check for special case
+        if passage.get('special_case') == 'grouped_commentary' and 'raw_response' in passage:
+            # Extract commentary from raw_response for special cases
+            raw_response = passage['raw_response']
+            commentary_match = re.search(r'<commentary>(.*?)</commentary>', raw_response, re.DOTALL)
+            if commentary_match:
+                row[f"{output_dir}_commentary"] = commentary_match.group(1).strip()
+            else:
+                row[f"{output_dir}_commentary"] = passage.get(f"{output_dir}_commentary", "")
+        else:
+            row[f"{output_dir}_commentary"] = passage.get(f"{output_dir}_commentary", "")
 
         # Add reference data if available
         if "reference_translation" in passage:

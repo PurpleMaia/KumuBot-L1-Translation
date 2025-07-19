@@ -221,11 +221,34 @@ class MultiComponentEvaluator:
 
         return pd.read_csv(ref_path)
 
+    def identify_grouped_commentary_indices(self, reference_texts: List[str]) -> List[int]:
+        """Identify indices of passages that have grouped commentary."""
+        grouped_indices = []
+        
+        for i, text in enumerate(reference_texts):
+            if pd.notna(text) and str(text).strip():
+                # Check if commentary starts with a grouped pattern like "**Paragraphs X—Y**"
+                # or "**Paragraphs X-Y**" or similar variations
+                import re
+                grouped_pattern = r'^\*?\*?Paragraphs?\s+\d+[\s—–-]+\d+'
+                if re.match(grouped_pattern, str(text).strip(), re.IGNORECASE):
+                    grouped_indices.append(i)
+        
+        return grouped_indices
+
     def evaluate_component_similarity(
-        self, model_texts: List[str], reference_texts: List[str], component_name: str
+        self, model_texts: List[str], reference_texts: List[str], component_name: str,
+        exclude_grouped_commentary: bool = False
     ) -> Tuple[List[float], float]:
         """Evaluate semantic similarity for a specific component."""
         print(f"Evaluating {component_name} similarity...")
+        
+        # For commentary, identify and potentially exclude grouped passages
+        grouped_indices = []
+        if component_name == "commentary" and exclude_grouped_commentary:
+            grouped_indices = self.identify_grouped_commentary_indices(reference_texts)
+            if grouped_indices:
+                print(f"  (Excluding {len(grouped_indices)} grouped commentary passages)")
 
         similarities = []
 
@@ -241,6 +264,11 @@ class MultiComponentEvaluator:
         for i, (model_text, ref_embedding) in enumerate(
             tqdm(zip(model_texts, ref_embeddings))
         ):
+            # Skip grouped commentary passages if requested
+            if component_name == "commentary" and exclude_grouped_commentary and i in grouped_indices:
+                similarities.append(np.nan)  # Mark as excluded
+                continue
+                
             if ref_embedding is None or pd.isna(model_text) or model_text == "":
                 similarities.append(np.nan)
                 continue
@@ -280,10 +308,12 @@ class MultiComponentEvaluator:
 
         return components
 
-    def evaluate_model(self, output_dir: str, task_name: str = None) -> Dict[str, any]:
+    def evaluate_model(self, output_dir: str, task_name: str = None, exclude_grouped_commentary: bool = False) -> Dict[str, any]:
         """Evaluate a single model's complex analysis output."""
         task_info = f" with task '{task_name}'" if task_name else ""
         print(f"\n=== Evaluating model: {output_dir}{task_info} ===")
+        if exclude_grouped_commentary:
+            print("    [Grouped commentary excluded]")
 
         # Load data
         model_df = self.load_complex_analysis_data(output_dir, task_name)
@@ -297,11 +327,12 @@ class MultiComponentEvaluator:
             "model": output_dir,
             "total_passages": len(model_df),
             "components": {},
+            "grouped_commentary_excluded": exclude_grouped_commentary,
         }
 
         for component_name, (model_texts, ref_texts) in components.items():
             similarities, avg_similarity = self.evaluate_component_similarity(
-                model_texts, ref_texts, component_name
+                model_texts, ref_texts, component_name, exclude_grouped_commentary
             )
 
             results["components"][component_name] = {
@@ -326,6 +357,10 @@ class MultiComponentEvaluator:
 
         # Create filename suffix for task-specific results
         suffix = f"_{task_name}" if task_name else ""
+        
+        # Add suffix for grouped commentary exclusion
+        if results.get("grouped_commentary_excluded", False):
+            suffix += "_no_grouped"
 
         # Save detailed results as JSON
         json_path = f"benchmarking/complex_analysis/{output_dir}{suffix}_similarity_results.json"
@@ -342,6 +377,7 @@ class MultiComponentEvaluator:
                     "average_similarity": data["average_similarity"],
                     "valid_count": data["valid_count"],
                     "missing_count": data["missing_count"],
+                    "grouped_commentary_excluded": results.get("grouped_commentary_excluded", False),
                 }
             )
 
@@ -421,6 +457,11 @@ def main():
     parser.add_argument(
         "--list", action="store_true", help="List available models and exit"
     )
+    parser.add_argument(
+        "--exclude-grouped-commentary",
+        action="store_true",
+        help="Exclude grouped commentary passages (10-14) from similarity calculation",
+    )
 
     args = parser.parse_args()
 
@@ -471,7 +512,7 @@ def main():
     # Evaluate each model
     for model, task_name in models_to_evaluate:
         try:
-            results = evaluator.evaluate_model(model, task_name)
+            results = evaluator.evaluate_model(model, task_name, args.exclude_grouped_commentary)
             evaluator.save_results(results, model, task_name)
         except Exception as e:
             task_info = f" with task '{task_name}'" if task_name else ""

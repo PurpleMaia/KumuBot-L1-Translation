@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def discover_complex_analysis_results():
+def discover_complex_analysis_results(exclude_grouped_only=False):
     """Discover all available complex analysis results."""
     results_dir = Path("benchmarking/complex_analysis")
     if not results_dir.exists():
@@ -26,11 +26,23 @@ def discover_complex_analysis_results():
     models = []
     for file in results_dir.glob("*_similarity_summary.csv"):
         stem = file.stem.replace("_similarity_summary", "")
+        
+        # If exclude_grouped_only is True, skip non-grouped results
+        if exclude_grouped_only and not stem.endswith("_no_grouped"):
+            continue
 
         # Parse model name and task name
         # Patterns:
         # 1. model_similarity_summary.csv -> (model, None)
         # 2. model_taskname_similarity_summary.csv -> (model, taskname)
+        # 3. model_taskname_no_grouped_similarity_summary.csv -> (model, taskname)
+        
+        # Track if this is a no_grouped variant
+        is_no_grouped = stem.endswith("_no_grouped")
+        
+        # Remove _no_grouped suffix if present for parsing
+        if is_no_grouped:
+            stem = stem[:-len("_no_grouped")]
 
         # Check for known task patterns - order matters for proper matching
         if "_hybrid_complex_analysis_" in stem:
@@ -39,27 +51,31 @@ def discover_complex_analysis_results():
             task_start = stem.find("_hybrid_complex_analysis_")
             model_name = stem[:task_start]
             task_name = stem[task_start + 1 :]  # Skip the leading underscore
-            models.append((model_name, task_name))
+            models.append((model_name, task_name, is_no_grouped))
         elif "_hybrid_complex_analysis" in stem:
             model_name = stem.replace("_hybrid_complex_analysis", "")
-            models.append((model_name, "hybrid_complex_analysis"))
+            models.append((model_name, "hybrid_complex_analysis", is_no_grouped))
         else:
             # No task suffix
-            models.append((stem, None))
+            models.append((stem, None, is_no_grouped))
 
-    # Sort by model name and task name
-    return sorted(models, key=lambda x: (x[0], x[1] or ""))
+    # Sort by model name, task name, and no_grouped status
+    return sorted(models, key=lambda x: (x[0], x[1] or "", x[2]))
 
 
-def load_model_results(model_name, task_name=None):
+def load_model_results(model_name, task_name=None, no_grouped=False):
     """Load results for a specific model and task."""
     # Build filename based on task
     if task_name:
-        summary_file = f"benchmarking/complex_analysis/{model_name}_{task_name}_similarity_summary.csv"
+        summary_file = f"benchmarking/complex_analysis/{model_name}_{task_name}"
     else:
-        summary_file = (
-            f"benchmarking/complex_analysis/{model_name}_similarity_summary.csv"
-        )
+        summary_file = f"benchmarking/complex_analysis/{model_name}"
+    
+    # Add no_grouped suffix if needed
+    if no_grouped:
+        summary_file += "_no_grouped"
+        
+    summary_file += "_similarity_summary.csv"
 
     if not Path(summary_file).exists():
         return None
@@ -100,9 +116,9 @@ def calculate_composite_score(results):
         return np.nan
 
 
-def generate_summary_report(output_file="benchmarking/complex_analysis_results.csv", sort_by="composite"):
+def generate_summary_report(output_file="benchmarking/complex_analysis_results.csv", sort_by="composite", exclude_grouped_only=False):
     """Generate a comprehensive summary report."""
-    models = discover_complex_analysis_results()
+    models = discover_complex_analysis_results(exclude_grouped_only)
 
     if not models:
         print("No complex analysis results found.")
@@ -113,8 +129,8 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
     # Collect all results
     all_results = []
 
-    for model_name, task_name in models:
-        results = load_model_results(model_name, task_name)
+    for model_name, task_name, is_no_grouped in models:
+        results = load_model_results(model_name, task_name, no_grouped=is_no_grouped)
         if results:
             composite_score = calculate_composite_score(results)
 
@@ -122,6 +138,10 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
             display_name = model_name
             if task_name:
                 display_name = f"{model_name} ({task_name})"
+            
+            # Add indicator if grouped commentary was excluded
+            if is_no_grouped:
+                display_name += " [no grouped]"
 
             model_data = {
                 "model": display_name,
@@ -165,14 +185,17 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
     df = pd.DataFrame(all_results)
     df.to_csv(output_file, index=False)
 
+    # Check if we have any models with grouped commentary excluded
+    has_excluded = any(model[2] for model in models)
+
     # Print summary to console
     sort_display = sort_by.lower().replace("_", " ").title()
     print(f"\nComplex Analysis Results (sorted by {sort_display}):")
-    print("=" * 165)
+    print("=" * 175)
     print(
-        f"{'Model':<85} | {'Composite':<10} | {'Translation':<12} | {'Commentary':<12} | {'Summary':<10} | {'Valid Passages':<15}"
+        f"{'Model':<95} | {'Composite':<10} | {'Translation':<12} | {'Commentary':<12} | {'Summary':<10} | {'Included (Valid) Passages':<15}"
     )
-    print("-" * 165)
+    print("-" * 175)
 
     for result in all_results:
         model = result["model"]
@@ -188,7 +211,7 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
         summary_str = f"{summary:.4f}" if not np.isnan(summary) else "N/A"
 
         print(
-            f"{model:<85} | {composite_str:<10} | {translation_str:<12} | {commentary_str:<12} | {summary_str:<10} | {valid_passages:<15}"
+            f"{model:<95} | {composite_str:<10} | {translation_str:<12} | {commentary_str:<12} | {summary_str:<10} | {valid_passages:<15}"
         )
 
     print(f"\nLegend:")
@@ -196,15 +219,17 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
         f"  Composite: Weighted average (Translation: 40%, Commentary: 40%, Summary: 20%)"
     )
     print(f"  Valid Passages: Translation/Commentary/Summary valid counts")
+    if has_excluded:
+        print(f"  [no grouped]: Results where grouped commentary passages were excluded from similarity calculation")
     print(f"  Results saved to: {output_file}")
 
     return all_results
 
 
-def show_detailed_comparison(models=None):
+def show_detailed_comparison(models=None, exclude_grouped_only=False):
     """Show a detailed comparison of specific models."""
     if not models:
-        models = discover_complex_analysis_results()
+        models = discover_complex_analysis_results(exclude_grouped_only)
 
     if not models:
         print("No models found for comparison.")
@@ -213,9 +238,15 @@ def show_detailed_comparison(models=None):
     print(f"\nDetailed Component Comparison:")
     print("=" * 80)
 
-    for model in models:
-        results = load_model_results(model)
+    for model_name, task_name, is_no_grouped in models:
+        results = load_model_results(model_name, task_name, no_grouped=is_no_grouped)
         if results:
+            # Create display name
+            model = model_name
+            if task_name:
+                model = f"{model_name} ({task_name})"
+            if is_no_grouped:
+                model += " [no grouped]"
             print(f"\n📊 {model}:")
             for component, data in results.items():
                 similarity = data["average_similarity"]
@@ -248,12 +279,17 @@ if __name__ == "__main__":
         choices=["composite", "translation", "commentary", "summary"],
         help="Sort results by specified component (default: composite)"
     )
+    parser.add_argument(
+        "--exclude-grouped-commentary",
+        action="store_true",
+        help="Only show results where grouped commentary was excluded"
+    )
 
     args = parser.parse_args()
 
     # Generate main summary
-    results = generate_summary_report(sort_by=args.sort)
+    results = generate_summary_report(sort_by=args.sort, exclude_grouped_only=args.exclude_grouped_commentary)
 
     # Show detailed comparison if requested
     if args.detailed:
-        show_detailed_comparison(args.models)
+        show_detailed_comparison(args.models, exclude_grouped_only=args.exclude_grouped_commentary)
