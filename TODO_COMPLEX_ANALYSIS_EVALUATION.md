@@ -548,6 +548,66 @@ Both Qwen3 and the reference applied sophisticated colonial-era analysis, BUT:
   - [x] Original summary dropped 3.7%, exposing content differences
 - [x] **Key insight**: Formatting was creating artificial similarity that masked actual content alignment differences
 
+## Beyond Semantic Similarity: Comprehensive Evaluation Framework
+
+### Critical Discovery: The Semantic Similarity Paradox
+
+Recent analysis revealed that **semantic similarity alone is insufficient** for evaluating complex cultural analysis tasks. The model with the lowest composite score (DeepSeek R1 at 0.7180) actually provided the most accurate political/historical interpretation.
+
+#### Key Findings:
+- **Different analytical approaches score poorly** despite reaching correct conclusions
+- **Historiographical vs. literary analysis** approaches can diverge by 50%+ in similarity
+- **Methodological diversity is penalized** by pure semantic similarity metrics
+
+#### Documentation Created:
+1. **[COMPLEX_ANALYSIS_EVALUATION_METHODOLOGY.md](./COMPLEX_ANALYSIS_EVALUATION_METHODOLOGY.md)** - Complete evaluation framework and rubric
+2. **[COMPLEX_ANALYSIS_EVALUATION_FINDINGS.md](./COMPLEX_ANALYSIS_EVALUATION_FINDINGS.md)** - Detailed findings for all 17 models tested
+3. **[COMPLEX_ANALYSIS_QUICK_REFERENCE.md](./COMPLEX_ANALYSIS_QUICK_REFERENCE.md)** - Quick reference guide with rankings
+4. **[COMPLEX_ANALYSIS_MODEL_EXAMPLES.md](./COMPLEX_ANALYSIS_MODEL_EXAMPLES.md)** - Direct quotes showing interpretation differences
+5. **[SEMANTIC_SIMILARITY_PARADOX.md](./SEMANTIC_SIMILARITY_PARADOX.md)** - Analysis of why low similarity can indicate high insight
+
+### Task 18: Implement Multi-Modal Evaluation Framework (🆕 HIGH PRIORITY)
+
+Based on the semantic similarity paradox discovery, we need additional evaluation methods:
+
+#### 18a: Critical Interpretation Rubric
+- [ ] Create binary classification for colonial critique recognition
+- [ ] Develop scale for historical awareness (1-5)
+- [ ] Implement political subtext detection scoring
+- [ ] Add methodological approach classification
+
+#### 18b: Complementary Analysis Detection
+- [ ] Identify when different approaches reach same conclusions
+- [ ] Score methodological diversity as positive factor
+- [ ] Recognize valid alternative analytical frameworks
+- [ ] Weight interpretive accuracy over textual similarity
+
+#### 18c: Manual Review Integration
+- [ ] Create structured review template for human evaluation
+- [ ] Identify key passages requiring manual assessment
+- [ ] Develop quick-check criteria for political awareness
+- [ ] Build consensus mechanism for subjective interpretations
+
+### Task 19: Enhance Evaluation Pipeline with Multi-Modal Scoring (🆕 MEDIUM PRIORITY)
+
+#### 19a: Augment Semantic Similarity with Interpretation Scores
+- [ ] Add interpretation accuracy as separate metric (0-1)
+- [ ] Create weighted composite: 60% semantic + 40% interpretation
+- [ ] Flag cases where metrics diverge significantly
+- [ ] Generate alerts for manual review needs
+
+#### 19b: Implement Automated Political Awareness Detection
+- [ ] Create keyword/phrase detection for colonial context
+- [ ] Check for temporal markers (1893, 1894, etc.)
+- [ ] Identify allegorical interpretation patterns
+- [ ] Score based on critical stance indicators
+
+#### 19c: Report Generation Updates
+- [ ] Add interpretation accuracy column to rankings
+- [ ] Create divergence analysis section
+- [ ] Highlight models with complementary approaches
+- [ ] Include methodological diversity metrics
+
 ## Low Priority Tasks
 
 ### Task 15: Integrate Complex Analysis Evaluation into run_pipeline_v2.sh (✅ COMPLETED)
