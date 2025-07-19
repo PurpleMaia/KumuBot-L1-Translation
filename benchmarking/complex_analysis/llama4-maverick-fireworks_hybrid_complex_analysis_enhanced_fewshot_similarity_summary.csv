@@ -1,4 +1,4 @@
 model,component,average_similarity,valid_count,missing_count
 llama4-maverick-fireworks,translation,0.9634851728121424,14,0
-llama4-maverick-fireworks,commentary,0.7092484416278474,14,0
+llama4-maverick-fireworks,commentary,0.6549344914854996,14,0
 llama4-maverick-fireworks,summary,0.8380018434348125,1,13

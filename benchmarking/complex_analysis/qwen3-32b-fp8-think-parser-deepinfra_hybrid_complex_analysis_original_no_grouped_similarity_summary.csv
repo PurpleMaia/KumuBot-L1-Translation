@@ -1,0 +1,4 @@
+model,component,average_similarity,valid_count,missing_count,grouped_commentary_excluded
+qwen3-32b-fp8-think-parser-deepinfra,translation,0.8905360136153816,14,0,True
+qwen3-32b-fp8-think-parser-deepinfra,commentary,0.6680569391258123,9,5,True
+qwen3-32b-fp8-think-parser-deepinfra,summary,0.8194507643451657,1,13,True

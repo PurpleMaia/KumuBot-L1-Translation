@@ -1,0 +1,4 @@
+model,component,average_similarity,valid_count,missing_count,grouped_commentary_excluded
+deepseek-r1-0528-fireworks,translation,0.9508325644228744,14,0,True
+deepseek-r1-0528-fireworks,commentary,0.6246265180475564,9,5,True
+deepseek-r1-0528-fireworks,summary,0.43887483597526245,1,13,True

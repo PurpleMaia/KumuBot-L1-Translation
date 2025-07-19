@@ -1,4 +1,4 @@
 model,component,average_similarity,valid_count,missing_count
 gemma-3n-e4b-it-gguf-q4kxl-32k-maui,translation,0.9413821817063089,14,0
-gemma-3n-e4b-it-gguf-q4kxl-32k-maui,commentary,0.696560370649231,14,0
+gemma-3n-e4b-it-gguf-q4kxl-32k-maui,commentary,0.6455020745867979,14,0
 gemma-3n-e4b-it-gguf-q4kxl-32k-maui,summary,0.7767488133932344,1,13

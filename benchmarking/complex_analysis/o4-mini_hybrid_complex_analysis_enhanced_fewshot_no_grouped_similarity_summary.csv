@@ -1,0 +1,4 @@
+model,component,average_similarity,valid_count,missing_count,grouped_commentary_excluded
+o4-mini,translation,0.9388516853826124,14,0,True
+o4-mini,commentary,0.6637840084391118,9,5,True
+o4-mini,summary,0.8161385329015485,1,13,True

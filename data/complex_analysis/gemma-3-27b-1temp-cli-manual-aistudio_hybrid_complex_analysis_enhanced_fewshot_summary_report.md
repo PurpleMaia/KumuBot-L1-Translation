@@ -13,7 +13,7 @@
 - Translation completion: 14/14 (100.0%)
 - Commentary completion: 14/14 (100.0%)
 - Average translation length: 509 characters
-- Average commentary length: 2889 characters
+- Average commentary length: 4183 characters
 
 ### Sample Outputs
 

@@ -1,4 +1,4 @@
 model,component,average_similarity,valid_count,missing_count
 gemma-3-27b-1temp-cli-manual-aistudio,translation,0.9529658928643397,14,0
-gemma-3-27b-1temp-cli-manual-aistudio,commentary,0.7141892262810016,14,0
+gemma-3-27b-1temp-cli-manual-aistudio,commentary,0.6881990214266442,14,0
 gemma-3-27b-1temp-cli-manual-aistudio,summary,0.7592193084029297,1,13

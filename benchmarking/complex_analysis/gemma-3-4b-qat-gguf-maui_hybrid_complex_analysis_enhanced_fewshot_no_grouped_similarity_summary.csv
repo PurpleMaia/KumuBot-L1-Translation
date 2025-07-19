@@ -1,0 +1,4 @@
+model,component,average_similarity,valid_count,missing_count,grouped_commentary_excluded
+gemma-3-4b-qat-gguf-maui,translation,0.9385005451469375,14,0,True
+gemma-3-4b-qat-gguf-maui,commentary,0.684712910471608,9,5,True
+gemma-3-4b-qat-gguf-maui,summary,0.8524616452604402,1,13,True

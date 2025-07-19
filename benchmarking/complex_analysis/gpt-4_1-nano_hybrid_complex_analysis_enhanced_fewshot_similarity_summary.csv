@@ -1,4 +1,4 @@
 model,component,average_similarity,valid_count,missing_count
 gpt-4_1-nano,translation,0.9063827902764012,14,0
-gpt-4_1-nano,commentary,0.7160724698888628,14,0
+gpt-4_1-nano,commentary,0.6965403734968992,14,0
 gpt-4_1-nano,summary,0.8703356152073815,1,13

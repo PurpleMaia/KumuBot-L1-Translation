@@ -1,0 +1,4 @@
+model,component,average_similarity,valid_count,missing_count,grouped_commentary_excluded
+llama-3.3-70B-Instruct_exl2_6.0bpw-maui,translation,0.954611362898066,14,0,True
+llama-3.3-70B-Instruct_exl2_6.0bpw-maui,commentary,0.6813791496366928,9,5,True
+llama-3.3-70B-Instruct_exl2_6.0bpw-maui,summary,0.8432085914531103,1,13,True

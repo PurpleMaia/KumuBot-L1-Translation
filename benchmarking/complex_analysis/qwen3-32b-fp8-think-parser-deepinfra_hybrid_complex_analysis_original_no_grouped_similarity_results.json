@@ -1,0 +1,70 @@
+{
+  "model": "qwen3-32b-fp8-think-parser-deepinfra",
+  "total_passages": 14,
+  "components": {
+    "translation": {
+      "similarities": [
+        0.9282670165631182,
+        0.8514442235491032,
+        0.9119284045641597,
+        0.9392891605253307,
+        0.8288636949606651,
+        0.8016834909118652,
+        0.8768012280444523,
+        0.9407574330862959,
+        0.8591494725956719,
+        0.9621586010520728,
+        0.8444881262646929,
+        0.9208399147356868,
+        0.8735662607763945,
+        0.9282671629858326
+      ],
+      "average_similarity": 0.8905360136153816,
+      "valid_count": 14,
+      "missing_count": 0
+    },
+    "commentary": {
+      "similarities": [
+        0.6871236882287632,
+        0.6064602580689734,
+        0.6710923544596458,
+        0.7226099017325149,
+        0.693340968714978,
+        0.6391512011665883,
+        0.7000432579605589,
+        0.6421838322306916,
+        0.6505069895695972,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN
+      ],
+      "average_similarity": 0.6680569391258123,
+      "valid_count": 9,
+      "missing_count": 5
+    },
+    "summary": {
+      "similarities": [
+        0.8194507643451657,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN
+      ],
+      "average_similarity": 0.8194507643451657,
+      "valid_count": 1,
+      "missing_count": 13
+    }
+  },
+  "grouped_commentary_excluded": true
+}

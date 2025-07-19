@@ -1,0 +1,70 @@
+{
+  "model": "llama4-maverick-fireworks",
+  "total_passages": 14,
+  "components": {
+    "translation": {
+      "similarities": [
+        0.9879370523062331,
+        0.9400493479367779,
+        0.9964964720853869,
+        0.9748039555265653,
+        0.9705912411933068,
+        0.9713146873469255,
+        0.9431191329650969,
+        0.8949247118811036,
+        0.9745456856148078,
+        0.9824297163494401,
+        0.9741286311428583,
+        0.9632642477798024,
+        0.9396435137261256,
+        0.9755440235155622
+      ],
+      "average_similarity": 0.9634851728121424,
+      "valid_count": 14,
+      "missing_count": 0
+    },
+    "commentary": {
+      "similarities": [
+        0.9151276458110668,
+        0.548572815058868,
+        0.5343060716927847,
+        0.5748495939143757,
+        0.6526484334417145,
+        0.55959697929562,
+        0.6520365164750406,
+        0.8463452139462194,
+        0.6480160216618325,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN
+      ],
+      "average_similarity": 0.6590554768108359,
+      "valid_count": 9,
+      "missing_count": 5
+    },
+    "summary": {
+      "similarities": [
+        0.8380018434348125,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN
+      ],
+      "average_similarity": 0.8380018434348125,
+      "valid_count": 1,
+      "missing_count": 13
+    }
+  },
+  "grouped_commentary_excluded": true
+}

@@ -1,0 +1,4 @@
+model,component,average_similarity,valid_count,missing_count,grouped_commentary_excluded
+qwen3-235b-a22b-think-parser-fireworks,translation,0.9350797933851558,14,0,True
+qwen3-235b-a22b-think-parser-fireworks,commentary,0.6641332750399221,9,5,True
+qwen3-235b-a22b-think-parser-fireworks,summary,0.7581183318249896,1,13,True

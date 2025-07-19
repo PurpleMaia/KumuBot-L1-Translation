@@ -1,4 +1,4 @@
 model,component,average_similarity,valid_count,missing_count
 qwen3-235b-a22b-exp-no_think-fireworks,translation,0.9459203663021114,14,0
-qwen3-235b-a22b-exp-no_think-fireworks,commentary,0.7065265343891401,14,0
+qwen3-235b-a22b-exp-no_think-fireworks,commentary,0.6439804881027653,14,0
 qwen3-235b-a22b-exp-no_think-fireworks,summary,0.8716968554382151,1,13

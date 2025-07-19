@@ -1,0 +1,70 @@
+{
+  "model": "qwen3-235b-a22b-think-parser-fireworks",
+  "total_passages": 14,
+  "components": {
+    "translation": {
+      "similarities": [
+        0.7613662784863989,
+        0.9085586743869812,
+        0.926339243051224,
+        0.8161743090332337,
+        0.8910154948514664,
+        0.9178537068177027,
+        0.9255036942456489,
+        0.9350978771082491,
+        0.9451426616824139,
+        0.94838378547683,
+        0.9515551389461818,
+        0.9458727507309167,
+        0.8912956486363832,
+        0.9078463807533026
+      ],
+      "average_similarity": 0.9051432603004953,
+      "valid_count": 14,
+      "missing_count": 0
+    },
+    "commentary": {
+      "similarities": [
+        0.759537737436609,
+        0.6228974301816202,
+        0.6597908839864554,
+        NaN,
+        NaN,
+        0.6350042402585444,
+        0.6601638753063506,
+        NaN,
+        0.6559009918538286,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN
+      ],
+      "average_similarity": 0.6655491931705679,
+      "valid_count": 6,
+      "missing_count": 8
+    },
+    "summary": {
+      "similarities": [
+        0.8318561738559107,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN
+      ],
+      "average_similarity": 0.8318561738559107,
+      "valid_count": 1,
+      "missing_count": 13
+    }
+  },
+  "grouped_commentary_excluded": true
+}

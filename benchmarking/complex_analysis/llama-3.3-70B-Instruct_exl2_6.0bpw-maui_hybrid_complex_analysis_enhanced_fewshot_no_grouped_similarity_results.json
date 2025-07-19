@@ -1,0 +1,70 @@
+{
+  "model": "llama-3.3-70B-Instruct_exl2_6.0bpw-maui",
+  "total_passages": 14,
+  "components": {
+    "translation": {
+      "similarities": [
+        0.9874670985516513,
+        0.9113326897518667,
+        0.9334818647085958,
+        0.9402155482220437,
+        0.9374136398219185,
+        0.9919962888826372,
+        0.9700141697974946,
+        0.9593819248010071,
+        0.9719159238358767,
+        0.9732622205287009,
+        0.954623992222926,
+        0.9486371169418893,
+        0.9396997765126521,
+        0.9451168259936652
+      ],
+      "average_similarity": 0.954611362898066,
+      "valid_count": 14,
+      "missing_count": 0
+    },
+    "commentary": {
+      "similarities": [
+        0.7247709047627082,
+        0.6149472081998598,
+        0.6305182774052175,
+        0.7412478813253268,
+        0.5817480311250453,
+        0.7177370007755758,
+        0.719218635667068,
+        0.8044519598632965,
+        0.5977724476061369,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN
+      ],
+      "average_similarity": 0.6813791496366928,
+      "valid_count": 9,
+      "missing_count": 5
+    },
+    "summary": {
+      "similarities": [
+        0.8432085914531103,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN,
+        NaN
+      ],
+      "average_similarity": 0.8432085914531103,
+      "valid_count": 1,
+      "missing_count": 13
+    }
+  },
+  "grouped_commentary_excluded": true
+}

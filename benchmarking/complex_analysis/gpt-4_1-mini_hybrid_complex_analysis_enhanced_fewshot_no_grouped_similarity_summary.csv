@@ -1,0 +1,4 @@
+model,component,average_similarity,valid_count,missing_count,grouped_commentary_excluded
+gpt-4_1-mini,translation,0.9562293233060938,14,0,True
+gpt-4_1-mini,commentary,0.6597638202917953,9,5,True
+gpt-4_1-mini,summary,0.7560598535926073,1,13,True
