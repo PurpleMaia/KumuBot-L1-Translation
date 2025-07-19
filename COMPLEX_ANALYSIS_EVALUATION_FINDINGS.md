@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-17 models were evaluated on the `hybrid_complex_analysis_enhanced_fewshot` task. The critical differentiator was recognition of the story as potential post-1893 pro-colonial propaganda rather than authentic Hawaiian narrative or resistance literature.
+18 models were evaluated on the `hybrid_complex_analysis_enhanced_fewshot` task. The critical differentiator was recognition of the story as potential post-1893 pro-colonial propaganda rather than authentic Hawaiian narrative or resistance literature.
 
 ## Detailed Model Evaluations
 
@@ -44,7 +44,28 @@
 
 **Overall**: Sophisticated analysis but opposite interpretation
 
-### 3. DeepSeek V3 (deepseek-v3-0324-fireworks) - TIER 2
+### 3. Kimi-K2 (kimi-k2-fireworks) - TIER 2
+
+**Translation Quality**: Excellent (95.5%)
+- Passage 1: "Nāmakaokapāo'o was a very small child, and an extremely strong one in his youth"
+- Passage 7: Strong handling of death chant with appropriate formatting
+- Consistent accuracy with good readability
+
+**Commentary Depth**: Exceptional with scholarly rigor
+- Passage 1: Four-part structural analysis with deep etymology (e.g., "Ka-ulu-a-kaha'i" linked to demigod Kaha'i)
+- Passage 7: Sophisticated four-couplet chant analysis with cosmic interpretations
+- Key insight: "māla ʻuala (garden patch) becomes the new luakini, and cultivation supplants sacrifice"
+
+**Summary Interpretation**: SOPHISTICATED BUT INVERTED
+- Key quote: "Created within the period of American occupation (1893-1898)"
+- Explicitly notes "Ka Nūpepa Kū'oko'a, 1894" publication
+- Recognizes "compensatory mythology for Hawaiian military defeats... culminating in the 1893 overthrow"
+- BUT interprets as "cultural palimpsest" of resistance rather than propaganda
+- Sees it as "encoded resistance to colonial power" rather than justification
+
+**Overall**: Deep colonial awareness with exceptional commentary but reaches opposite conclusion
+
+### 4. DeepSeek V3 (deepseek-v3-0324-fireworks) - TIER 2
 
 **Translation Quality**: Highly accurate
 - Strong handling of ritual language
@@ -61,7 +82,7 @@
 
 **Overall**: Good colonial awareness but inverted interpretation
 
-### 4. GPT-4.1 (gpt-4_1) - TIER 2
+### 5. GPT-4.1 (gpt-4_1) - TIER 2
 
 **Translation Quality**: Highest technical accuracy (96.6%)
 - Passage 7: Excellent handling of prayer language
@@ -79,7 +100,7 @@
 
 **Overall**: Excellent scholarship but lacks critical conviction
 
-### 5. Llama4-Maverick (llama4-maverick-fireworks) - TIER 3
+### 6. Llama4-Maverick (llama4-maverick-fireworks) - TIER 3
 
 **Translation Quality**: Highest overall (96.4%)
 - Exceptional accuracy in translation
@@ -133,7 +154,7 @@
 
 **Overall**: Standard resistance interpretation
 
-### 8-17. Remaining Models - TIER 3-4
+### 8-18. Remaining Models - TIER 3-4
 
 **Common patterns**:
 - Translation accuracy: Generally 93-95%
@@ -162,7 +183,7 @@
 
 ### Summary Interpretation Distribution
 - 1 model correctly identified as colonial propaganda (DeepSeek R1)
-- 5 models saw it as resistance narrative (inverted)
+- 6 models saw it as resistance narrative (inverted)
 - 11 models treated as traditional narrative (no political awareness)
 - 0 models were truly neutral (GPT-4.1 came closest)
 

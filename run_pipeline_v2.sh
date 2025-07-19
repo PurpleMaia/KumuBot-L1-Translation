@@ -107,10 +107,10 @@ elif [[ "$TASK_TYPE" == "hybrid_complex_analysis"* ]]; then
     python translations/extract_hybrid_complex_analysis.py --output-dir "$OUTPUT_DIR" --task-name "$TASK_TYPE"
     
     echo "Step 3: Evaluating hybrid complex analysis..."
-    python benchmarking/complex_semantic_similarity.py --model "$OUTPUT_DIR" --task-name "$TASK_TYPE"
+    python benchmarking/complex_semantic_similarity.py --model "$OUTPUT_DIR" --task-name "$TASK_TYPE" --exclude-grouped-commentary
     
     echo "Step 4: Generating complex analysis summary..."
-    python benchmarking/complex_semantic_similarity_summary.py
+    python benchmarking/complex_semantic_similarity_summary.py --exclude-grouped-commentary
     
 else
     echo "Unknown task type: $TASK_TYPE"

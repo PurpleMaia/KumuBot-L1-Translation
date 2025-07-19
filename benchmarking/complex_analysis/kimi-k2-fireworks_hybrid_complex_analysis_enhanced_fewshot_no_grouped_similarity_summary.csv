@@ -1,0 +1,4 @@
+model,component,average_similarity,valid_count,missing_count,grouped_commentary_excluded
+kimi-k2-fireworks,translation,0.9546478957868425,14,0,True
+kimi-k2-fireworks,commentary,0.6579997643895757,9,5,True
+kimi-k2-fireworks,summary,0.7097627950982054,1,13,True
