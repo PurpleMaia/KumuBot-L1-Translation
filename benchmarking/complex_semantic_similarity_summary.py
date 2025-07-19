@@ -116,7 +116,88 @@ def calculate_composite_score(results):
         return np.nan
 
 
-def generate_summary_report(output_file="benchmarking/complex_analysis_results.csv", sort_by="composite", exclude_grouped_only=False):
+def parse_thresholds(threshold_string):
+    """Parse threshold string into a dictionary.
+    
+    Example: "commentary>0.68,summary>0.8" -> {"commentary": (">", 0.68), "summary": (">", 0.8)}
+    """
+    if not threshold_string:
+        return {}
+    
+    thresholds = {}
+    for condition in threshold_string.split(","):
+        condition = condition.strip()
+        # Try different operators
+        for operator in [">=", "<=", ">", "<", "="]:
+            if operator in condition:
+                component, value = condition.split(operator, 1)
+                component = component.strip()
+                
+                # Map component names to column names
+                component_mapping = {
+                    "composite": "composite_score",
+                    "translation": "translation_similarity",
+                    "commentary": "commentary_similarity", 
+                    "summary": "summary_similarity"
+                }
+                
+                if component in component_mapping:
+                    try:
+                        thresholds[component_mapping[component]] = (operator, float(value))
+                    except ValueError:
+                        print(f"Warning: Invalid threshold value '{value}' for {component}")
+                else:
+                    print(f"Warning: Unknown component '{component}' in threshold")
+                break
+    
+    return thresholds
+
+
+def apply_thresholds(results, thresholds):
+    """Apply threshold filters to results."""
+    if not thresholds:
+        return results
+    
+    filtered = []
+    for result in results:
+        include = True
+        for column, (operator, value) in thresholds.items():
+            result_value = result.get(column, np.nan)
+            
+            # Skip if value is NaN
+            if np.isnan(result_value):
+                include = False
+                break
+            
+            # Apply comparison
+            if operator == ">":
+                if not (result_value > value):
+                    include = False
+                    break
+            elif operator == ">=":
+                if not (result_value >= value):
+                    include = False
+                    break
+            elif operator == "<":
+                if not (result_value < value):
+                    include = False
+                    break
+            elif operator == "<=":
+                if not (result_value <= value):
+                    include = False
+                    break
+            elif operator == "=":
+                if not (result_value == value):
+                    include = False
+                    break
+        
+        if include:
+            filtered.append(result)
+    
+    return filtered
+
+
+def generate_summary_report(output_file="benchmarking/complex_analysis_results.csv", sort_by="composite", exclude_grouped_only=False, thresholds=None):
     """Generate a comprehensive summary report."""
     models = discover_complex_analysis_results(exclude_grouped_only)
 
@@ -162,6 +243,14 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
                 "summary_valid": results.get("summary", {}).get("valid_count", 0),
             }
             all_results.append(model_data)
+    
+    # Apply threshold filters if provided
+    original_count = len(all_results)
+    all_results = apply_thresholds(all_results, thresholds)
+    filtered_count = original_count - len(all_results)
+    
+    if filtered_count > 0:
+        print(f"Filtered out {filtered_count} results based on thresholds")
 
     # Sort by specified column (descending)
     sort_mapping = {
@@ -191,6 +280,21 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
     # Print summary to console
     sort_display = sort_by.lower().replace("_", " ").title()
     print(f"\nComplex Analysis Results (sorted by {sort_display}):")
+    
+    # Show active filters
+    if thresholds:
+        filter_parts = []
+        for column, (operator, value) in thresholds.items():
+            # Reverse map column names to component names for display
+            column_display = {
+                "composite_score": "composite",
+                "translation_similarity": "translation",
+                "commentary_similarity": "commentary",
+                "summary_similarity": "summary"
+            }.get(column, column)
+            filter_parts.append(f"{column_display}{operator}{value}")
+        print(f"Active filters: {', '.join(filter_parts)}")
+    
     print("=" * 175)
     print(
         f"{'Model':<95} | {'Composite':<10} | {'Translation':<12} | {'Commentary':<12} | {'Summary':<10} | {'Included (Valid) Passages':<15}"
@@ -221,6 +325,8 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
     print(f"  Valid Passages: Translation/Commentary/Summary valid counts")
     if has_excluded:
         print(f"  [no grouped]: Results where grouped commentary passages were excluded from similarity calculation")
+    if filtered_count > 0:
+        print(f"  Showing {len(all_results)} results (filtered {filtered_count} entries)")
     print(f"  Results saved to: {output_file}")
 
     return all_results
@@ -284,11 +390,19 @@ if __name__ == "__main__":
         action="store_true",
         help="Only show results where grouped commentary was excluded"
     )
+    parser.add_argument(
+        "--thresholds",
+        type=str,
+        help="Filter results by component thresholds (e.g., 'commentary>0.68,summary>0.8')"
+    )
 
     args = parser.parse_args()
+    
+    # Parse thresholds if provided
+    thresholds = parse_thresholds(args.thresholds) if args.thresholds else None
 
     # Generate main summary
-    results = generate_summary_report(sort_by=args.sort, exclude_grouped_only=args.exclude_grouped_commentary)
+    results = generate_summary_report(sort_by=args.sort, exclude_grouped_only=args.exclude_grouped_commentary, thresholds=thresholds)
 
     # Show detailed comparison if requested
     if args.detailed:
