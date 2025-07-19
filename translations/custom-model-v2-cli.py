@@ -84,9 +84,7 @@ class ManualCLIProcessor:
         """Read text from clipboard using system commands."""
         try:
             # Try macOS pbpaste first
-            result = subprocess.run(
-                ["pbpaste"], capture_output=True, text=True
-            )
+            result = subprocess.run(["pbpaste"], capture_output=True, text=True)
             if result.returncode == 0:
                 return result.stdout
         except FileNotFoundError:
@@ -120,47 +118,51 @@ class ManualCLIProcessor:
 
     def get_user_response(self, prompt_type: str, passage_info: str = "") -> str:
         """Get LLM response from user via manual input or clipboard."""
-        print(f"\n{'='*80}")
+        print(f"\n{'=' * 80}")
         print(f"🤖 PROMPT FOR {prompt_type.upper()}")
         if passage_info:
             print(f"📍 {passage_info}")
-        print(f"{'='*80}")
+        print(f"{'=' * 80}")
         print("📋 Prompt has been copied to clipboard!")
         print("✅ Paste it into your LLM interface and copy the response back.")
         print("💬 Options:")
         print("   - Type 'c' or 'clip' to read response from clipboard")
         print("   - Type 'p' or 'paste' to manually paste response")
         print("   - Type 'q' or 'quit' to cancel entire run")
-        print(f"{'='*80}")
+        print(f"{'=' * 80}")
 
         while True:
             try:
                 user_input = input("Choose (c/p/q): ").strip().lower()
-                
-                if user_input in ['q', 'quit', 'exit']:
+
+                if user_input in ["q", "quit", "exit"]:
                     print("\n🛑 User requested to quit the entire run")
                     raise KeyboardInterrupt("User quit")
-                
-                elif user_input in ['c', 'clip', 'clipboard']:
+
+                elif user_input in ["c", "clip", "clipboard"]:
                     # Read from clipboard
                     response = self.read_from_clipboard().strip()
                     if not response:
                         print("⚠️  Clipboard is empty or couldn't read from clipboard")
                         continue
-                    print(f"✅ Response read from clipboard ({len(response)} characters)")
+                    print(
+                        f"✅ Response read from clipboard ({len(response)} characters)"
+                    )
                     return response
-                
-                elif user_input in ['p', 'paste']:
+
+                elif user_input in ["p", "paste"]:
                     # Manual paste mode
-                    print("💬 Paste the response below and press Enter twice when done:")
-                    
+                    print(
+                        "💬 Paste the response below and press Enter twice when done:"
+                    )
+
                     lines = []
                     empty_line_count = 0
-                    
+
                     while True:
                         try:
                             line = input()
-                            
+
                             if line.strip() == "":
                                 empty_line_count += 1
                                 if empty_line_count >= 2:  # Two consecutive empty lines
@@ -171,19 +173,21 @@ class ManualCLIProcessor:
                                 lines.append(line)
                         except EOFError:
                             break
-                    
+
                     response = "\n".join(lines).strip()
-                    
+
                     if not response:
                         print("⚠️  No response provided")
                         continue
-                        
+
                     print(f"✅ Response received ({len(response)} characters)")
                     return response
-                
+
                 else:
-                    print(f"❌ Unknown option: {user_input}. Please type 'c', 'p', or 'q'")
-                    
+                    print(
+                        f"❌ Unknown option: {user_input}. Please type 'c', 'p', or 'q'"
+                    )
+
             except EOFError:
                 return ""
             except KeyboardInterrupt:
@@ -216,19 +220,25 @@ class ManualCLIProcessor:
                 # Stage 1: Process passages one by one
                 passage_results = []
                 total_passages = len(chapter_df)
-                
+
                 for idx, row in chapter_df.iterrows():
                     current_passage = row["paragraph"]
-                    print(f"📊 Progress: Passage {current_passage} of {total_passages} passages in Chapter {chapter}")
-                    
+                    print(
+                        f"📊 Progress: Passage {current_passage} of {total_passages} passages in Chapter {chapter}"
+                    )
+
                     passage_result = self._process_single_passage_manual(row, chapter)
                     if passage_result:
                         passage_results.append(passage_result)
-                        print(f"✅ Completed passage {current_passage} ({len(passage_results)}/{total_passages} successful)")
+                        print(
+                            f"✅ Completed passage {current_passage} ({len(passage_results)}/{total_passages} successful)"
+                        )
                     else:
                         print(f"⚠️  Skipped passage {current_passage}")
-                
-                print(f"\n📋 Chapter {chapter} Summary: {len(passage_results)}/{total_passages} passages completed")
+
+                print(
+                    f"\n📋 Chapter {chapter} Summary: {len(passage_results)}/{total_passages} passages completed"
+                )
 
                 # Stage 2: Generate chapter summary
                 if passage_results:
@@ -238,7 +248,9 @@ class ManualCLIProcessor:
             print(f"📁 Partial results may be available in: translations/{OUTPUT_DIR}")
             return
 
-    def _process_single_passage_manual(self, row: pd.Series, chapter: str) -> Dict[str, Any]:
+    def _process_single_passage_manual(
+        self, row: pd.Series, chapter: str
+    ) -> Dict[str, Any]:
         """Process a single passage manually."""
         hawaiian_text = row[self.config.source_column]
         paragraph = row["paragraph"]
@@ -288,15 +300,17 @@ class ManualCLIProcessor:
         if not parsed.get("translation") and not parsed.get("commentary"):
             print(f"⚠️  Failed to parse translation/commentary from response")
             print("🔍 Response preview:", response[:200], "...")
-            
+
             # Check for XML tags
             has_translation_tag = "<translation>" in response.lower()
             has_commentary_tag = "<commentary>" in response.lower()
-            print(f"🔍 XML tags found: translation={has_translation_tag}, commentary={has_commentary_tag}")
-            
+            print(
+                f"🔍 XML tags found: translation={has_translation_tag}, commentary={has_commentary_tag}"
+            )
+
             # Ask user if they want to retry
             retry = input("🔄 Retry this passage? (y/n): ").lower().strip()
-            if retry == 'y':
+            if retry == "y":
                 return self._process_single_passage_manual(row, chapter)
             else:
                 return None
@@ -325,7 +339,9 @@ class ManualCLIProcessor:
 
         return output
 
-    def _handle_special_case_passage(self, row: pd.Series, chapter: str) -> Optional[Dict[str, Any]]:
+    def _handle_special_case_passage(
+        self, row: pd.Series, chapter: str
+    ) -> Optional[Dict[str, Any]]:
         """Handle special cases like grouped commentary for paragraphs 10-14."""
         special_cases = self.config.config.get("special_cases", {})
         grouped_commentary = special_cases.get("grouped_commentary", {})
@@ -336,9 +352,15 @@ class ManualCLIProcessor:
         # Check if this passage is in a special group
         groups = grouped_commentary.get("groups", [])
         for group in groups:
-            if group.get("chapter") == int(chapter) and int(row["paragraph"]) in group.get("paragraphs", []):
-                print(f"📋 Special case: paragraph {row['paragraph']} uses grouped commentary")
-                return self._process_grouped_commentary_passage_manual(row, chapter, group)
+            if group.get("chapter") == int(chapter) and int(
+                row["paragraph"]
+            ) in group.get("paragraphs", []):
+                print(
+                    f"📋 Special case: paragraph {row['paragraph']} uses grouped commentary"
+                )
+                return self._process_grouped_commentary_passage_manual(
+                    row, chapter, group
+                )
 
         return None
 
@@ -375,12 +397,16 @@ class ManualCLIProcessor:
 
         # Copy to clipboard and get response
         if self.copy_to_clipboard(full_prompt):
-            passage_info = f"Chapter {chapter}, Paragraph {paragraph} (GROUPED COMMENTARY)"
+            passage_info = (
+                f"Chapter {chapter}, Paragraph {paragraph} (GROUPED COMMENTARY)"
+            )
             response = self.get_user_response("PASSAGE TRANSLATION", passage_info)
         else:
             print("❌ Failed to copy to clipboard. Showing prompt:")
             print(full_prompt)
-            passage_info = f"Chapter {chapter}, Paragraph {paragraph} (GROUPED COMMENTARY)"
+            passage_info = (
+                f"Chapter {chapter}, Paragraph {paragraph} (GROUPED COMMENTARY)"
+            )
             response = self.get_user_response("PASSAGE TRANSLATION", passage_info)
 
         if not response:
@@ -449,7 +475,9 @@ class ManualCLIProcessor:
             print(f"⚠️  Error loading grouped commentary: {e}")
             return f"[Grouped commentary for paragraphs {group.get('paragraphs', [])} - see paragraph {group.get('commentary_location', '')}]"
 
-    def _generate_chapter_summary_manual(self, chapter: str, passage_results: List[Dict[str, Any]]):
+    def _generate_chapter_summary_manual(
+        self, chapter: str, passage_results: List[Dict[str, Any]]
+    ):
         """Generate chapter summary manually."""
         print(f"\n📊 Generating summary for Chapter {chapter}...")
 
@@ -458,7 +486,9 @@ class ManualCLIProcessor:
         for result in sorted(passage_results, key=lambda x: int(x["paragraph"])):
             translation = result.get(f"{OUTPUT_DIR}_translation", "")
             if translation:
-                all_translations.append(f"Paragraph {result['paragraph']}:\n{translation}")
+                all_translations.append(
+                    f"Paragraph {result['paragraph']}:\n{translation}"
+                )
 
         if not all_translations:
             print("❌ No translations found for summary generation")
@@ -608,15 +638,19 @@ def main():
 
     # Only support hybrid_analysis for now
     if task_config.task_type != "hybrid_analysis":
-        print(f"❌ Only hybrid_analysis task type is supported, got: {task_config.task_type}")
-        print("💡 Try: --task hybrid_complex_analysis_original or --task hybrid_complex_analysis_enhanced_fewshot")
+        print(
+            f"❌ Only hybrid_analysis task type is supported, got: {task_config.task_type}"
+        )
+        print(
+            "💡 Try: --task hybrid_complex_analysis_original or --task hybrid_complex_analysis_enhanced_fewshot"
+        )
         return
 
     print(f"\n🚀 Starting manual CLI processing...")
     print(f"📁 Output directory: translations/{OUTPUT_DIR}")
     print(f"🔧 Task configuration: {args.task}")
     print(f"💻 Clipboard functionality will be used for prompts")
-    print(f"{'='*80}")
+    print(f"{'=' * 80}")
 
     # Process dataset
     processor = ManualCLIProcessor(task_config, debug=args.debug)

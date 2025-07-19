@@ -26,7 +26,7 @@ def discover_complex_analysis_results(exclude_grouped_only=False):
     models = []
     for file in results_dir.glob("*_similarity_summary.csv"):
         stem = file.stem.replace("_similarity_summary", "")
-        
+
         # If exclude_grouped_only is True, skip non-grouped results
         if exclude_grouped_only and not stem.endswith("_no_grouped"):
             continue
@@ -36,13 +36,13 @@ def discover_complex_analysis_results(exclude_grouped_only=False):
         # 1. model_similarity_summary.csv -> (model, None)
         # 2. model_taskname_similarity_summary.csv -> (model, taskname)
         # 3. model_taskname_no_grouped_similarity_summary.csv -> (model, taskname)
-        
+
         # Track if this is a no_grouped variant
         is_no_grouped = stem.endswith("_no_grouped")
-        
+
         # Remove _no_grouped suffix if present for parsing
         if is_no_grouped:
-            stem = stem[:-len("_no_grouped")]
+            stem = stem[: -len("_no_grouped")]
 
         # Check for known task patterns - order matters for proper matching
         if "_hybrid_complex_analysis_" in stem:
@@ -70,11 +70,11 @@ def load_model_results(model_name, task_name=None, no_grouped=False):
         summary_file = f"benchmarking/complex_analysis/{model_name}_{task_name}"
     else:
         summary_file = f"benchmarking/complex_analysis/{model_name}"
-    
+
     # Add no_grouped suffix if needed
     if no_grouped:
         summary_file += "_no_grouped"
-        
+
     summary_file += "_similarity_summary.csv"
 
     if not Path(summary_file).exists():
@@ -118,12 +118,12 @@ def calculate_composite_score(results):
 
 def parse_thresholds(threshold_string):
     """Parse threshold string into a dictionary.
-    
+
     Example: "commentary>0.68,summary>0.8" -> {"commentary": (">", 0.68), "summary": (">", 0.8)}
     """
     if not threshold_string:
         return {}
-    
+
     thresholds = {}
     for condition in threshold_string.split(","):
         condition = condition.strip()
@@ -132,24 +132,29 @@ def parse_thresholds(threshold_string):
             if operator in condition:
                 component, value = condition.split(operator, 1)
                 component = component.strip()
-                
+
                 # Map component names to column names
                 component_mapping = {
                     "composite": "composite_score",
                     "translation": "translation_similarity",
-                    "commentary": "commentary_similarity", 
-                    "summary": "summary_similarity"
+                    "commentary": "commentary_similarity",
+                    "summary": "summary_similarity",
                 }
-                
+
                 if component in component_mapping:
                     try:
-                        thresholds[component_mapping[component]] = (operator, float(value))
+                        thresholds[component_mapping[component]] = (
+                            operator,
+                            float(value),
+                        )
                     except ValueError:
-                        print(f"Warning: Invalid threshold value '{value}' for {component}")
+                        print(
+                            f"Warning: Invalid threshold value '{value}' for {component}"
+                        )
                 else:
                     print(f"Warning: Unknown component '{component}' in threshold")
                 break
-    
+
     return thresholds
 
 
@@ -157,18 +162,18 @@ def apply_thresholds(results, thresholds):
     """Apply threshold filters to results."""
     if not thresholds:
         return results
-    
+
     filtered = []
     for result in results:
         include = True
         for column, (operator, value) in thresholds.items():
             result_value = result.get(column, np.nan)
-            
+
             # Skip if value is NaN
             if np.isnan(result_value):
                 include = False
                 break
-            
+
             # Apply comparison
             if operator == ">":
                 if not (result_value > value):
@@ -190,14 +195,19 @@ def apply_thresholds(results, thresholds):
                 if not (result_value == value):
                     include = False
                     break
-        
+
         if include:
             filtered.append(result)
-    
+
     return filtered
 
 
-def generate_summary_report(output_file="benchmarking/complex_analysis_results.csv", sort_by="composite", exclude_grouped_only=False, thresholds=None):
+def generate_summary_report(
+    output_file="benchmarking/complex_analysis_results.csv",
+    sort_by="composite",
+    exclude_grouped_only=False,
+    thresholds=None,
+):
     """Generate a comprehensive summary report."""
     models = discover_complex_analysis_results(exclude_grouped_only)
 
@@ -219,7 +229,7 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
             display_name = model_name
             if task_name:
                 display_name = f"{model_name} ({task_name})"
-            
+
             # Add indicator if grouped commentary was excluded
             if is_no_grouped:
                 display_name += " [no grouped]"
@@ -243,29 +253,27 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
                 "summary_valid": results.get("summary", {}).get("valid_count", 0),
             }
             all_results.append(model_data)
-    
+
     # Apply threshold filters if provided
     original_count = len(all_results)
     all_results = apply_thresholds(all_results, thresholds)
     filtered_count = original_count - len(all_results)
-    
+
     if filtered_count > 0:
         print(f"Filtered out {filtered_count} results based on thresholds")
 
     # Sort by specified column (descending)
     sort_mapping = {
         "composite": "composite_score",
-        "translation": "translation_similarity", 
+        "translation": "translation_similarity",
         "commentary": "commentary_similarity",
-        "summary": "summary_similarity"
+        "summary": "summary_similarity",
     }
-    
+
     sort_key = sort_mapping.get(sort_by.lower(), "composite_score")
-    
+
     all_results.sort(
-        key=lambda x: x[sort_key]
-        if not np.isnan(x[sort_key])
-        else -1,
+        key=lambda x: x[sort_key] if not np.isnan(x[sort_key]) else -1,
         reverse=True,
     )
 
@@ -280,7 +288,7 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
     # Print summary to console
     sort_display = sort_by.lower().replace("_", " ").title()
     print(f"\nComplex Analysis Results (sorted by {sort_display}):")
-    
+
     # Show active filters
     if thresholds:
         filter_parts = []
@@ -290,11 +298,11 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
                 "composite_score": "composite",
                 "translation_similarity": "translation",
                 "commentary_similarity": "commentary",
-                "summary_similarity": "summary"
+                "summary_similarity": "summary",
             }.get(column, column)
             filter_parts.append(f"{column_display}{operator}{value}")
         print(f"Active filters: {', '.join(filter_parts)}")
-    
+
     print("=" * 175)
     print(
         f"{'Model':<95} | {'Composite':<10} | {'Translation':<12} | {'Commentary':<12} | {'Summary':<10} | {'Included (Valid) Passages':<15}"
@@ -324,9 +332,13 @@ def generate_summary_report(output_file="benchmarking/complex_analysis_results.c
     )
     print(f"  Valid Passages: Translation/Commentary/Summary valid counts")
     if has_excluded:
-        print(f"  [no grouped]: Results where grouped commentary passages were excluded from similarity calculation")
+        print(
+            f"  [no grouped]: Results where grouped commentary passages were excluded from similarity calculation"
+        )
     if filtered_count > 0:
-        print(f"  Showing {len(all_results)} results (filtered {filtered_count} entries)")
+        print(
+            f"  Showing {len(all_results)} results (filtered {filtered_count} entries)"
+        )
     print(f"  Results saved to: {output_file}")
 
     return all_results
@@ -380,30 +392,36 @@ if __name__ == "__main__":
     )
     parser.add_argument("--models", nargs="*", help="Specific models to compare")
     parser.add_argument(
-        "--sort", 
+        "--sort",
         default="composite",
         choices=["composite", "translation", "commentary", "summary"],
-        help="Sort results by specified component (default: composite)"
+        help="Sort results by specified component (default: composite)",
     )
     parser.add_argument(
         "--exclude-grouped-commentary",
         action="store_true",
-        help="Only show results where grouped commentary was excluded"
+        help="Only show results where grouped commentary was excluded",
     )
     parser.add_argument(
         "--thresholds",
         type=str,
-        help="Filter results by component thresholds (e.g., 'commentary>0.68,summary>0.8')"
+        help="Filter results by component thresholds (e.g., 'commentary>0.68,summary>0.8')",
     )
 
     args = parser.parse_args()
-    
+
     # Parse thresholds if provided
     thresholds = parse_thresholds(args.thresholds) if args.thresholds else None
 
     # Generate main summary
-    results = generate_summary_report(sort_by=args.sort, exclude_grouped_only=args.exclude_grouped_commentary, thresholds=thresholds)
+    results = generate_summary_report(
+        sort_by=args.sort,
+        exclude_grouped_only=args.exclude_grouped_commentary,
+        thresholds=thresholds,
+    )
 
     # Show detailed comparison if requested
     if args.detailed:
-        show_detailed_comparison(args.models, exclude_grouped_only=args.exclude_grouped_commentary)
+        show_detailed_comparison(
+            args.models, exclude_grouped_only=args.exclude_grouped_commentary
+        )
