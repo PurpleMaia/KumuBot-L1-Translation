@@ -103,6 +103,7 @@ All translation scripts follow a similar pattern:
 
 - **Semantic Similarity**: Uses sentence embeddings to compare translations with references
 - **LLM Judge**: Uses GPT-4 to evaluate translation quality on multiple criteria
+- **Grouped Commentary Handling**: Supports excluding passages 10-14 from commentary evaluation when using grouped reference
 - Results are aggregated and summarized for comparison
 
 ## Hybrid Complex Analysis Approach
@@ -120,7 +121,7 @@ The hybrid approach combines two processing modes:
 
 #### Configuration System
 
-- Uses JSON task configuration files (e.g., `config/tasks/hybrid_complex_analysis.json`)
+- Uses JSON task configuration files (e.g., `task_configs/hybrid_complex_analysis_enhanced_fewshot.json`)
 - Supports both passage-level and chapter-level prompts
 - Configurable parallel processing limits
 
@@ -160,11 +161,17 @@ python translations/extract_hybrid_complex_analysis.py --output-dir model_name
 # Evaluate semantic similarity for complex analysis
 python benchmarking/complex_semantic_similarity.py --model model_name
 
+# Evaluate with grouped commentary excluded (passages 10-14)
+python benchmarking/complex_semantic_similarity.py --model model_name --exclude-grouped-commentary
+
 # List available models for evaluation
 python benchmarking/complex_semantic_similarity.py --list
 
-# Generate summary comparison across all models
-python benchmarking/complex_semantic_similarity_summary.py --detailed
+# Generate summary comparison across all models (shows both regular and excluded versions)
+python benchmarking/complex_semantic_similarity_summary.py
+
+# Show only results with grouped commentary excluded
+python benchmarking/complex_semantic_similarity_summary.py --exclude-grouped-commentary
 ```
 
 ### Pipeline Commands
@@ -210,21 +217,6 @@ Hybrid complex analysis uses a structured approach:
 - **Individual Passage Recovery**: Malformed responses can be fixed by creating subset datasets and reprocessing specific passages
 - **Debug Mode Control**: By default, shows all status messages and progress indicators but hides LLM response content. Use `--debug` to see LLM response content (translations and commentary) during processing
 
-### Current Model Performance
-
-Latest complex analysis semantic similarity results with enhanced few-shot prompting (ranked by composite score):
-
-1. **Llama 3.3 70B** (enhanced few-shot): Composite 0.8399 (Translation: 95.5%, Commentary: 72.4%, Summary: 84.3%)
-2. **Llama4 Maverick** (enhanced few-shot): Composite 0.8367 (Translation: **96.4%** 🏆, Commentary: 70.9%, Summary: 83.8%)
-3. **Gemma 3 4B QAT** (enhanced few-shot): Composite 0.8362 (Translation: 93.9%, Commentary: **72.6%**, Summary: **85.3%**)
-4. **DeepSeek V3** (enhanced few-shot): Composite 0.8322 (Translation: 95.3%, Commentary: 72.3%, Summary: 81.0%)
-5. **Gemma 3 27B QAT** (enhanced few-shot): Composite 0.8271 (Translation: 95.0%, Commentary: 72.5%, Summary: 78.5%)
-6. **Qwen3 235B Think-Parser** (original): Composite 0.8244 (Translation: 91.2%, Commentary: 74.7%, Summary: 80.3%)
-7. **Llama4 Scout** (enhanced few-shot): Composite 0.8240 (Translation: 95.9%, Commentary: 68.3%, Summary: 83.6%)
-8. **Gemma 3 27B Manual CLI** (enhanced few-shot): Composite 0.8187 (Translation: 95.3%, Commentary: 71.4%, Summary: 75.9%)
-9. **Gemma 3N E4B** (enhanced few-shot): Composite 0.8105 (Translation: 94.1%, Commentary: 69.7%, Summary: 77.7%)
-10. **Qwen3 30B** (enhanced few-shot): Composite 0.8079 (Translation: 86.8%, Commentary: 71.0%, Summary: **88.4%** 🥇)
-
 **Enhanced few-shot success rate**: 82% of tested models (9/11) showed significant improvement
 All models achieved 100% completion rate (14/14 passages) with successful handling of grouped commentary passages (10-14).
 
@@ -234,13 +226,15 @@ All models achieved 100% completion rate (14/14 passages) with successful handli
 
 **Multi-model testing across prompt variations revealed clear patterns:**
 
-#### **Enhanced Few-shot Prompting: Production-Ready Strategy** 
+#### **Enhanced Few-shot Prompting: Production-Ready Strategy**
+
 - **82% success rate**: 9 out of 11 tested models showed significant improvement
 - **Cross-architecture effectiveness**: Works across Llama, Gemma, Qwen, and DeepSeek families
 - **Consistent gains**: 20-47 point composite score improvements for compatible models
 - **Key insight**: Quality examples outperform prescriptive instructions
 
 #### **Model Architecture Compatibility Patterns**
+
 - **✅ Standard models**: Universal success (100% improvement rate)
 - **✅ Implicit reasoning models**: DeepSeek V3 achieved #4 ranking with enhanced few-shot
 - **⚠️ Explicit reasoning models**: R1-style and think-parser models showed degraded performance
@@ -248,6 +242,7 @@ All models achieved 100% completion rate (14/14 passages) with successful handli
 - **Identification rule**: Use original prompts for models that output `<think>` chains or have "r1"/"think-parser" in name
 
 #### **"Improved" Prompts: Confirmed Anti-pattern**
+
 - **Performance degradation**: Consistently worst scores across all tested architectures
 - **Translation quality drops**: 2-4% reduction due to cognitive overload
 - **Over-engineering evidence**: Complex constraints reduce natural language generation
@@ -289,6 +284,7 @@ python translations/custom-model-v2-cli.py --task hybrid_complex_analysis_enhanc
 ### Manual CLI Validation Results
 
 **Gemma 3 27B Performance Comparison:**
+
 - **API Version** (MLX-maui): Composite 0.8271 (Translation: 95.0%, Commentary: 72.5%, Summary: 78.5%)
 - **Manual CLI Version** (Google AI Studio): Composite 0.8187 (Translation: 95.3%, Commentary: 71.4%, Summary: 75.9%)
 - **Difference**: Only 0.84 points (1% relative difference), validating manual testing methodology
@@ -300,39 +296,46 @@ This demonstrates that manual CLI testing provides reliable results for comparin
 ### Complex Analysis Task Costs
 
 **o4-mini** (enhanced few-shot):
+
 - **Cost**: $0.130 per complete complex analysis run
 - **Performance**: 0.8237 composite score (ranked 10th)
 - **Strengths**: Complete output with balanced performance across all components
 
 **GPT-4.1** (enhanced few-shot):
+
 - **Cost**: $0.090 per complete complex analysis run (56,271 tokens)
 - **Performance**: 0.8257 composite score (ranked 6th)
 - **Strengths**: **Highest translation quality (96.6%)** among all models tested
 - **Complete**: Now includes all components (translation, commentary, summary)
 
 **GPT-4.1-nano** (enhanced few-shot):
+
 - **Cost**: ~$0.026 per complete complex analysis run (estimated)
-- **Performance**: 0.8230 composite score (ranked 10th) 
+- **Performance**: 0.8230 composite score (ranked 10th)
 - **Strengths**: Highest summary quality (87.0%) among OpenAI models
 
 **GPT-4.1-mini** (enhanced few-shot):
+
 - **Cost**: ~$0.026 per complete complex analysis run (24,801 tokens baseline)
 - **Performance**: 0.8176 composite score (ranked 12th)
 - **Improvement**: +0.76 points over improved prompts
 
 **Cost Comparison**:
+
 - **o4-mini**: $0.130 (highest cost, balanced performance)
 - **GPT-4.1**: $0.090 (premium translation quality)
 - **GPT-4.1-mini/nano**: $0.026 (most cost-effective)
 - **Cost ratios**: o4-mini is 5x more expensive than mini/nano; GPT-4.1 is 3.5x more expensive
 
 #### **Enhanced Few-Shot Implementation**
+
 - **3 diverse examples**: Character introduction, dialogue, and symbolic action passages
 - **Chapter summary example**: Demonstrates synthesis and scholarly analysis depth
 - **Natural flow**: No forced formatting or rigid structural requirements
 - **Production config**: `hybrid_complex_analysis_enhanced_fewshot.json`
 
 #### **Component-Specific Excellence Achieved**
+
 - **Translation champion**: Llama4 Maverick (96.4% similarity)
 - **Commentary leaders**: Multiple models achieving 72%+ similarity
 - **Summary specialist**: Qwen3 30B (88.4% similarity - new record)
@@ -340,6 +343,7 @@ This demonstrates that manual CLI testing provides reliable results for comparin
 ### Text Normalization in Benchmarking
 
 The semantic similarity evaluation now includes text normalization (as of latest update) to focus on content rather than formatting differences:
+
 - **Applied equally** to both reference and model texts before computing embeddings
 - **Normalizations include**: bullet standardization, markdown removal, whitespace cleanup, header formatting
 - **Impact**: Revealed true semantic similarities by removing formatting "false positives"
@@ -349,10 +353,13 @@ The semantic similarity evaluation now includes text normalization (as of latest
 ### Commentary Performance Insights
 
 Commentary generation appears to be the most challenging component for current LLMs, with scores typically ranging from 68-74%. The reference commentary expects:
+
 - Specific allegorical interpretations
 - Historical period references (e.g., 'Ai Kapu era)
 - Academic citations
 - Bullet-point structure with hierarchical organization
+
+**Grouped Commentary Note**: The reference dataset groups passages 10-14 with identical generic commentary. Models generate individual commentaries for each passage, which can inflate similarity scores. Use `--exclude-grouped-commentary` flag to exclude these passages for fairer evaluation.
 
 ### Summary Performance Deep Dive
 
